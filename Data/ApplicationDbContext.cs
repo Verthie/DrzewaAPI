@@ -20,6 +20,21 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<Tag> Tags { get; set; }
 	public DbSet<SpeciesAdditionRequest> SpeciesAdditionRequests { get; set; }
 
+	// Static GUIDs (constant across builds)
+	private static readonly Guid SeedUserId = new Guid("11111111-1111-1111-1111-111111111111");
+	private static readonly Guid SeedOakId = new Guid("22222222-2222-2222-2222-222222222222");
+	private static readonly Guid SeedPineId = new Guid("33333333-3333-3333-3333-333333333333");
+	private static readonly Guid SeedTreeReportOneId = new Guid("44444444-4444-4444-4444-444444444444");
+	private static readonly Guid SeedTreeReportTwoId = new Guid("55555555-5555-5555-5555-555555555555");
+	private static readonly Guid SeedImageOneId = new Guid("66666666-6666-6666-6666-666666666666");
+	private static readonly Guid SeedImageTwoId = new Guid("77777777-7777-7777-7777-777777777777");
+	private static readonly Guid SeedAttachmentOneId = new Guid("88888888-8888-8888-8888-888888888888");
+	private static readonly Guid SeedAttachmentTwoId = new Guid("99999999-9999-9999-9999-999999999999");
+	private static readonly Guid SeedAttachmentThreeId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+	private static readonly Guid SeedDroughtTagId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+	private static readonly Guid SeedUnstableTagId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc");
+	private static readonly Guid SeedMunicipalityId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd");
+
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
@@ -118,26 +133,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	private void SeedData(ModelBuilder modelBuilder)
 	{
 		// Seed Users
-		Guid userId = Guid.NewGuid();
-		SetUserData(modelBuilder, userId);
+		SetUserData(modelBuilder);
 
 		// Seed Tree Species
-		Guid oakId = Guid.NewGuid();
-		Guid pineId = Guid.NewGuid();
-
-		SetSpeciesData(modelBuilder, oakId, pineId);
+		SetSpeciesData(modelBuilder);
 
 		// Seed Reports
-		Guid treeReportOneId = Guid.NewGuid();
-		Guid treeReportTwoId = Guid.NewGuid();
-
-		SetReportData(modelBuilder, treeReportOneId, treeReportTwoId, oakId, pineId, userId);
+		SetReportData(modelBuilder);
 
 		// Seed sample municipalities
 		modelBuilder.Entity<Municipality>().HasData(
 				new Municipality
 				{
-					Id = Guid.NewGuid(),
+					Id = SeedMunicipalityId,
 					Name = "GminaWarszawska",
 					City = "Warszawa",
 					Province = "Mazowieckie",
@@ -149,27 +157,27 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	}
 
 
-	private void SetUserData(ModelBuilder modelBuilder, Guid userId)
+	private void SetUserData(ModelBuilder modelBuilder)
 	{
 		modelBuilder.Entity<User>().HasData(
 				new User
 				{
-					Id = userId,
+					Id = SeedUserId,
 					FirstName = "Eko",
 					LastName = "Wojownik",
 					Email = "ekowojownik@gmail.com",
 					PasswordHash = "VerySafe",
-					CreatedAt = DateTime.Now,
+					CreatedAt = new DateTime(2025, 1, 1),
 				}
 		);
 	}
 
-	private void SetSpeciesData(ModelBuilder modelBuilder, Guid oakId, Guid pineId)
+	private void SetSpeciesData(ModelBuilder modelBuilder)
 	{
 		modelBuilder.Entity<TreeSpecies>().HasData(
 					new TreeSpecies
 					{
-						Id = oakId,
+						Id = SeedOakId,
 						PolishName = "Dąb szypułkowy",
 						LatinName = "Quercus robur",
 						Description = "Dąb szypułkowy to jeden z najpopularniejszych gatunków drzew w Polsce.",
@@ -177,7 +185,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 					},
 					new TreeSpecies
 					{
-						Id = pineId,
+						Id = SeedPineId,
 						PolishName = "Sosna zwyczajna",
 						LatinName = "Pinus sylvestris",
 						Description = "Sosna zwyczajna to charakterystyczne drzewo iglaste występujące w Polsce.",
@@ -186,20 +194,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			);
 
 		// Seed Images
-		Guid imageOneId = Guid.NewGuid();
-		Guid imageTwoId = Guid.NewGuid();
-
 		modelBuilder.Entity<SpeciesImage>().HasData(
 				new SpeciesImage
 				{
-					Id = imageOneId,
+					Id = SeedImageOneId,
 					ImageUrl = "fileUrl",
 					Type = Utils.ImageType.Tree,
 					Description = "Zdjęcie dęba szypułkowego"
 				},
 				new SpeciesImage
 				{
-					Id = imageTwoId,
+					Id = SeedImageTwoId,
 					ImageUrl = "fileUrl",
 					Type = Utils.ImageType.Leaf,
 					Description = "Zdjęcie liścia sosny zwyczajnej"
@@ -210,26 +215,26 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<TreeSpeciesImages>().HasData(
 				new TreeSpeciesImages
 				{
-					TreeSpeciesId = oakId,
-					ImageId = imageOneId
+					TreeSpeciesId = SeedOakId,
+					ImageId = SeedImageOneId
 				},
 				new TreeSpeciesImages
 				{
-					TreeSpeciesId = pineId,
-					ImageId = imageTwoId
+					TreeSpeciesId = SeedPineId,
+					ImageId = SeedImageTwoId
 				}
 		);
 	}
 
-	private void SetReportData(ModelBuilder modelBuilder, Guid treeReportOneId, Guid treeReportTwoId, Guid oakId, Guid pineId, Guid userId)
+	private void SetReportData(ModelBuilder modelBuilder)
 	{
 		// Seed Report
 		modelBuilder.Entity<TreeReport>().HasData(
 				new TreeReport
 				{
-					Id = treeReportOneId,
-					SpeciesId = oakId,
-					UserId = userId,
+					Id = SeedTreeReportOneId,
+					SpeciesId = SeedOakId,
+					UserId = SeedUserId,
 					Latitude = 500,
 					Longitude = 100,
 					LocationDescription = "Miasto: Warszawa\nUlica: 3 maja",
@@ -244,9 +249,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 				},
 				new TreeReport
 				{
-					Id = treeReportTwoId,
-					SpeciesId = pineId,
-					UserId = userId,
+					Id = SeedTreeReportTwoId,
+					SpeciesId = SeedPineId,
+					UserId = SeedUserId,
 					Latitude = 400,
 					Longitude = 210,
 					LocationDescription = "Miasto: Warszawa\nUlica: Wyspiańskiego",
@@ -259,54 +264,47 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		);
 
 		// Seed Attachments
-		Guid attachmentOneId = Guid.NewGuid();
-		Guid attachmentTwoId = Guid.NewGuid();
-		Guid attachmentThreeId = Guid.NewGuid();
-
 		modelBuilder.Entity<TreeReportAttachment>().HasData(
 			new TreeReportAttachment
 			{
-				Id = attachmentOneId,
-				TreeReportId = treeReportOneId,
+				Id = SeedAttachmentOneId,
+				TreeReportId = SeedTreeReportOneId,
 				FileName = "Obrazek pnia dębu",
 				FileUrl = "fileUrl",
 			},
 			new TreeReportAttachment
 			{
-				Id = attachmentTwoId,
-				TreeReportId = treeReportOneId,
+				Id = SeedAttachmentTwoId,
+				TreeReportId = SeedTreeReportOneId,
 				FileName = "Obrazek liścia dębu",
 				FileUrl = "fileUrl",
 			},
 			new TreeReportAttachment
 			{
-				Id = attachmentThreeId,
-				TreeReportId = treeReportTwoId,
+				Id = SeedAttachmentThreeId,
+				TreeReportId = SeedTreeReportTwoId,
 				FileName = "Obrazek pnia sosny",
 				FileUrl = "fileUrl",
 			}
 		);
 
 		// Seed Tags
-		Guid droughtId = Guid.NewGuid();
-		Guid unstableId = Guid.NewGuid();
-
 		modelBuilder.Entity<Tag>().HasData(
-				new Tag { Id = droughtId, Name = "Posusz" },
-				new Tag { Id = unstableId, Name = "Niestabilny" }
+				new Tag { Id = SeedDroughtTagId, Name = "Posusz" },
+				new Tag { Id = SeedUnstableTagId, Name = "Niestabilny" }
 		);
 
 		// Connection between Reports and Tags
 		modelBuilder.Entity<TreeConditionTags>().HasData(
 			new TreeConditionTags
 			{
-				TreeReportId = treeReportOneId,
-				TagId = droughtId
+				TreeReportId = SeedTreeReportOneId,
+				TagId = SeedDroughtTagId
 			},
 			new TreeConditionTags
 			{
-				TreeReportId = treeReportOneId,
-				TagId = unstableId
+				TreeReportId = SeedTreeReportOneId,
+				TagId = SeedUnstableTagId
 			}
 		);
 	}
