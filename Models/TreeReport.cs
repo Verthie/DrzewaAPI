@@ -5,12 +5,12 @@ namespace DrzewaAPI.Models;
 
 public class TreeReport
 {
-	public Guid Id { get; set; }
-	public Guid UserId { get; set; }
+	public required Guid Id { get; set; }
+	public required Guid UserId { get; set; }
+	public required Guid SpeciesId { get; set; }
 	public double Latitude { get; set; }
 	public double Longitude { get; set; }
 	public string? LocationDescription { get; set; }
-	public Guid SpeciesId { get; set; }
 	public int Circumference { get; set; } // Pierśnica
 	public bool IsAlive { get; set; }
 	public int? EstimatedAge { get; set; }
@@ -29,7 +29,7 @@ public class TreeReport
 	public TreeSpecies? Species { get; set; }
 	public ICollection<TreeConditionTags>? ConditionTags { get; set; }
 	public Application? Application { get; set; }
-	public required ICollection<TreeReportAttachment> Attachments { get; set; }
+	public ICollection<TreeReportAttachment>? Attachments { get; set; }
 	public ICollection<Comment>? Comments { get; set; }
 	public ICollection<Vote>? Votes { get; set; }
 }

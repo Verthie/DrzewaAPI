@@ -4,8 +4,8 @@ namespace DrzewaAPI.Models;
 
 public class SpeciesAdditionRequest
 {
-	public Guid Id { get; set; }
-	public Guid UserId { get; set; }
+	public required Guid Id { get; set; }
+	public required Guid UserId { get; set; }
 	public required string PolishName { get; set; }
 	public required string LatinName { get; set; }
 	public string? Description { get; set; }

@@ -5,8 +5,8 @@ namespace DrzewaAPI.Models;
 
 public class Notification
 {
-	public Guid Id { get; set; }
-	public Guid UserId { get; set; }
+	public required Guid Id { get; set; }
+	public required Guid UserId { get; set; }
 	public NotificationType Type { get; set; }
 	public required string Title { get; set; }
 	public required string Message { get; set; }
