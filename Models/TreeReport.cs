@@ -27,7 +27,7 @@ public class TreeReport
 	// Navigation Properties
 	public User? User { get; set; }
 	public TreeSpecies? Species { get; set; }
-	public TreeConditionTags? ConditionTags { get; set; }
+	public ICollection<TreeConditionTags>? ConditionTags { get; set; }
 	public Application? Application { get; set; }
 	public required ICollection<TreeReportAttachment> Attachments { get; set; }
 	public ICollection<Comment>? Comments { get; set; }
