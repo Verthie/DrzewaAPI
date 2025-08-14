@@ -8,6 +8,6 @@ public class TreeConditionTags
 	public Guid TagId { get; set; }
 
 	// Navigation Properties
-	public required ICollection<TreeReport> TreeReports { get; set; }
-	public required ICollection<Tag> Tags { get; set; }
+	public ICollection<TreeReport>? TreeReports { get; set; }
+	public ICollection<Tag>? Tags { get; set; }
 }

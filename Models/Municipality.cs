@@ -10,7 +10,8 @@ public class Municipality
 	public required string City { get; set; }
 	public required string Address { get; set; }
 	public required string ZipCode { get; set; }
+	public required string Email { get; set; }
 
 	// Navigation Properties
-	public required ICollection<Application> Applications { get; set; }
+	public ICollection<Application>? Applications { get; set; }
 }

@@ -18,7 +18,7 @@ public class Application
 	public string? AttachmentsZipUrl { get; set; }
 
 	// Navigation Properties
-	public required User User { get; set; }
-	public required Municipality Municipality { get; set; }
-	public required TreeReport TreeReport { get; set; }
+	public User? User { get; set; }
+	public Municipality? Municipality { get; set; }
+	public TreeReport? TreeReport { get; set; }
 }

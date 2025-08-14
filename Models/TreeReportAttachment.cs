@@ -14,5 +14,5 @@ public class TreeReportAttachment
 	public DateTime UploadedAt { get; set; }
 
 	// Navigation Properties
-	public required TreeReport TreeReport { get; set; }
+	public TreeReport? TreeReport { get; set; }
 }

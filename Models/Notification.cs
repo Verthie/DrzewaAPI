@@ -15,5 +15,5 @@ public class Notification
 	public DateTime CreatedAt { get; set; }
 
 	// Navigation Properties
-	public required User User { get; set; }
+	public User? User { get; set; }
 }

@@ -8,5 +8,5 @@ public class Tag
 	public required string Name { get; set; }
 
 	// Navigation Properties
-	public required ICollection<TreeConditionTags> ConditionTags { get; set; }
+	public ICollection<TreeConditionTags>? ConditionTags { get; set; }
 }

@@ -16,5 +16,4 @@ public class TreeSpecies
 	// Navigation Properties
 	public required ICollection<TreeSpeciesImage> Images { get; set; }
 	public ICollection<TreeReport>? TreeReports { get; set; }
-	public ICollection<SpeciesAdditionRequest>? AdditionRequests { get; set; }
 }

@@ -25,8 +25,8 @@ public class TreeReport
 	public int CommentsCount { get; set; } = 0;
 
 	// Navigation Properties
-	public required User User { get; set; }
-	public required TreeSpecies Species { get; set; }
+	public User? User { get; set; }
+	public TreeSpecies? Species { get; set; }
 	public TreeConditionTags? ConditionTags { get; set; }
 	public Application? Application { get; set; }
 	public required ICollection<TreeReportAttachment> Attachments { get; set; }

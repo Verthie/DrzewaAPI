@@ -12,5 +12,5 @@ public class TreeSpeciesImage
 	public string? Description { get; set; }
 
 	// Navigation Properties
-	public required TreeSpecies Species { get; set; }
+	public TreeSpecies? Species { get; set; }
 }

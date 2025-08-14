@@ -14,6 +14,6 @@ public class Comment
 	public bool IsDeleted { get; set; }
 
 	// Navigation Properties
-	public required TreeReport TreeReport { get; set; }
-	public required User User { get; set; }
+	public User? User { get; set; }
+	public TreeReport? TreeReport { get; set; }
 }
