@@ -11,7 +11,7 @@ public class TreeReport
 	public double Longitude { get; set; }
 	public string? LocationDescription { get; set; }
 	public Guid SpeciesId { get; set; }
-	public decimal Circumference { get; set; } // Pierśnica
+	public int Circumference { get; set; } // Pierśnica
 	public bool IsAlive { get; set; }
 	public int? EstimatedAge { get; set; }
 	public string? Description { get; set; }
