@@ -15,7 +15,7 @@ public class TreeReport
 	public bool IsAlive { get; set; }
 	public int? EstimatedAge { get; set; }
 	public string? Description { get; set; }
-	public string? Legend { get; set; }
+	public string? FeaturedLegend { get; set; }
 	public bool IsNatureMonument { get; set; } = false;
 	public ReportStatus Status { get; set; } = ReportStatus.Pending;
 	public DateTime CreatedAt { get; set; }
