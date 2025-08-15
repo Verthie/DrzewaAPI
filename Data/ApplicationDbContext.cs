@@ -55,7 +55,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<TreeReport>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Circumference).HasColumnType("int(10)");
+			entity.Property(e => e.Circumference).HasMaxLength(6);
 			entity.Property(e => e.LocationDescription).HasMaxLength(500);
 			entity.Property(e => e.Description).HasMaxLength(2000);
 			entity.Property(e => e.FeaturedLegend).HasMaxLength(1000);
