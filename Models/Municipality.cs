@@ -4,7 +4,7 @@ namespace DrzewaAPI.Models;
 
 public class Municipality
 {
-	public required Guid Id { get; set; }
+	public Guid Id { get; set; }
 	public required string Name { get; set; }
 	public required string Province { get; set; }
 	public required string City { get; set; }

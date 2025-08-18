@@ -4,10 +4,10 @@ namespace DrzewaAPI.Models;
 
 public class Application
 {
-	public required Guid Id { get; set; }
-	public required Guid UserId { get; set; }
-	public required Guid MunicipalityId { get; set; }
-	public required Guid TreeReportId { get; set; }
+	public Guid Id { get; set; }
+	public Guid UserId { get; set; }
+	public Guid MunicipalityId { get; set; }
+	public Guid TreeReportId { get; set; }
 	public required string PersonalData { get; set; }
 	public required string ContactPhone { get; set; }
 	public required string ContactEmail { get; set; }

@@ -5,9 +5,9 @@ namespace DrzewaAPI.Models;
 
 public class TreeReport
 {
-	public required Guid Id { get; set; }
-	public required Guid UserId { get; set; }
-	public required Guid SpeciesId { get; set; }
+	public Guid Id { get; set; }
+	public Guid UserId { get; set; }
+	public Guid SpeciesId { get; set; }
 	public double Latitude { get; set; }
 	public double Longitude { get; set; }
 	public string? LocationDescription { get; set; }

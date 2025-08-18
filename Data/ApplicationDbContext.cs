@@ -21,21 +21,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<Tag> Tags { get; set; }
 	public DbSet<SpeciesAdditionRequest> SpeciesAdditionRequests { get; set; }
 
-	// Static GUIDs (constant across builds)
-	private static readonly Guid SeedUserId = new Guid("11111111-1111-1111-1111-111111111111");
-	private static readonly Guid SeedOakId = new Guid("22222222-2222-2222-2222-222222222222");
-	private static readonly Guid SeedPineId = new Guid("33333333-3333-3333-3333-333333333333");
-	private static readonly Guid SeedTreeReportOneId = new Guid("44444444-4444-4444-4444-444444444444");
-	private static readonly Guid SeedTreeReportTwoId = new Guid("55555555-5555-5555-5555-555555555555");
-	private static readonly Guid SeedImageOneId = new Guid("66666666-6666-6666-6666-666666666666");
-	private static readonly Guid SeedImageTwoId = new Guid("77777777-7777-7777-7777-777777777777");
-	private static readonly Guid SeedAttachmentOneId = new Guid("88888888-8888-8888-8888-888888888888");
-	private static readonly Guid SeedAttachmentTwoId = new Guid("99999999-9999-9999-9999-999999999999");
-	private static readonly Guid SeedAttachmentThreeId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-	private static readonly Guid SeedDroughtTagId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
-	private static readonly Guid SeedUnstableTagId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc");
-	private static readonly Guid SeedMunicipalityId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd");
-
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
@@ -48,7 +33,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
 			entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
 			entity.Property(e => e.PasswordHash).IsRequired();
-			entity.Property(e => e.Phone).HasMaxLength(20);
+			entity.Property(e => e.Phone).HasMaxLength(15);
+			entity.Property(e => e.Avatar).HasMaxLength(500);
+			entity.Property(e => e.RegistrationDate).HasDefaultValueSql("GETUTCDATE()");
+			entity.Property(e => e.Role).HasDefaultValue(UserRole.User);
+			entity.Property(e => e.SubmissionsCount).HasDefaultValue(0);
+			entity.Property(e => e.VerificationsCount).HasDefaultValue(0);
 			entity.HasIndex(e => e.Email).IsUnique();
 		});
 
@@ -137,42 +127,81 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		SetUserData(modelBuilder);
 
 		// Seed Tree Species
-		SetSpeciesData(modelBuilder);
+		// SetSpeciesData(modelBuilder);
 
 		// Seed Reports
-		SetReportData(modelBuilder);
+		// SetReportData(modelBuilder);
 
 		// Seed sample municipalities
-		modelBuilder.Entity<Municipality>().HasData(
-				new Municipality
-				{
-					Id = SeedMunicipalityId,
-					Name = "GminaWarszawska",
-					City = "Warszawa",
-					Province = "Mazowieckie",
-					Address = "Street 15",
-					ZipCode = "24-040",
-					Email = "urząd@warszawa.pl"
-				}
-		);
+		// modelBuilder.Entity<Municipality>().HasData(
+		// 		new Municipality
+		// 		{
+		// 			Id = SeedMunicipalityId,
+		// 			Name = "GminaWarszawska",
+		// 			City = "Warszawa",
+		// 			Province = "Mazowieckie",
+		// 			Address = "Street 15",
+		// 			ZipCode = "24-040",
+		// 			Email = "urząd@warszawa.pl"
+		// 		}
+		// );
 	}
-
 
 	private void SetUserData(ModelBuilder modelBuilder)
 	{
 		modelBuilder.Entity<User>().HasData(
 				new User
 				{
-					Id = SeedUserId,
-					FirstName = "Eko",
-					LastName = "Wojownik",
-					Email = "ekowojownik@gmail.com",
+					Id = new Guid("11111111-1111-1111-1111-111111111111"),
+					FirstName = "Adam",
+					LastName = "Kowalski",
+					Email = "adam.wolkin@email.com",
+					Avatar = "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100&h=100&fit=crop",
+					RegistrationDate = new DateTime(2024, 1, 15),
 					PasswordHash = "VerySafe",
-					RegistrationDate = new DateTime(2025, 1, 1),
+					SubmissionsCount = 12,
+					VerificationsCount = 45,
+				},
+				new User
+				{
+					Id = new Guid("11111111-1111-1111-1111-111111111112"),
+					FirstName = "Maria",
+					LastName = "Nowak",
+					Email = "maria.kowalska@email.com",
+					Avatar = "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?w=100&h=100&fit=crop",
+					RegistrationDate = new DateTime(2024, 2, 20),
+					PasswordHash = "VerySafe",
+					SubmissionsCount = 8,
+					VerificationsCount = 32,
+				},
+				new User
+				{
+					Id = new Guid("11111111-1111-1111-1111-111111111113"),
+					FirstName = "Piotr",
+					LastName = "Wiśniewski",
+					Email = "piotr.nowak@email.com",
+					Avatar = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100&h=100&fit=crop",
+					RegistrationDate = new DateTime(2024, 3, 10),
+					PasswordHash = "VerySafe",
+					SubmissionsCount = 15,
+					VerificationsCount = 28,
+				},
+				new User
+				{
+					Id = new Guid("11111111-1111-1111-1111-111111111114"),
+					FirstName = "Anna",
+					LastName = "Zielińska",
+					Email = "anna.wisniowska@email.com",
+					Avatar = "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100&h=100&fit=crop",
+					RegistrationDate = new DateTime(2024, 1, 5),
+					PasswordHash = "VerySafe",
+					SubmissionsCount = 22,
+					VerificationsCount = 67,
 				}
 		);
 	}
 
+	/*  	
 	private void SetSpeciesData(ModelBuilder modelBuilder)
 	{
 		modelBuilder.Entity<TreeSpecies>().HasData(
@@ -311,4 +340,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			}
 		);
 	}
+	*/
 };

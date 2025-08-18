@@ -4,8 +4,8 @@ namespace DrzewaAPI.Models;
 
 public class TreeSpeciesImages
 {
-	public required Guid TreeSpeciesId { get; set; }
-	public required Guid ImageId { get; set; }
+	public Guid TreeSpeciesId { get; set; }
+	public Guid ImageId { get; set; }
 
 	// Navigation Properties
 	public TreeSpecies? TreeSpecies { get; set; }

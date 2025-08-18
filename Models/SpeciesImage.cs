@@ -5,7 +5,7 @@ namespace DrzewaAPI.Models;
 
 public class SpeciesImage
 {
-	public required Guid Id { get; set; }
+	public Guid Id { get; set; }
 	public required string ImageUrl { get; set; }
 	public ImageType Type { get; set; } // Tree, Bark, Leaf, Fruit
 	public string? Description { get; set; }

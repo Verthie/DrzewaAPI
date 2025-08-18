@@ -5,7 +5,7 @@ namespace DrzewaAPI.Models;
 
 public class TreeSpecies
 {
-	public required Guid Id { get; set; }
+	public Guid Id { get; set; }
 	public required string PolishName { get; set; }
 	public required string LatinName { get; set; }
 	public required string Family { get; set; }

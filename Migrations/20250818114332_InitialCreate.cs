@@ -63,6 +63,7 @@ namespace DrzewaAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PolishName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     LatinName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Family = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Category = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     IdentificationGuide = table.Column<string>(type: "nvarchar(max)", maxLength: 5000, nullable: true),
@@ -82,10 +83,12 @@ namespace DrzewaAPI.Migrations
                     LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastLoginAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
+                    Avatar = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    Role = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    SubmissionsCount = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    VerificationsCount = table.Column<int>(type: "int", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>
                 {
@@ -251,10 +254,8 @@ namespace DrzewaAPI.Migrations
                     TreeReportId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsLegend = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -327,6 +328,7 @@ namespace DrzewaAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TreeReportId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VoteType = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -347,77 +349,14 @@ namespace DrzewaAPI.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Municipalities",
-                columns: new[] { "Id", "Address", "City", "Email", "Name", "Province", "ZipCode" },
-                values: new object[] { new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"), "Street 15", "Warszawa", "urząd@warszawa.pl", "GminaWarszawska", "Mazowieckie", "24-040" });
-
-            migrationBuilder.InsertData(
-                table: "SpeciesImages",
-                columns: new[] { "Id", "Description", "ImageUrl", "Type" },
-                values: new object[,]
-                {
-                    { new Guid("66666666-6666-6666-6666-666666666666"), "Zdjęcie dęba szypułkowego", "fileUrl", 0 },
-                    { new Guid("77777777-7777-7777-7777-777777777777"), "Zdjęcie liścia sosny zwyczajnej", "fileUrl", 2 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Tags",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), "Posusz" },
-                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), "Niestabilny" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "TreeSpecies",
-                columns: new[] { "Id", "Category", "Description", "IdentificationGuide", "LatinName", "PolishName", "SeasonalChanges" },
-                values: new object[,]
-                {
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 1, "Dąb szypułkowy to jeden z najpopularniejszych gatunków drzew w Polsce.", null, "Quercus robur", "Dąb szypułkowy", null },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), 0, "Sosna zwyczajna to charakterystyczne drzewo iglaste występujące w Polsce.", null, "Pinus sylvestris", "Sosna zwyczajna", null }
-                });
-
-            migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreatedAt", "Email", "FirstName", "IsActive", "LastLoginAt", "LastName", "PasswordHash", "Phone" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "ekowojownik@gmail.com", "Eko", false, null, "Wojownik", "VerySafe", null });
-
-            migrationBuilder.InsertData(
-                table: "TreeReports",
-                columns: new[] { "Id", "Circumference", "CommentsCount", "CreatedAt", "Description", "EstimatedAge", "FeaturedLegend", "IsAlive", "IsNatureMonument", "IsVerified", "Latitude", "LocationDescription", "Longitude", "SpeciesId", "Status", "UserId", "VotesCount" },
+                columns: new[] { "Id", "Avatar", "Email", "FirstName", "LastName", "PasswordHash", "Phone", "RegistrationDate", "SubmissionsCount", "VerificationsCount" },
                 values: new object[,]
                 {
-                    { new Guid("44444444-4444-4444-4444-444444444444"), 300, 0, new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "Fajne drzewo", 150, null, true, true, true, 500.0, "Miasto: Warszawa\nUlica: 3 maja", 100.0, new Guid("22222222-2222-2222-2222-222222222222"), 1, new Guid("11111111-1111-1111-1111-111111111111"), 0 },
-                    { new Guid("55555555-5555-5555-5555-555555555555"), 220, 0, new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Martwe drzewo", 240, null, false, false, false, 400.0, "Miasto: Warszawa\nUlica: Wyspiańskiego", 210.0, new Guid("33333333-3333-3333-3333-333333333333"), 0, new Guid("11111111-1111-1111-1111-111111111111"), 0 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "TreeSpeciesImages",
-                columns: new[] { "ImageId", "TreeSpeciesId" },
-                values: new object[,]
-                {
-                    { new Guid("66666666-6666-6666-6666-666666666666"), new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("77777777-7777-7777-7777-777777777777"), new Guid("33333333-3333-3333-3333-333333333333") }
-                });
-
-            migrationBuilder.InsertData(
-                table: "TreeConditionTags",
-                columns: new[] { "TagId", "TreeReportId" },
-                values: new object[,]
-                {
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), new Guid("44444444-4444-4444-4444-444444444444") },
-                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), new Guid("44444444-4444-4444-4444-444444444444") }
-                });
-
-            migrationBuilder.InsertData(
-                table: "TreeReportAttachments",
-                columns: new[] { "Id", "FileName", "FileSize", "FileUrl", "TreeReportId", "Type", "UploadedAt" },
-                values: new object[,]
-                {
-                    { new Guid("88888888-8888-8888-8888-888888888888"), "Obrazek pnia dębu", 0L, "fileUrl", new Guid("44444444-4444-4444-4444-444444444444"), 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("99999999-9999-9999-9999-999999999999"), "Obrazek liścia dębu", 0L, "fileUrl", new Guid("44444444-4444-4444-4444-444444444444"), 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Obrazek pnia sosny", 0L, "fileUrl", new Guid("55555555-5555-5555-5555-555555555555"), 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100&h=100&fit=crop", "adam.wolkin@email.com", "Adam", "Kowalski", "VerySafe", null, new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), 12, 45 },
+                    { new Guid("11111111-1111-1111-1111-111111111112"), "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?w=100&h=100&fit=crop", "maria.kowalska@email.com", "Maria", "Nowak", "VerySafe", null, new DateTime(2024, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), 8, 32 },
+                    { new Guid("11111111-1111-1111-1111-111111111113"), "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100&h=100&fit=crop", "piotr.nowak@email.com", "Piotr", "Wiśniewski", "VerySafe", null, new DateTime(2024, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), 15, 28 },
+                    { new Guid("11111111-1111-1111-1111-111111111114"), "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100&h=100&fit=crop", "anna.wisniowska@email.com", "Anna", "Zielińska", "VerySafe", null, new DateTime(2024, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), 22, 67 }
                 });
 
             migrationBuilder.CreateIndex(

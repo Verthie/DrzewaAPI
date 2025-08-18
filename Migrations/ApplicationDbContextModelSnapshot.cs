@@ -89,12 +89,6 @@ namespace DrzewaAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsLegend")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("TreeReportId")
                         .HasColumnType("uniqueidentifier");
 
@@ -146,18 +140,6 @@ namespace DrzewaAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Municipalities");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                            Address = "Street 15",
-                            City = "Warszawa",
-                            Email = "urząd@warszawa.pl",
-                            Name = "GminaWarszawska",
-                            Province = "Mazowieckie",
-                            ZipCode = "24-040"
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.Notification", b =>
@@ -251,22 +233,6 @@ namespace DrzewaAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SpeciesImages");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("66666666-6666-6666-6666-666666666666"),
-                            Description = "Zdjęcie dęba szypułkowego",
-                            ImageUrl = "fileUrl",
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("77777777-7777-7777-7777-777777777777"),
-                            Description = "Zdjęcie liścia sosny zwyczajnej",
-                            ImageUrl = "fileUrl",
-                            Type = 2
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.Tag", b =>
@@ -282,18 +248,6 @@ namespace DrzewaAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tags");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            Name = "Posusz"
-                        },
-                        new
-                        {
-                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            Name = "Niestabilny"
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeConditionTags", b =>
@@ -309,18 +263,6 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("TreeReportId");
 
                     b.ToTable("TreeConditionTags");
-
-                    b.HasData(
-                        new
-                        {
-                            TagId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            TreeReportId = new Guid("44444444-4444-4444-4444-444444444444")
-                        },
-                        new
-                        {
-                            TagId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            TreeReportId = new Guid("44444444-4444-4444-4444-444444444444")
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeReport", b =>
@@ -388,46 +330,6 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TreeReports");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            Circumference = 300,
-                            CommentsCount = 0,
-                            CreatedAt = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Fajne drzewo",
-                            EstimatedAge = 150,
-                            IsAlive = true,
-                            IsNatureMonument = true,
-                            IsVerified = true,
-                            Latitude = 500.0,
-                            LocationDescription = "Miasto: Warszawa\nUlica: 3 maja",
-                            Longitude = 100.0,
-                            SpeciesId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Status = 1,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            VotesCount = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("55555555-5555-5555-5555-555555555555"),
-                            Circumference = 220,
-                            CommentsCount = 0,
-                            CreatedAt = new DateTime(2025, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Martwe drzewo",
-                            EstimatedAge = 240,
-                            IsAlive = false,
-                            IsNatureMonument = false,
-                            IsVerified = false,
-                            Latitude = 400.0,
-                            LocationDescription = "Miasto: Warszawa\nUlica: Wyspiańskiego",
-                            Longitude = 210.0,
-                            SpeciesId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            Status = 0,
-                            UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            VotesCount = 0
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeReportAttachment", b =>
@@ -461,38 +363,6 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("TreeReportId");
 
                     b.ToTable("TreeReportAttachments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("88888888-8888-8888-8888-888888888888"),
-                            FileName = "Obrazek pnia dębu",
-                            FileSize = 0L,
-                            FileUrl = "fileUrl",
-                            TreeReportId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            Type = 0,
-                            UploadedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("99999999-9999-9999-9999-999999999999"),
-                            FileName = "Obrazek liścia dębu",
-                            FileSize = 0L,
-                            FileUrl = "fileUrl",
-                            TreeReportId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            Type = 0,
-                            UploadedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            FileName = "Obrazek pnia sosny",
-                            FileSize = 0L,
-                            FileUrl = "fileUrl",
-                            TreeReportId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            Type = 0,
-                            UploadedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeSpecies", b =>
@@ -507,6 +377,10 @@ namespace DrzewaAPI.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Family")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IdentificationGuide")
                         .HasMaxLength(5000)
@@ -529,24 +403,6 @@ namespace DrzewaAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TreeSpecies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Category = 1,
-                            Description = "Dąb szypułkowy to jeden z najpopularniejszych gatunków drzew w Polsce.",
-                            LatinName = "Quercus robur",
-                            PolishName = "Dąb szypułkowy"
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            Category = 0,
-                            Description = "Sosna zwyczajna to charakterystyczne drzewo iglaste występujące w Polsce.",
-                            LatinName = "Pinus sylvestris",
-                            PolishName = "Sosna zwyczajna"
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeSpeciesImages", b =>
@@ -562,18 +418,6 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("ImageId");
 
                     b.ToTable("TreeSpeciesImages");
-
-                    b.HasData(
-                        new
-                        {
-                            TreeSpeciesId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            ImageId = new Guid("66666666-6666-6666-6666-666666666666")
-                        },
-                        new
-                        {
-                            TreeSpeciesId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            ImageId = new Guid("77777777-7777-7777-7777-777777777777")
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.User", b =>
@@ -582,8 +426,9 @@ namespace DrzewaAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Avatar")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -595,12 +440,6 @@ namespace DrzewaAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastLoginAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -611,8 +450,28 @@ namespace DrzewaAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<DateTime>("RegistrationDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("Role")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("SubmissionsCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("VerificationsCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.HasKey("Id");
 
@@ -625,12 +484,54 @@ namespace DrzewaAPI.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "ekowojownik@gmail.com",
-                            FirstName = "Eko",
-                            IsActive = false,
-                            LastName = "Wojownik",
-                            PasswordHash = "VerySafe"
+                            Avatar = "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100&h=100&fit=crop",
+                            Email = "adam.wolkin@email.com",
+                            FirstName = "Adam",
+                            LastName = "Kowalski",
+                            PasswordHash = "VerySafe",
+                            RegistrationDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = 0,
+                            SubmissionsCount = 12,
+                            VerificationsCount = 45
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111112"),
+                            Avatar = "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?w=100&h=100&fit=crop",
+                            Email = "maria.kowalska@email.com",
+                            FirstName = "Maria",
+                            LastName = "Nowak",
+                            PasswordHash = "VerySafe",
+                            RegistrationDate = new DateTime(2024, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = 0,
+                            SubmissionsCount = 8,
+                            VerificationsCount = 32
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111113"),
+                            Avatar = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100&h=100&fit=crop",
+                            Email = "piotr.nowak@email.com",
+                            FirstName = "Piotr",
+                            LastName = "Wiśniewski",
+                            PasswordHash = "VerySafe",
+                            RegistrationDate = new DateTime(2024, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = 0,
+                            SubmissionsCount = 15,
+                            VerificationsCount = 28
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111114"),
+                            Avatar = "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100&h=100&fit=crop",
+                            Email = "anna.wisniowska@email.com",
+                            FirstName = "Anna",
+                            LastName = "Zielińska",
+                            PasswordHash = "VerySafe",
+                            RegistrationDate = new DateTime(2024, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = 0,
+                            SubmissionsCount = 22,
+                            VerificationsCount = 67
                         });
                 });
 
@@ -648,6 +549,9 @@ namespace DrzewaAPI.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("VoteType")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

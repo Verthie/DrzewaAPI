@@ -33,12 +33,12 @@ public class User
 	public int SubmissionsCount { get; set; } = 0;
 	public int VerificationsCount { get; set; } = 0;
 
+	// Helper Properties
+	public string FullName => $"{FirstName} {LastName}";
+
 	// Navigation Properties
 	public ICollection<TreeReport> TreeReports { get; set; } = new List<TreeReport>();
 	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 	public ICollection<Vote> Votes { get; set; } = new List<Vote>();
 	public ICollection<Application> Applications { get; set; } = new List<Application>();
-
-	// Helper Properties
-	public string FullName => $"{FirstName} {LastName}";
 }
