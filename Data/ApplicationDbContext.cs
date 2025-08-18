@@ -1,5 +1,6 @@
 using System;
 using DrzewaAPI.Models;
+using DrzewaAPI.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Data;
@@ -180,16 +181,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 						Id = SeedOakId,
 						PolishName = "Dąb szypułkowy",
 						LatinName = "Quercus robur",
+						Family = "Fagaceae",
 						Description = "Dąb szypułkowy to jeden z najpopularniejszych gatunków drzew w Polsce.",
-						Category = Utils.SpeciesCategory.Coniferous,
+						Category = SpeciesCategory.Coniferous,
 					},
 					new TreeSpecies
 					{
 						Id = SeedPineId,
 						PolishName = "Sosna zwyczajna",
 						LatinName = "Pinus sylvestris",
+						Family = "Pinaceae",
 						Description = "Sosna zwyczajna to charakterystyczne drzewo iglaste występujące w Polsce.",
-						Category = Utils.SpeciesCategory.Deciduous,
+						Category = SpeciesCategory.Deciduous,
 					}
 			);
 
@@ -199,14 +202,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 				{
 					Id = SeedImageOneId,
 					ImageUrl = "fileUrl",
-					Type = Utils.ImageType.Tree,
+					Type = ImageType.Tree,
 					Description = "Zdjęcie dęba szypułkowego"
 				},
 				new SpeciesImage
 				{
 					Id = SeedImageTwoId,
 					ImageUrl = "fileUrl",
-					Type = Utils.ImageType.Leaf,
+					Type = ImageType.Leaf,
 					Description = "Zdjęcie liścia sosny zwyczajnej"
 				}
 		);
@@ -243,7 +246,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 					EstimatedAge = 150,
 					Description = "Fajne drzewo",
 					IsNatureMonument = true,
-					Status = Utils.ReportStatus.Approved,
+					Status = ReportStatus.Approved,
 					CreatedAt = new DateTime(2025, 6, 15),
 					IsVerified = true,
 				},

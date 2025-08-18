@@ -1,6 +1,6 @@
 using System;
 
-namespace DrzewaAPI.Utils;
+namespace DrzewaAPI.Models.Enums;
 
 public enum ReportStatus
 {

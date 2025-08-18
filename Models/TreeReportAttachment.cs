@@ -1,5 +1,5 @@
 using System;
-using DrzewaAPI.Utils;
+using DrzewaAPI.Models.Enums;
 
 namespace DrzewaAPI.Models;
 
