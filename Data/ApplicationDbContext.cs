@@ -168,7 +168,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 					LastName = "Wojownik",
 					Email = "ekowojownik@gmail.com",
 					PasswordHash = "VerySafe",
-					CreatedAt = new DateTime(2025, 1, 1),
+					RegistrationDate = new DateTime(2025, 1, 1),
 				}
 		);
 	}
