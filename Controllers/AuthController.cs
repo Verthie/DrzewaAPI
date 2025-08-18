@@ -8,16 +8,8 @@ namespace DrzewaAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(IAuthService _authService, ILogger<AuthController> _logger) : ControllerBase
 {
-	private readonly IAuthService _authService;
-	private readonly ILogger<AuthController> _logger;
-
-	public AuthController(IAuthService authService, ILogger<AuthController> logger)
-	{
-		_authService = authService;
-		_logger = logger;
-	}
 
 	[HttpPost("register")]
 	public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)

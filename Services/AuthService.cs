@@ -19,17 +19,20 @@ public class AuthService : IAuthService
 	private readonly IPasswordHasher<User> _passwordHasher;
 	private readonly JwtSettings _jwtSettings;
 	private readonly ILogger<AuthService> _logger;
+	private readonly IUserService _userService;
 
 	public AuthService(
 			ApplicationDbContext context,
 			IPasswordHasher<User> passwordHasher,
 			IOptions<JwtSettings> jwtSettings,
-			ILogger<AuthService> logger)
+			ILogger<AuthService> logger,
+			IUserService userService)
 	{
 		_context = context;
 		_passwordHasher = passwordHasher;
 		_jwtSettings = jwtSettings.Value;
 		_logger = logger;
+		_userService = userService;
 	}
 
 	public async Task<AuthResponseDto?> RegisterAsync(RegisterDto registerDto)
@@ -99,7 +102,7 @@ public class AuthService : IAuthService
 			}
 
 			// Update user profile statistics
-			await UpdateUserStatsAsync(user.Id);
+			await _userService.UpdateUserStatsAsync(user.Id);
 
 			// Get the user again with the updated statistics
 			user = await _context.Users.FindAsync(user.Id);
@@ -111,7 +114,7 @@ public class AuthService : IAuthService
 
 			await _context.SaveChangesAsync();
 
-			// Generuj token JWT
+			// Generate JWT Token
 			var token = GenerateJwtToken(user);
 
 			_logger.LogInformation("Użytkownik zalogowany: {Email}", user.Email);
@@ -126,22 +129,6 @@ public class AuthService : IAuthService
 		{
 			_logger.LogError(ex, "Błąd podczas logowania użytkownika: {Email}", loginDto.Email);
 			throw;
-		}
-	}
-
-	public async Task UpdateUserStatsAsync(Guid userId)
-	{
-		var user = await _context.Users.FindAsync(userId);
-		if (user != null)
-		{
-			// TODO
-			// Tutaj będzie logika liczenia statystyk gdy dodamy TreeReports i Votes
-
-			// Przykład:
-			// user.SubmissionsCount = await _context.TreeReports.CountAsync(r => r.UserId == userId);
-			// user.VerificationsCount = await _context.Votes.CountAsync(v => v.UserId == userId && v.Approve);
-
-			await _context.SaveChangesAsync();
 		}
 	}
 
