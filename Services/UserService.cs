@@ -19,7 +19,8 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 									.Select(u => new UserDetailDto
 									{
 										Id = u.Id,
-										Name = u.FullName,
+										FirstName = u.FirstName,
+										LastName = u.LastName,
 										Email = u.Email,
 										Phone = u.Phone,
 										Avatar = u.Avatar,
@@ -50,7 +51,8 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 			return new UserDetailDto
 			{
 				Id = user.Id,
-				Name = user.FullName,
+				FirstName = user.FirstName,
+				LastName = user.LastName,
 				Email = user.Email,
 				Phone = user.Phone,
 				Avatar = user.Avatar,
