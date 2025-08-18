@@ -18,7 +18,7 @@ public class User
 	[MaxLength(100)]
 	public required string Email { get; set; }
 	[Required]
-	public required string PasswordHash { get; set; }
+	public string PasswordHash { get; set; } = "";
 	[Phone]
 	[MaxLength(15)]
 	public string? Phone { get; set; }

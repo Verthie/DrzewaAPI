@@ -32,7 +32,6 @@
   <ItemGroup>
     <Folder Include="Middleware\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Services\" />
     <Folder Include="wwwroot\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
