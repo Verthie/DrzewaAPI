@@ -7,7 +7,7 @@ public class Application
 	public Guid Id { get; set; }
 	public Guid UserId { get; set; }
 	public Guid MunicipalityId { get; set; }
-	public Guid TreeReportId { get; set; }
+	public Guid TreeSubmissionId { get; set; }
 	public required string PersonalData { get; set; }
 	public required string ContactPhone { get; set; }
 	public required string ContactEmail { get; set; }
@@ -20,5 +20,5 @@ public class Application
 	// Navigation Properties
 	public User? User { get; set; }
 	public Municipality? Municipality { get; set; }
-	public TreeReport? TreeReport { get; set; }
+	public TreeSubmission? TreeSubmission { get; set; }
 }

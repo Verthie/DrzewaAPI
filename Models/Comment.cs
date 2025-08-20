@@ -14,5 +14,5 @@ public class Comment
 
 	// Navigation Properties
 	public User? User { get; set; }
-	public TreeReport? TreeReport { get; set; }
+	public TreeSubmission? TreeReport { get; set; }
 }

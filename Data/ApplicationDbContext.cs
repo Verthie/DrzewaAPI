@@ -8,14 +8,14 @@ namespace DrzewaAPI.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
 	public DbSet<User> Users { get; set; }
-	public DbSet<TreeReport> TreeReports { get; set; }
+	public DbSet<TreeSubmission> TreeSubmissions { get; set; }
 	public DbSet<TreeSpecies> TreeSpecies { get; set; }
 	public DbSet<Application> Applications { get; set; }
 	public DbSet<Municipality> Municipalities { get; set; }
 	public DbSet<Comment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
 	public DbSet<Notification> Notifications { get; set; }
-	public DbSet<TreeReportAttachment> TreeReportAttachments { get; set; }
+	public DbSet<TreeSubmissionAttachment> TreeSubmissionAttachments { get; set; }
 	public DbSet<SpeciesImage> SpeciesImages { get; set; }
 	public DbSet<TreeSpeciesImages> TreeSpeciesImages { get; set; }
 	public DbSet<Tag> Tags { get; set; }
@@ -43,21 +43,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		});
 
 		// TreeReport Configuration
-		modelBuilder.Entity<TreeReport>(entity =>
+		modelBuilder.Entity<TreeSubmission>(entity =>
 		{
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.Circumference).HasMaxLength(6);
-			entity.Property(e => e.LocationDescription).HasMaxLength(500);
 			entity.Property(e => e.Description).HasMaxLength(2000);
-			entity.Property(e => e.FeaturedLegend).HasMaxLength(1000);
 
 			entity.HasOne(e => e.User)
-									.WithMany(e => e.TreeReports)
+									.WithMany(e => e.TreeSubmissions)
 									.HasForeignKey(e => e.UserId)
 									.OnDelete(DeleteBehavior.Restrict);
 
 			entity.HasOne(e => e.Species)
-									.WithMany(e => e.TreeReports)
+									.WithMany(e => e.TreeSubmissions)
 									.HasForeignKey(e => e.SpeciesId)
 									.OnDelete(DeleteBehavior.Restrict);
 		});
@@ -77,31 +75,31 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<Vote>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.HasIndex(e => new { e.UserId, e.TreeReportId }).IsUnique();
+			entity.HasIndex(e => new { e.UserId, e.TreeSubmissionId }).IsUnique();
 
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.Votes)
 									.HasForeignKey(e => e.UserId)
 									.OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasOne(e => e.TreeReport)
+			entity.HasOne(e => e.TreeSubmission)
 									.WithMany(e => e.Votes)
-									.HasForeignKey(e => e.TreeReportId)
+									.HasForeignKey(e => e.TreeSubmissionId)
 									.OnDelete(DeleteBehavior.Cascade);
 		});
 
 		// Many-to-Many Relationships
 		modelBuilder.Entity<TreeConditionTags>(entity =>
 		{
-			entity.HasKey(e => new { e.TagId, e.TreeReportId });
+			entity.HasKey(e => new { e.TagId, e.TreeSubmissionId });
 
 			entity.HasOne(e => e.Tags)
 									.WithMany(e => e.ConditionTags)
 									.HasForeignKey(e => e.TagId);
 
-			entity.HasOne(e => e.TreeReports)
+			entity.HasOne(e => e.TreeSubmissions)
 									.WithMany(e => e.ConditionTags)
-									.HasForeignKey(e => e.TreeReportId);
+									.HasForeignKey(e => e.TreeSubmissionId);
 		});
 
 		modelBuilder.Entity<TreeSpeciesImages>(entity =>

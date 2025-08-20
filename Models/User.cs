@@ -37,7 +37,7 @@ public class User
 	public string FullName => $"{FirstName} {LastName}";
 
 	// Navigation Properties
-	public ICollection<TreeReport> TreeReports { get; set; } = new List<TreeReport>();
+	public ICollection<TreeSubmission> TreeSubmissions { get; set; } = new List<TreeSubmission>();
 	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 	public ICollection<Vote> Votes { get; set; } = new List<Vote>();
 	public ICollection<Application> Applications { get; set; } = new List<Application>();

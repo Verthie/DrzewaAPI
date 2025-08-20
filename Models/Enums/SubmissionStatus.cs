@@ -2,9 +2,10 @@ using System;
 
 namespace DrzewaAPI.Models.Enums;
 
-public enum ReportStatus
+public enum SubmissionStatus
 {
 	Pending = 0,
 	Approved = 1,
-	Rejected = 2
+	Rejected = 2,
+	Monument = 3
 }

@@ -6,12 +6,13 @@ namespace DrzewaAPI.Models;
 public class Vote
 {
 	public Guid Id { get; set; }
-	public Guid TreeReportId { get; set; }
+	public Guid TreeSubmissionId { get; set; }
 	public Guid UserId { get; set; }
-	public required VoteType VoteType { get; set; }
-	public DateTime CreatedAt { get; set; }
+	public VoteType Type { get; set; }
+	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+	public DateTime? UpdatedAt { get; set; }
 
 	// Navigation Properties
-	public TreeReport? TreeReport { get; set; }
-	public User? User { get; set; }
+	public TreeSubmission TreeSubmission { get; set; } = null!;
+	public User User { get; set; } = null!;
 }
