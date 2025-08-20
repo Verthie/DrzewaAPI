@@ -29,7 +29,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.RegistrationDate).HasDefaultValueSql("GETUTCDATE()");
 			entity.Property(e => e.Role).HasDefaultValue(UserRole.User);
 			entity.HasIndex(e => e.Email).IsUnique();
-
 		});
 
 		// TreeReport Configuration
@@ -40,9 +39,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.Description).HasMaxLength(2000);
 			entity.OwnsOne(e => e.Location, loc =>
 			{
-				loc.Property(p => p.Latitude).HasColumnName("Latitude").IsRequired();
-				loc.Property(p => p.Longitude).HasColumnName("Longitude").IsRequired();
-				loc.Property(p => p.Address).HasColumnName("Address");
+				loc.Property(p => p.Lat).HasColumnName("Lat").IsRequired();
+				loc.Property(p => p.Lng).HasColumnName("Lng").IsRequired();
+				loc.Property(p => p.Address).HasColumnName("Address").IsRequired();
 			});
 
 			entity.HasOne(e => e.User)

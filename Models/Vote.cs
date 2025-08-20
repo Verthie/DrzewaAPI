@@ -13,6 +13,6 @@ public class Vote
 	public DateTime? UpdatedAt { get; set; }
 
 	// Navigation Properties
-	public TreeSubmission TreeSubmission { get; set; } = null!;
-	public User User { get; set; } = null!;
+	public TreeSubmission TreeSubmission { get; set; } = default!;
+	public User User { get; set; } = default!;
 }

@@ -12,5 +12,5 @@ public class TreeSpeciesImage
 	public string? AltText { get; set; }
 
 	// Navigation Properties
-	public TreeSpecies TreeSpecies { get; set; } = null!;
+	public TreeSpecies TreeSpecies { get; set; } = default!;
 }
