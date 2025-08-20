@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DrzewaAPI.Models.Enums;
 
 namespace DrzewaAPI.Models;
@@ -30,15 +31,17 @@ public class User
 	// public bool IsActive { get; set; }
 
 	// Computed Properties (for statistics)
-	public int SubmissionsCount { get; set; } = 0;
-	public int VerificationsCount { get; set; } = 0;
+	[NotMapped]
+	public int SubmissionsCount => TreeSubmissions?.Count ?? 0;
+	[NotMapped]
+	public int VerificationsCount => Votes?.Count(v => v.Type == VoteType.Approve) ?? 0;
+	[NotMapped]
+	public int MonumentCount => TreeSubmissions?.Count(s => s.Status == SubmissionStatus.Monument) ?? 0;
 
 	// Helper Properties
 	public string FullName => $"{FirstName} {LastName}";
 
 	// Navigation Properties
 	public ICollection<TreeSubmission> TreeSubmissions { get; set; } = new List<TreeSubmission>();
-	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 	public ICollection<Vote> Votes { get; set; } = new List<Vote>();
-	public ICollection<Application> Applications { get; set; } = new List<Application>();
 }

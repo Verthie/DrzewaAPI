@@ -3,13 +3,14 @@ using DrzewaAPI.Models.Enums;
 
 namespace DrzewaAPI.Models;
 
-public class SpeciesImage
+public class TreeSpeciesImage
 {
 	public Guid Id { get; set; }
+	public Guid TreeSpeciesId { get; set; }
 	public required string ImageUrl { get; set; }
 	public ImageType Type { get; set; } // Tree, Bark, Leaf, Fruit
-	public string? Description { get; set; }
+	public string? AltText { get; set; }
 
 	// Navigation Properties
-	public ICollection<TreeSpeciesImages>? TreeSpeciesImages { get; set; }
+	public TreeSpecies TreeSpecies { get; set; } = null!;
 }

@@ -21,6 +21,8 @@ public class TreeSubmission
 	public bool IsAlive { get; set; } = true;
 	public int? EstimatedAge { get; set; }
 	public string? Description { get; set; }
+	public required List<string> Images { get; set; }
+	public List<string>? Videos { get; set; }
 	public bool IsMonument { get; set; } = false;
 	public SubmissionStatus Status { get; set; } = SubmissionStatus.Pending;
 	public DateTime SubmissionDate { get; set; } = DateTime.UtcNow;
@@ -37,7 +39,4 @@ public class TreeSubmission
 	public User User { get; set; } = null!;
 	public TreeSpecies Species { get; set; } = null!;
 	public ICollection<Vote> Votes { get; set; } = new List<Vote>();
-	// public ICollection<TreeConditionTags>? ConditionTags { get; set; }
-	// public ICollection<TreeSubmissionAttachment>? Attachments { get; set; }
-	// public ICollection<Comment>? Comments { get; set; }
 }
