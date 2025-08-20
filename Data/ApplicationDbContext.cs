@@ -10,16 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<User> Users { get; set; }
 	public DbSet<TreeSubmission> TreeSubmissions { get; set; }
 	public DbSet<TreeSpecies> TreeSpecies { get; set; }
-	public DbSet<Application> Applications { get; set; }
-	public DbSet<Municipality> Municipalities { get; set; }
-	public DbSet<Comment> Comments { get; set; }
 	public DbSet<Vote> Votes { get; set; }
-	public DbSet<Notification> Notifications { get; set; }
-	public DbSet<TreeSubmissionAttachment> TreeSubmissionAttachments { get; set; }
-	public DbSet<SpeciesImage> SpeciesImages { get; set; }
-	public DbSet<TreeSpeciesImages> TreeSpeciesImages { get; set; }
-	public DbSet<Tag> Tags { get; set; }
-	public DbSet<SpeciesAdditionRequest> SpeciesAdditionRequests { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -68,7 +59,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.LatinName).IsRequired().HasMaxLength(200);
 			entity.Property(e => e.Description).HasMaxLength(2000);
 			entity.Property(e => e.IdentificationGuide).HasMaxLength(5000);
-			entity.Property(e => e.SeasonalChanges).HasMaxLength(2000);
 		});
 
 		// Vote Configuration - Unique constraint
@@ -86,33 +76,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 									.WithMany(e => e.Votes)
 									.HasForeignKey(e => e.TreeSubmissionId)
 									.OnDelete(DeleteBehavior.Cascade);
-		});
-
-		// Many-to-Many Relationships
-		modelBuilder.Entity<TreeConditionTags>(entity =>
-		{
-			entity.HasKey(e => new { e.TagId, e.TreeSubmissionId });
-
-			entity.HasOne(e => e.Tags)
-									.WithMany(e => e.ConditionTags)
-									.HasForeignKey(e => e.TagId);
-
-			entity.HasOne(e => e.TreeSubmissions)
-									.WithMany(e => e.ConditionTags)
-									.HasForeignKey(e => e.TreeSubmissionId);
-		});
-
-		modelBuilder.Entity<TreeSpeciesImages>(entity =>
-		{
-			entity.HasKey(e => new { e.TreeSpeciesId, e.ImageId });
-
-			entity.HasOne(e => e.TreeSpecies)
-									.WithMany(e => e.TreeSpeciesImages)
-									.HasForeignKey(e => e.TreeSpeciesId);
-
-			entity.HasOne(e => e.SpeciesImage)
-									.WithMany(e => e.TreeSpeciesImages)
-									.HasForeignKey(e => e.ImageId);
 		});
 	}
 };
