@@ -55,8 +55,6 @@ public class AuthService : IAuthService
 				Phone = registerDto.Phone?.Trim(),
 				RegistrationDate = DateTime.UtcNow,
 				Role = UserRole.User,
-				SubmissionsCount = 0,
-				VerificationsCount = 0
 			};
 
 			// Create password hash

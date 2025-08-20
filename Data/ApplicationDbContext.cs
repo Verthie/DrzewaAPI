@@ -28,9 +28,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.Avatar).HasMaxLength(500);
 			entity.Property(e => e.RegistrationDate).HasDefaultValueSql("GETUTCDATE()");
 			entity.Property(e => e.Role).HasDefaultValue(UserRole.User);
-			entity.Property(e => e.SubmissionsCount).HasDefaultValue(0);
-			entity.Property(e => e.VerificationsCount).HasDefaultValue(0);
 			entity.HasIndex(e => e.Email).IsUnique();
+
 		});
 
 		// TreeReport Configuration
@@ -39,6 +38,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.Circumference).HasMaxLength(6);
 			entity.Property(e => e.Description).HasMaxLength(2000);
+			entity.OwnsOne(e => e.Location, loc =>
+			{
+				loc.Property(p => p.Latitude).HasColumnName("Latitude").IsRequired();
+				loc.Property(p => p.Longitude).HasColumnName("Longitude").IsRequired();
+				loc.Property(p => p.Address).HasColumnName("Address");
+			});
 
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.TreeSubmissions)
@@ -58,7 +63,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.PolishName).IsRequired().HasMaxLength(200);
 			entity.Property(e => e.LatinName).IsRequired().HasMaxLength(200);
 			entity.Property(e => e.Description).HasMaxLength(2000);
-			entity.Property(e => e.IdentificationGuide).HasMaxLength(5000);
 		});
 
 		// Vote Configuration - Unique constraint

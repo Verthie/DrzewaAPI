@@ -33,8 +33,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			Email = "adam.wolkin@email.com",
 			Avatar = "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100&h=100&fit=crop",
 			RegistrationDate = new DateTime(2024, 1, 15),
-			SubmissionsCount = 12,
-			VerificationsCount = 45,
 		};
 		user1.PasswordHash = _hasher.HashPassword(user1, "Passw0rd!");
 
@@ -46,8 +44,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			Email = "maria.kowalska@email.com",
 			Avatar = "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?w=100&h=100&fit=crop",
 			RegistrationDate = new DateTime(2024, 2, 20),
-			SubmissionsCount = 8,
-			VerificationsCount = 32,
 		};
 		user2.PasswordHash = _hasher.HashPassword(user2, "VerySafe");
 
@@ -59,8 +55,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			Email = "piotr.nowak@email.com",
 			Avatar = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100&h=100&fit=crop",
 			RegistrationDate = new DateTime(2024, 3, 10),
-			SubmissionsCount = 15,
-			VerificationsCount = 28,
 		};
 		user3.PasswordHash = _hasher.HashPassword(user3, "HelloWorld");
 
@@ -72,8 +66,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			Email = "anna.wisniowska@email.com",
 			Avatar = "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100&h=100&fit=crop",
 			RegistrationDate = new DateTime(2024, 1, 5),
-			SubmissionsCount = 22,
-			VerificationsCount = 67,
 		};
 		user4.PasswordHash = _hasher.HashPassword(user4, "123456789");
 
