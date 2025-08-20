@@ -1,4 +1,3 @@
-using System;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +9,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<User> Users { get; set; }
 	public DbSet<TreeSubmission> TreeSubmissions { get; set; }
 	public DbSet<TreeSpecies> TreeSpecies { get; set; }
+	public DbSet<TreeSpeciesImage> TreeSpeciesImages { get; set; }
 	public DbSet<Vote> Votes { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,12 +37,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.Circumference).HasMaxLength(6);
 			entity.Property(e => e.Description).HasMaxLength(2000);
-			entity.OwnsOne(e => e.Location, loc =>
-			{
-				loc.Property(p => p.Lat).HasColumnName("Lat").IsRequired();
-				loc.Property(p => p.Lng).HasColumnName("Lng").IsRequired();
-				loc.Property(p => p.Address).HasColumnName("Address").IsRequired();
-			});
+			entity.OwnsOne(e => e.Location);
 
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.TreeSubmissions)
@@ -62,6 +57,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.PolishName).IsRequired().HasMaxLength(200);
 			entity.Property(e => e.LatinName).IsRequired().HasMaxLength(200);
 			entity.Property(e => e.Description).HasMaxLength(2000);
+			entity.OwnsOne(e => e.SeasonalChanges);
+			entity.OwnsOne(e => e.Traits);
+		});
+
+		// TreeSpeciesImage Configuration 
+		modelBuilder.Entity<TreeSpeciesImage>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.ImageUrl).IsRequired();
+			entity.HasOne(e => e.TreeSpecies)
+									.WithMany(e => e.Images)
+									.HasForeignKey(e => e.TreeSpeciesId)
+									.OnDelete(DeleteBehavior.Restrict);
 		});
 
 		// Vote Configuration - Unique constraint
