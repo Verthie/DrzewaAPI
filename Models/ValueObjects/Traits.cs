@@ -2,7 +2,7 @@ using System;
 
 namespace DrzewaAPI.Models.ValueObjects;
 
-public class Traits
+public record Traits
 {
 	public int? MaxHeight { get; set; }
 	public string? Lifespan { get; set; }

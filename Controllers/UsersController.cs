@@ -18,9 +18,9 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
     {
         try
         {
-            var result = await _userService.GetAllUsersAsync();
+            List<UserDetailDto> users = await _userService.GetAllUsersAsync();
 
-            return Ok(result);
+            return Ok(users);
         }
         catch (Exception ex)
         {
@@ -39,7 +39,7 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
                 return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
             }
 
-            var user = await _userService.GetUserByIdAsync(userId);
+            UserDetailDto? user = await _userService.GetUserByIdAsync(userId);
 
             if (user == null)
             {
@@ -65,27 +65,27 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
                 return BadRequest(ModelState);
             }
 
-            if (!Guid.TryParse(id, out var userId))
+            if (!Guid.TryParse(id, out Guid userId))
             {
                 return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
             }
 
             // Check if user can edit this profile
-            var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            string? currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            if (!Guid.TryParse(currentUserIdClaim, out var currentUserId))
+            if (!Guid.TryParse(currentUserIdClaim, out Guid currentUserId))
             {
                 return Unauthorized(new ErrorResponseDto { Error = "Nieprawidłowy token" });
             }
 
-            // User can edit only his own profile, unless he is an admin
+            // User can edit only his own profile, unless he is a moderator
             if (currentUserId != userId && currentUserRole != UserRole.Moderator.ToString())
             {
                 return Forbid();
             }
 
-            var updatedUser = await _userService.UpdateUserAsync(userId, updateDto);
+            UserDetailDto? updatedUser = await _userService.UpdateUserAsync(userId, updateDto);
 
             if (updatedUser == null)
             {

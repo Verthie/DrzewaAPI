@@ -13,25 +13,11 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 	{
 		try
 		{
-			List<User> users = await _context.Users.ToListAsync();
+			List<UserDetailDto> users = await _context.Users
+				.Select(s => MapToUserDetailDto(s))
+				.ToListAsync();
 
-			List<UserDetailDto> userDtos = users
-									.Select(u => new UserDetailDto
-									{
-										Id = u.Id,
-										FirstName = u.FirstName,
-										LastName = u.LastName,
-										Email = u.Email,
-										Phone = u.Phone,
-										Avatar = u.Avatar,
-										RegistrationDate = u.RegistrationDate,
-										SubmissionsCount = u.SubmissionsCount,
-										VerificationsCount = u.VerificationsCount,
-										Role = u.Role
-									})
-									.ToList();
-
-			return userDtos;
+			return users;
 		}
 		catch (Exception ex)
 		{
@@ -48,19 +34,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 
 			ArgumentNullException.ThrowIfNull(user);
 
-			return new UserDetailDto
-			{
-				Id = user.Id,
-				FirstName = user.FirstName,
-				LastName = user.LastName,
-				Email = user.Email,
-				Phone = user.Phone,
-				Avatar = user.Avatar,
-				RegistrationDate = user.RegistrationDate,
-				SubmissionsCount = user.SubmissionsCount,
-				VerificationsCount = user.VerificationsCount,
-				Role = user.Role
-			};
+			return MapToUserDetailDto(user);
 		}
 		catch (Exception ex)
 		{
@@ -122,4 +96,22 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 			throw;
 		}
 	}
+
+	private static UserDetailDto MapToUserDetailDto(User u)
+	{
+		return new UserDetailDto
+		{
+			Id = u.Id,
+			FirstName = u.FirstName,
+			LastName = u.LastName,
+			Email = u.Email,
+			Phone = u.Phone,
+			Avatar = u.Avatar,
+			RegistrationDate = u.RegistrationDate,
+			SubmissionsCount = u.SubmissionsCount,
+			VerificationsCount = u.VerificationsCount,
+			Role = u.Role
+		};
+	}
+
 }

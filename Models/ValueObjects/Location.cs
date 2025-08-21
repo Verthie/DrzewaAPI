@@ -1,6 +1,6 @@
 namespace DrzewaAPI.Models.ValueObjects;
 
-public class Location
+public record Location
 {
 	public required double Lat { get; set; }
 	public required double Lng { get; set; }

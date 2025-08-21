@@ -1,6 +1,6 @@
 namespace DrzewaAPI.Models.ValueObjects;
 
-public class SeasonalChanges
+public record SeasonalChanges
 {
 	public required string Spring { get; set; }
 	public required string Summer { get; set; }

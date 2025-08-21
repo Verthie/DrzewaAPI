@@ -27,13 +27,6 @@ public class TreeSubmission
 	public DateTime SubmissionDate { get; set; } = DateTime.UtcNow;
 	public DateTime? ApprovalDate { get; set; }
 
-	// Computed Properties
-	[NotMapped]
-	public int ApprovalVotes => Votes?.Count(v => v.Type == VoteType.Approve) ?? 0;
-
-	[NotMapped]
-	public int RejectionVotes => Votes?.Count(v => v.Type == VoteType.Reject) ?? 0;
-
 	// Navigation Properties
 	public User User { get; set; } = default!;
 	public TreeSpecies Species { get; set; } = default!;
