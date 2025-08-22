@@ -8,7 +8,7 @@ public class Vote
 	public Guid Id { get; set; }
 	public Guid TreeSubmissionId { get; set; }
 	public Guid UserId { get; set; }
-	public VoteType Type { get; set; }
+	public required VoteType Type { get; set; }
 	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 	public DateTime? UpdatedAt { get; set; }
 

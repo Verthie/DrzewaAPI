@@ -2,6 +2,6 @@ namespace DrzewaAPI.Models.ValueObjects;
 
 public record VotesCount
 {
-	public required int Approve { get; set; }
-	public required int Reject { get; set; }
+	public int Approve { get; set; } = 0;
+	public int Reject { get; set; } = 0;
 }

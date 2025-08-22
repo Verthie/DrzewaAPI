@@ -2,7 +2,9 @@ using System.Security.Claims;
 using DrzewaAPI.Data;
 using DrzewaAPI.Dtos.Auth;
 using DrzewaAPI.Dtos.TreeSubmissions;
+using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
+using DrzewaAPI.Models.ValueObjects;
 using DrzewaAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -56,8 +58,8 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
         }
     }
 
-    [HttpPost]
     [Authorize]
+    [HttpPost]
     public async Task<IActionResult> CreateTreeSubmission([FromBody] CreateTreeSubmissionDto request)
     {
         try
@@ -65,14 +67,9 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
-                return Forbid();
+            Guid userId = User.GetCurrentUserId();
 
-            if (!Guid.TryParse(userIdClaim, out var userGuid))
-                return Forbid();
-
-            var result = await _treeService.CreateTreeSubmissionAsync(request, userGuid);
+            var result = await _treeService.CreateTreeSubmissionAsync(request, userId);
 
             if (result == null)
             {
@@ -88,4 +85,66 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
         }
     }
 
+    [Authorize]
+    [HttpPut("/api/trees/{id}/vote")]
+    public async Task<ActionResult<VotesCount>> UpdateVote(string id, [FromBody] VoteRequestDto request)
+    {
+        try
+        {
+            if (!Guid.TryParse(id, out var treeId))
+            {
+                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
+            }
+
+            Guid userId = User.GetCurrentUserId();
+
+            if (request?.Type == null)
+            {
+                return BadRequest(new ErrorResponseDto { Error = "Typ musi zostać podany" });
+            }
+
+            var result = await _treeService.SetVoteAsync(treeId, userId, request.Type);
+
+            if (result == null)
+            {
+                return NotFound(new ErrorResponseDto { Error = "Nie udało się oddać głosu" });
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Błąd podczas oddawania głosu na drzewo: {TreeId}", id);
+            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
+        }
+    }
+
+    [Authorize]
+    [HttpDelete("/api/trees/{id}/vote")]
+    public async Task<ActionResult<VotesCount>> DeleteVote(string id)
+    {
+        try
+        {
+            if (!Guid.TryParse(id, out var treeId))
+            {
+                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
+            }
+
+            Guid userId = User.GetCurrentUserId();
+
+            var result = await _treeService.SetVoteAsync(treeId, userId, type: null);
+
+            if (result == null)
+            {
+                return NotFound(new ErrorResponseDto { Error = "Nie udało się usunąć głosu" });
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Błąd podczas usuwania głosu z drzewa: {TreeId}", id);
+            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
+        }
+    }
 }

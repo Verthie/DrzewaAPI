@@ -100,7 +100,4 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
             return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
         }
     }
-
-    // TODO Retrieve the list of tree submisions created by user (can be created when TreeSubmissions are implemented)
-    // [HttpGet("{id}/trees")]
 }

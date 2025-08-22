@@ -37,7 +37,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 				.Include(s => s.Votes)
 				.FirstOrDefaultAsync(s => s.Id == treeId);
 
-			ArgumentNullException.ThrowIfNull(submission);
+			if (submission == null) return null;
 
 			return MapToTreeSubmissionDto(submission);
 		}
@@ -50,39 +50,99 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 	public async Task<TreeSubmissionDto?> CreateTreeSubmissionAsync(CreateTreeSubmissionDto req, Guid userId)
 	{
-		using var tx = await _context.Database.BeginTransactionAsync();
-
-		TreeSubmission submission = new TreeSubmission
+		try
 		{
-			Id = Guid.NewGuid(),
-			UserId = userId,
-			SpeciesId = req.SpeciesId,
-			Location = new Location
+			TreeSubmission submission = new TreeSubmission
 			{
-				Lat = req.Location.Lat,
-				Lng = req.Location.Lng,
-				Address = req.Location.Address,
-			},
-			Circumference = req.Circumference,
-			Height = req.Height,
-			Condition = req.Condition,
-			IsAlive = req.IsAlive,
-			EstimatedAge = req.EstimatedAge,
-			Description = req.Description,
-			Images = req.Images,
-			IsMonument = req.IsMonument,
-		};
+				Id = Guid.NewGuid(),
+				UserId = userId,
+				SpeciesId = req.SpeciesId,
+				Location = new Location
+				{
+					Lat = req.Location.Lat,
+					Lng = req.Location.Lng,
+					Address = req.Location.Address,
+				},
+				Circumference = req.Circumference,
+				Height = req.Height,
+				Condition = req.Condition,
+				IsAlive = req.IsAlive,
+				EstimatedAge = req.EstimatedAge,
+				Description = req.Description,
+				Images = req.Images,
+				IsMonument = req.IsMonument,
+			};
 
-		_context.TreeSubmissions.Add(submission);
-		await _context.SaveChangesAsync();
+			_context.TreeSubmissions.Add(submission);
+			await _context.SaveChangesAsync();
 
-		// Load navigation properties
-		await _context.Entry(submission).Reference(s => s.Species).LoadAsync();
-		await _context.Entry(submission).Collection(s => s.Votes).LoadAsync();
+			// Load navigation properties
+			await _context.Entry(submission).Reference(s => s.Species).LoadAsync();
+			await _context.Entry(submission).Collection(s => s.Votes).LoadAsync();
 
-		await tx.CommitAsync();
+			return MapToTreeSubmissionDto(submission);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas tworzenia drzewa");
+			throw;
+		}
+	}
 
-		return MapToTreeSubmissionDto(submission);
+	public async Task<VotesCount?> SetVoteAsync(Guid treeId, Guid userId, VoteType? type)
+	{
+		try
+		{
+			TreeSubmission? submission = await _context.TreeSubmissions.FirstOrDefaultAsync(s => s.Id == treeId);
+
+			if (submission == null) return null;
+
+			Vote? existing = await _context.Votes
+				.SingleOrDefaultAsync(v => v.TreeSubmissionId == treeId && v.UserId == userId);
+
+			if (type == null)
+			{
+				// remove existing vote
+				if (existing != null) _context.Votes.Remove(existing);
+			}
+			else
+			{
+				if (existing == null)
+				{
+					// add new vote
+					_context.Votes.Add(new Vote
+					{
+						Id = Guid.NewGuid(),
+						TreeSubmissionId = submission.Id,
+						UserId = userId,
+						Type = type.Value,
+					});
+				}
+				else if (existing.Type != type.Value)
+				{
+					existing.Type = type.Value; // change the vote from one type to another
+				}
+			}
+
+			await _context.SaveChangesAsync();
+
+			var counts = await _context.Votes
+				.Where(v => v.TreeSubmissionId == treeId)
+				.GroupBy(_ => 1)
+				.Select(g => new VotesCount
+				{
+					Approve = g.Count(v => v.Type == VoteType.Approve),
+					Reject = g.Count(v => v.Type == VoteType.Reject)
+				})
+				.FirstOrDefaultAsync() ?? new VotesCount();
+
+			return counts;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas nadawania głosu");
+			throw;
+		}
 	}
 
 	private static TreeSubmissionDto MapToTreeSubmissionDto(TreeSubmission s)
@@ -111,4 +171,5 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			},
 		};
 	}
+
 }
