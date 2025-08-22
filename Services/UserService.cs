@@ -2,19 +2,21 @@ using System;
 using DrzewaAPI.Data;
 using DrzewaAPI.Dtos.User;
 using DrzewaAPI.Models;
+using DrzewaAPI.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
 public class UserService(ApplicationDbContext _context, ILogger<UserService> _logger) : IUserService
 {
-
-	public async Task<List<UserDetailDto>> GetAllUsersAsync()
+	public async Task<List<UserDto>> GetAllUsersAsync()
 	{
 		try
 		{
-			List<UserDetailDto> users = await _context.Users
-				.Select(s => MapToUserDetailDto(s))
+			List<UserDto> users = await _context.Users
+				.Include(u => u.TreeSubmissions)
+				.Include(u => u.Votes)
+				.Select(u => MapToUserDto(u))
 				.ToListAsync();
 
 			return users;
@@ -26,15 +28,18 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		}
 	}
 
-	public async Task<UserDetailDto?> GetUserByIdAsync(Guid userId)
+	public async Task<UserDto?> GetUserByIdAsync(Guid userId)
 	{
 		try
 		{
-			User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+			User? user = await _context.Users
+				.Include(u => u.TreeSubmissions)
+				.Include(u => u.Votes)
+				.FirstOrDefaultAsync(u => u.Id == userId);
 
 			ArgumentNullException.ThrowIfNull(user);
 
-			return MapToUserDetailDto(user);
+			return MapToUserDto(user);
 		}
 		catch (Exception ex)
 		{
@@ -43,7 +48,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		}
 	}
 
-	public async Task<UserDetailDto?> UpdateUserAsync(Guid userId, UpdateUserDto updateDto)
+	public async Task<UserDto?> UpdateUserAsync(Guid userId, UpdateUserDto updateDto)
 	{
 		try
 		{
@@ -72,46 +77,17 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		}
 	}
 
-	public async Task UpdateUserStatsAsync(Guid userId)
+	private static UserDto MapToUserDto(User u)
 	{
-		try
-		{
-			var user = await _context.Users.FindAsync(userId);
-			if (user == null) return;
-
-			// TODO
-			// Tutaj będzie logika liczenia statystyk gdy dodamy TreeReports i Votes
-
-			// Przykład:
-			// user.SubmissionsCount = await _context.TreeReports.CountAsync(r => r.UserId == userId);
-			// user.VerificationsCount = await _context.Votes.CountAsync(v => v.UserId == userId && v.VoteType.Approved);
-
-			await _context.SaveChangesAsync();
-
-			_logger.LogInformation("Zaktualizowano statystyki użytkownika: {UserId}", userId);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Błąd podczas aktualizacji statystyk użytkownika: {UserId}", userId);
-			throw;
-		}
-	}
-
-	private static UserDetailDto MapToUserDetailDto(User u)
-	{
-		return new UserDetailDto
+		return new UserDto
 		{
 			Id = u.Id,
-			FirstName = u.FirstName,
-			LastName = u.LastName,
 			Email = u.Email,
-			Phone = u.Phone,
+			Name = u.FullName,
 			Avatar = u.Avatar,
 			RegistrationDate = u.RegistrationDate,
-			SubmissionsCount = u.SubmissionsCount,
-			VerificationsCount = u.VerificationsCount,
-			Role = u.Role
+			SubmissionsCount = u.TreeSubmissions.Count,
+			VerificationsCount = u.Votes.Count(v => v.Type == VoteType.Approve),
 		};
 	}
-
 }

@@ -1,4 +1,5 @@
 using System;
+using DrzewaAPI.Dtos.User;
 
 namespace DrzewaAPI.Dtos.Auth;
 

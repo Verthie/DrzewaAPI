@@ -30,15 +30,8 @@ public class User
 	// public DateTime? LastLoginAt { get; set; }
 	// public bool IsActive { get; set; }
 
-	// Computed Properties (for statistics)
-	[NotMapped]
-	public int SubmissionsCount => TreeSubmissions?.Count ?? 0;
-	[NotMapped]
-	public int VerificationsCount => Votes?.Count(v => v.Type == VoteType.Approve) ?? 0;
-	[NotMapped]
-	public int MonumentCount => TreeSubmissions?.Count(s => s.Status == SubmissionStatus.Monument) ?? 0;
-
 	// Helper Properties
+	[NotMapped]
 	public string FullName => $"{FirstName} {LastName}";
 
 	// Navigation Properties

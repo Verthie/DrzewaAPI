@@ -18,7 +18,7 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
     {
         try
         {
-            List<UserDetailDto> users = await _userService.GetAllUsersAsync();
+            List<UserDto> users = await _userService.GetAllUsersAsync();
 
             return Ok(users);
         }
@@ -39,7 +39,7 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
                 return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
             }
 
-            UserDetailDto? user = await _userService.GetUserByIdAsync(userId);
+            UserDto? user = await _userService.GetUserByIdAsync(userId);
 
             if (user == null)
             {
@@ -85,7 +85,7 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
                 return Forbid();
             }
 
-            UserDetailDto? updatedUser = await _userService.UpdateUserAsync(userId, updateDto);
+            UserDto? updatedUser = await _userService.UpdateUserAsync(userId, updateDto);
 
             if (updatedUser == null)
             {

@@ -1,15 +1,15 @@
 using System;
 using DrzewaAPI.Dtos.User;
 using DrzewaAPI.Models;
+using DrzewaAPI.Models.Enums;
 
 namespace DrzewaAPI.Services;
 
 public interface IUserService
 {
-	Task<List<UserDetailDto>> GetAllUsersAsync();
-	Task<UserDetailDto?> GetUserByIdAsync(Guid userId);
-	Task<UserDetailDto?> UpdateUserAsync(Guid userId, UpdateUserDto updateDto);
-	Task UpdateUserStatsAsync(Guid userId);
+	Task<List<UserDto>> GetAllUsersAsync();
+	Task<UserDto?> GetUserByIdAsync(Guid userId);
+	Task<UserDto?> UpdateUserAsync(Guid userId, UpdateUserDto updateDto);
 	// Task<bool> DeactivateUserAsync(Guid userId);
 	// Task<bool> ActivateUserAsync(Guid userId);
 }

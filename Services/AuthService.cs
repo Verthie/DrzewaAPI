@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using DrzewaAPI.Configuration;
 using DrzewaAPI.Data;
 using DrzewaAPI.Dtos.Auth;
+using DrzewaAPI.Dtos.User;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using System.IdentityModel.Tokens.Jwt;
@@ -99,9 +100,6 @@ public class AuthService : IAuthService
 				return null;
 			}
 
-			// Update user profile statistics
-			await _userService.UpdateUserStatsAsync(user.Id);
-
 			// Get the user again with the updated statistics
 			user = await _context.Users.FindAsync(user.Id);
 
@@ -167,8 +165,8 @@ public class AuthService : IAuthService
 			Name = user.FullName,
 			Avatar = user.Avatar,
 			RegistrationDate = user.RegistrationDate,
-			SubmissionsCount = user.SubmissionsCount,
-			VerificationsCount = user.VerificationsCount
+			SubmissionsCount = user.TreeSubmissions.Count,
+			VerificationsCount = user.Votes.Count(v => v.Type == VoteType.Approve)
 		};
 	}
 }
