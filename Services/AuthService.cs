@@ -134,14 +134,16 @@ public class AuthService : IAuthService
 		var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
 
 		var claims = new List<Claim>
-				{
-						new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-						new(ClaimTypes.Name, user.FullName),
-						new(ClaimTypes.Email, user.Email),
-						new(ClaimTypes.Role, user.Role.ToString()),
-						new("firstName", user.FirstName),
-						new("lastName", user.LastName)
-				};
+		{
+				new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+				new(ClaimTypes.Name, user.FullName),
+				new(ClaimTypes.Email, user.Email),
+				new(ClaimTypes.Role, user.Role.ToString()),
+
+				new("userId", user.Id.ToString()),
+				new("email", user.Email),
+				new("name", user.FullName)
+		};
 
 		var tokenDescriptor = new SecurityTokenDescriptor
 		{
