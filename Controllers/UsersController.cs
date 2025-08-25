@@ -30,7 +30,7 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetUser(string id)
+    public async Task<IActionResult> GetUserById(string id)
     {
         try
         {

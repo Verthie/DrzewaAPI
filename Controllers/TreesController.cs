@@ -33,7 +33,7 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetTreeSubmission(string id)
+    public async Task<IActionResult> GetTreeSubmissionById(string id)
     {
         try
         {
@@ -76,7 +76,7 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
                 return NotFound(new ErrorResponseDto { Error = "Nie udało się utworzyć drzewa" });
             }
 
-            return CreatedAtAction(nameof(GetTreeSubmission), new { id = result.Id }, result);
+            return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
         }
         catch (Exception ex)
         {
