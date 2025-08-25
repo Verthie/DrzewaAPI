@@ -100,15 +100,10 @@ public class AuthService : IAuthService
 				return null;
 			}
 
-			// Get the user again with the updated statistics
-			user = await _context.Users.FindAsync(user.Id);
-
-			ArgumentNullException.ThrowIfNull(user);
-
 			// Updating last login time 
 			// user.LastLoginAt = DateTime.UtcNow;
 
-			await _context.SaveChangesAsync();
+			// await _context.SaveChangesAsync();
 
 			// Generate JWT Token
 			var token = GenerateJwtToken(user);
