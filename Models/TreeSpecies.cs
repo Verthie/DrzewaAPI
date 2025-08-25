@@ -1,7 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Reflection.PortableExecutable;
-using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
 
 namespace DrzewaAPI.Models;
