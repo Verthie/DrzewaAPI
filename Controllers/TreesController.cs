@@ -86,7 +86,7 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
     }
 
     [Authorize]
-    [HttpPut("/api/trees/{id}/vote")]
+    [HttpPut("{id}/vote")]
     public async Task<ActionResult<VotesCount>> UpdateVote(string id, [FromBody] VoteRequestDto request)
     {
         try
@@ -120,7 +120,7 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
     }
 
     [Authorize]
-    [HttpDelete("/api/trees/{id}/vote")]
+    [HttpDelete("{id}/vote")]
     public async Task<ActionResult<VotesCount>> DeleteVote(string id)
     {
         try
