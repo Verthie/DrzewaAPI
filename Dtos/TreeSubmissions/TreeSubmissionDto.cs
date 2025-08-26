@@ -6,6 +6,7 @@ namespace DrzewaAPI.Dtos.TreeSubmissions;
 public record TreeSubmissionDto
 {
 	public Guid Id { get; init; }
+	public required UserData UserData { get; set; }
 	public required string Species { get; init; }
 	public required string SpeciesLatin { get; init; }
 	public required Location Location { get; init; }

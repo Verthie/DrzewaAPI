@@ -16,6 +16,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			List<TreeSubmissionDto> submissions = await _context.TreeSubmissions
 				.Include(s => s.Species)
 				.Include(s => s.Votes)
+				.Include(s => s.User)
 				.Select(s => MapToTreeSubmissionDto(s))
 				.ToListAsync();
 
@@ -35,6 +36,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			TreeSubmission? submission = await _context.TreeSubmissions
 				.Include(s => s.Species)
 				.Include(s => s.Votes)
+				.Include(s => s.User)
 				.FirstOrDefaultAsync(s => s.Id == treeId);
 
 			if (submission == null) return null;
@@ -150,6 +152,11 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		return new TreeSubmissionDto
 		{
 			Id = s.Id,
+			UserData = new UserData
+			{
+				UserName = s.User.FullName,
+				Avatar = s.User.Avatar
+			},
 			Species = s.Species.PolishName,
 			SpeciesLatin = s.Species.LatinName,
 			Location = s.Location,
