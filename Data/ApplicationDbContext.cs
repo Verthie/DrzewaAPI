@@ -95,7 +95,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<Comment>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Content).IsRequired().HasMaxLength(300);
+			entity.Property(e => e.Content).IsRequired().HasMaxLength(3000);
 
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.Comments)

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrzewaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250826104658_AddedCommentsAndLikes")]
+    [Migration("20250826112713_AddedCommentsAndLikes")]
     partial class AddedCommentsAndLikes
     {
         /// <inheritdoc />
@@ -33,8 +33,8 @@ namespace DrzewaAPI.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
 
                     b.Property<DateTime>("DatePosted")
                         .HasColumnType("datetime2");

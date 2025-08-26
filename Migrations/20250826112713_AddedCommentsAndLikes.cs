@@ -18,7 +18,7 @@ namespace DrzewaAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TreeSubmissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(3000)", maxLength: 3000, nullable: false),
                     DatePosted = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsLegend = table.Column<bool>(type: "bit", nullable: false)
                 },

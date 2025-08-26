@@ -35,6 +35,13 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		if (!await _db.Votes.AnyAsync(ct)) _db.Votes.AddRange(votes);
 		// else votes = await _db.Votes.ToArrayAsync(ct);
 
+		Comment[] comments = GetMockComments(submissions, users);
+		if (!await _db.Comments.AnyAsync(ct)) _db.Comments.AddRange(comments);
+		else comments = await _db.Comments.ToArrayAsync(ct);
+
+		Like[] likes = GetMockLikes(users, comments);
+		if (!await _db.Likes.AnyAsync(ct)) _db.Likes.AddRange(likes);
+		// else likes = await _db.Likes.ToArrayAsync(ct);
 
 		if (!_db.ChangeTracker.Entries().Any()) return;
 
@@ -365,6 +372,90 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 				UserId = users[3].Id,
 				Type = VoteType.Approve,
 				CreatedAt = new DateTime(2024, 12, 24)
+			},
+		];
+	}
+
+	private Comment[] GetMockComments(TreeSubmission[] submissions, List<User> users)
+	{
+		return [
+			new Comment {
+				Id = Guid.NewGuid(),
+				UserId = users[2].Id,
+				TreeSubmissionId = submissions[0].Id,
+				Content = "Ten dąb pamięta czasy króla Jana III Sobieskiego. Według lokalnej tradycji przekazywanej przez pokolenia, król odpoczywał w jego cieniu po powrocie z wiktorii wiedeńskiej w 1683 roku. Stare dokumenty z archiwum królewskiego wspominają o \"wielkim dębie przy pałacu\", który mógł być właśnie tym drzewem.",
+				DatePosted = new DateTime(2024, 1, 21),
+				IsLegend = true
+			},
+			new Comment {
+				Id = Guid.NewGuid(),
+				UserId = users[3].Id,
+				TreeSubmissionId = submissions[1].Id,
+				Content = "Wspaniały okaz! Widziałam go osobiście podczas spaceru z rodziną. Moje dzieci były zachwycone jego rozmiarami. To naprawdę żywy pomnik historii.",
+				DatePosted = new DateTime(2024, 1, 21),
+			},
+			new Comment {
+				Id = Guid.NewGuid(),
+				UserId = users[0].Id,
+				TreeSubmissionId = submissions[2].Id,
+				Content = "Potrzeba więcej zdjęć z różnych perspektyw, szczególnie kory i liści. Byłoby też dobrze dodać zdjęcie całego drzewa z większej odległości.",
+				DatePosted = new DateTime(2024, 1, 21),
+			},
+			new Comment {
+				Id = Guid.NewGuid(),
+				UserId = users[4].Id,
+				TreeSubmissionId = submissions[2].Id,
+				Content = "Ta lipa była sadzona w 1257 roku z okazji lokacji miasta Krakowa. Przez wieki była miejscem spotkań kupców i rzemieślników. W średniowieczu pod lipami na rynkach odbywały się sądy i zgromadzenia miejskie. \"Lipa Mariacka\" była świadkiem koronacji królów i ważnych wydarzeń historycznych.",
+				DatePosted = new DateTime(2024, 1, 21),
+				IsLegend = true
+			},
+			new Comment {
+				Id = Guid.NewGuid(),
+				UserId = users[3].Id,
+				TreeSubmissionId = submissions[0].Id,
+				Content = "Jako dendrolożka mogę potwierdzić, że to wyjątkowy okaz. Pierśnica 520 cm to naprawdę imponujący rozmiar. Stan zachowania jest doskonały jak na wiek drzewa.",
+				DatePosted = new DateTime(2024, 1, 21),
+			},
+		];
+	}
+
+	private Like[] GetMockLikes(List<User> users, Comment[] comments)
+	{
+		return [
+			new Like{
+				Id = Guid.NewGuid(),
+				UserId = users[0].Id,
+				CommentId = comments[0].Id,
+			},
+			new Like{
+				Id = Guid.NewGuid(),
+				UserId = users[1].Id,
+				CommentId = comments[0].Id,
+			},
+			new Like{
+				Id = Guid.NewGuid(),
+				UserId = users[2].Id,
+				CommentId = comments[1].Id,
+			},
+			new Like{
+				Id = Guid.NewGuid(),
+				UserId = users[4].Id,
+				CommentId = comments[1].Id,
+			},
+			new Like{
+				Id = Guid.NewGuid(),
+				UserId = users[3].Id,
+				CommentId = comments[3].Id,
+			},
+			new Like{
+				Id = Guid.NewGuid(),
+				UserId = users[0].Id,
+				CommentId = comments[4].Id,
+			},
+			new Like{
+				Id = Guid.NewGuid(),
+				UserId = users[4].Id,
+				CommentId = comments[4].Id,
 			},
 		];
 	}

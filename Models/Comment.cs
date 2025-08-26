@@ -8,7 +8,7 @@ public class Comment
 	public Guid UserId { get; set; }
 	public Guid TreeSubmissionId { get; set; }
 	[Required]
-	[MaxLength(300)]
+	[MaxLength(3000)]
 	public required string Content { get; set; }
 	public DateTime DatePosted { get; set; } = DateTime.UtcNow;
 	public bool IsLegend { get; set; } = false;

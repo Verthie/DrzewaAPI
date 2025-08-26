@@ -30,8 +30,8 @@ namespace DrzewaAPI.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
 
                     b.Property<DateTime>("DatePosted")
                         .HasColumnType("datetime2");
