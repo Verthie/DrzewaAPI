@@ -24,6 +24,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ITreeService, TreeService>();
 builder.Services.AddScoped<ISpeciesService, SpeciesService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IDataSeeder, DataSeeder>();
 
 // JWT Configuration
