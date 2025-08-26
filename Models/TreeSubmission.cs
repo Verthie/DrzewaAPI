@@ -31,4 +31,5 @@ public class TreeSubmission
 	public User User { get; set; } = default!;
 	public TreeSpecies Species { get; set; } = default!;
 	public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

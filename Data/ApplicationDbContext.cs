@@ -11,6 +11,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<TreeSpecies> TreeSpecies { get; set; }
 	public DbSet<TreeSpeciesImage> TreeSpeciesImages { get; set; }
 	public DbSet<Vote> Votes { get; set; }
+	public DbSet<Comment> Comments { get; set; }
+	public DbSet<Like> Likes { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -86,6 +88,40 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasOne(e => e.TreeSubmission)
 									.WithMany(e => e.Votes)
 									.HasForeignKey(e => e.TreeSubmissionId)
+									.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		// Comment Configuration
+		modelBuilder.Entity<Comment>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.Content).IsRequired().HasMaxLength(300);
+
+			entity.HasOne(e => e.User)
+									.WithMany(e => e.Comments)
+									.HasForeignKey(e => e.UserId)
+									.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(e => e.TreeSubmission)
+									.WithMany(e => e.Comments)
+									.HasForeignKey(e => e.TreeSubmissionId)
+									.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		// Like Configuration
+		modelBuilder.Entity<Like>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.HasIndex(e => new { e.UserId, e.CommentId }).IsUnique();
+
+			entity.HasOne(e => e.User)
+									.WithMany(e => e.Likes)
+									.HasForeignKey(e => e.UserId)
+									.OnDelete(DeleteBehavior.NoAction);
+
+			entity.HasOne(e => e.Comment)
+									.WithMany(e => e.Likes)
+									.HasForeignKey(e => e.CommentId)
 									.OnDelete(DeleteBehavior.Cascade);
 		});
 	}

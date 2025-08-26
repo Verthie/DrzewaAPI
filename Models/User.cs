@@ -37,4 +37,6 @@ public class User
 	// Navigation Properties
 	public ICollection<TreeSubmission> TreeSubmissions { get; set; } = new List<TreeSubmission>();
 	public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+	public ICollection<Like> Likes { get; set; } = new List<Like>();
 }
