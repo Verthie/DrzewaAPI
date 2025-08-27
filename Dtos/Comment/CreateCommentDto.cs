@@ -4,6 +4,6 @@ namespace DrzewaAPI.Dtos.Comment;
 
 public record CreateCommentDto
 {
-	public required string Content { get; set; }
-	public bool IsLegend { get; set; }
+	public required string Content { get; init; }
+	public bool IsLegend { get; init; }
 }

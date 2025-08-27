@@ -1,8 +1,10 @@
 using System;
+using System.Text.Json;
 using DrzewaAPI.Data;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
+using DrzewaAPI.Utils.Mocks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +29,7 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		if (!await _db.TreeSpeciesImages.AnyAsync(ct)) _db.TreeSpeciesImages.AddRange(images);
 		// else images = await _db.TreeSpeciesImages.ToArrayAsync(ct);
 
-		TreeSubmission[] submissions = GetMockSubmissions(users, species);
+		TreeSubmission[] submissions = GetMockSubmissionsFromJson(users, "Utils\\Mocks\\pomniki_przyrody_to_post.json");
 		if (!await _db.TreeSubmissions.AnyAsync(ct)) _db.TreeSubmissions.AddRange(submissions);
 		else submissions = await _db.TreeSubmissions.ToArrayAsync(ct);
 
@@ -118,6 +120,81 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		return users;
 	}
 
+	private TreeSpecies[] GetMockSpecies()
+	{
+		return [
+			new TreeSpecies() {
+				Id = Guid.Parse("e677fa5e-876f-44f4-9542-8d90533ea4fa"),
+				PolishName = "Dąb szypułkowy",
+				LatinName = "Quercus Robur",
+				Family = "Fagaceae",
+				Description = "Dąb szypułkowy to jeden z najważniejszych gatunków drzew w Polsce. Może żyć ponad 1000 lat i osiągać wysokość do 40 metrów. Jest symbolem siły, trwałości i mądrości w kulturze słowiańskiej. Drewno dębu było używane do budowy statków, domów i mebli przez wieki.",
+				IdentificationGuide = ["Liście z wyraźnymi wcięciami, bez szypułek lub z bardzo krótkimi szypułkami",
+					"Żołędzie na długich szypułkach (2-8 cm), dojrzewają jesienią",
+					"Kora szara, głęboko bruzdowna u starych okazów, gładka u młodych",
+					"Korona szeroka, rozłożysta, charakterystyczny pokrój \"parasola\"",
+					"Pąki skupione na końcach pędów, jajowate, brązowe"],
+				SeasonalChanges = new SeasonalChanges {
+					Spring = "Młode liście jasno-zielone, często z czerwonawym nalotem. Kwitnienie w maju - kotki męskie i niewielkie kwiaty żeńskie",
+					Summer = "Liście ciemno-zielone, gęsta korona dająca dużo cienia. Rozwijają się żołędzie",
+					Autumn = "Liście żółto-brązowe, opadają późno w sezonie. Dojrzałe żołędzie opadają i są zbierane przez zwierzęta",
+					Winter = "Charakterystyczna sylwetka z grubym pniem i rozłożystymi gałęziami. Kora wyraźnie bruzdowna"
+				},
+				Traits = new Traits {
+					MaxHeight = 40,
+					Lifespan = "Ponad 1000 lat",
+					NativeToPoland = true
+				}
+			},
+			new TreeSpecies() {
+				Id = Guid.Parse("0dc0ebe4-b07f-4724-9dae-88b3823907a9"),
+				PolishName = "Lipa drobnolistna",
+				LatinName = "Tilia cordata",
+				Family = "Malvaceae",
+				Description = "Lipa drobnolistna to drzewo o wielkiej wartości kulturowej i przyrodniczej. Od wieków sadzona w centrach miast i przy dworkach. W tradycji słowiańskiej lipa była drzewem świętym, symbolem miłości i sprawiedliwości. Pod lipami odbywały się sądy i zgromadzenia wiejskie.",
+				IdentificationGuide = ["Małe, sercowate liście z ząbkowanymi brzegami (3-6 cm długości)",
+					"Kwiaty żółtawe, bardzo pachnące, zebrane w baldachogrona (czerwiec-lipiec)",
+					"Owoce kuliste z charakterystyczną przysadką - skrzydełkiem",
+					"Gładka kora, u starszych drzew lekko spękana w płytkie bruzdy",
+					"Korona gęsta, jajowata lub okrągła"],
+				SeasonalChanges = new SeasonalChanges {
+					Spring = "Młode liście jasno-zielone, często z czerwonawymi nasadami ogonków. Pąki czerwonawe",
+					Summer = "Intensywnie pachnące kwiaty przyciągają pszczoły - lipiec to \"miesiąc lipowy\" pszczelarzy",
+					Autumn = "Liście żółte, opadają wcześnie. Dojrzałe owoce z przysadkami unoszą się na wietrze",
+					Winter = "Charakterystyczne rozgałęzienie, często przystrzyżone w parkach. Pąki czerwonawe"
+				},
+				Traits = new Traits {
+					MaxHeight = 30,
+					Lifespan = "800-1000 lat",
+					NativeToPoland = true
+				}
+			},
+			new TreeSpecies() {
+				Id = Guid.Parse("9b61a499-4928-45c2-83ea-4906df3a3c32"),
+				PolishName = "Buk zwyczajny",
+				LatinName = "Fagus sylvatica",
+				Family = "Fagaceae",
+				Description = "Buk zwyczajny to \"król lasów liściastych\" w Polsce. Tworzy charakterystyczne \"katedry bukowe\" - lasy o wysokich, prostych pniach i zwartym sklepieniu koron. Drewno buka jest bardzo twarde i było używane do produkcji narzędzi, mebli i węgla drzewnego.",
+				IdentificationGuide = ["Liście owalne, faliste brzegi, wyraźne nerwowanie (6-12 cm długości)",
+					"Kora gładka, szara, charakterystyczna przez całe życie drzewa",
+					"Owoce - trójkątne orzeszki w kolczastych okrywach (żołędzie bukowe)",
+					"Pąki długie, spiczaste, brązowe, charakterystyczne dla gatunku",
+					"Korona gęsta, jajowata, rzuca głęboki cień"],
+				SeasonalChanges = new SeasonalChanges {
+					Spring = "Młode liście jasnozielone, jedwabiste, z delikatnym meszkiem. Kwitnienie w maju",
+					Summer = "Ciemnozielone liście tworzą gęsty baldachim. Pod bukami panuje charakterystyczny półmrok",
+					Autumn = "Spektakularne żółto-brązowo-miedziane ubarwienie. Opadające liście tworzą grubą ściółkę",
+					Winter = "Gładka, szara kora wyraźnie widoczna. Długie, spiczaste pąki na końcach gałązek"
+				},
+				Traits = new Traits {
+					MaxHeight = 45,
+					Lifespan = "300-500 lat",
+					NativeToPoland = true
+				}
+			},
+		];
+	}
+
 	private TreeSpeciesImage[] GetMockImages(TreeSpecies[] species)
 	{
 		return [
@@ -184,279 +261,229 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		];
 	}
 
-	private TreeSpecies[] GetMockSpecies()
+	private TreeSubmission[] GetMockSubmissionsFromJson(List<User> users, string jsonFilePath)
 	{
-		return [
-			new TreeSpecies() {
-				Id = Guid.NewGuid(),
-				PolishName = "Dąb szypułkowy",
-				LatinName = "Quercus Robur",
-				Family = "Fagaceae",
-				Description = "Dąb szypułkowy to jeden z najważniejszych gatunków drzew w Polsce. Może żyć ponad 1000 lat i osiągać wysokość do 40 metrów. Jest symbolem siły, trwałości i mądrości w kulturze słowiańskiej. Drewno dębu było używane do budowy statków, domów i mebli przez wieki.",
-				IdentificationGuide = ["Liście z wyraźnymi wcięciami, bez szypułek lub z bardzo krótkimi szypułkami",
-					"Żołędzie na długich szypułkach (2-8 cm), dojrzewają jesienią",
-					"Kora szara, głęboko bruzdowna u starych okazów, gładka u młodych",
-					"Korona szeroka, rozłożysta, charakterystyczny pokrój \"parasola\"",
-					"Pąki skupione na końcach pędów, jajowate, brązowe"],
-				SeasonalChanges = new SeasonalChanges {
-					Spring = "Młode liście jasno-zielone, często z czerwonawym nalotem. Kwitnienie w maju - kotki męskie i niewielkie kwiaty żeńskie",
-					Summer = "Liście ciemno-zielone, gęsta korona dająca dużo cienia. Rozwijają się żołędzie",
-					Autumn = "Liście żółto-brązowe, opadają późno w sezonie. Dojrzałe żołędzie opadają i są zbierane przez zwierzęta",
-					Winter = "Charakterystyczna sylwetka z grubym pniem i rozłożystymi gałęziami. Kora wyraźnie bruzdowna"
-				},
-				Traits = new Traits {
-					MaxHeight = 40,
-					Lifespan = "Ponad 1000 lat",
-					NativeToPoland = true
-				}
-			},
-			new TreeSpecies() {
-				Id = Guid.NewGuid(),
-				PolishName = "Lipa drobnolistna",
-				LatinName = "Tilia cordata",
-				Family = "Malvaceae",
-				Description = "Lipa drobnolistna to drzewo o wielkiej wartości kulturowej i przyrodniczej. Od wieków sadzona w centrach miast i przy dworkach. W tradycji słowiańskiej lipa była drzewem świętym, symbolem miłości i sprawiedliwości. Pod lipami odbywały się sądy i zgromadzenia wiejskie.",
-				IdentificationGuide = ["Małe, sercowate liście z ząbkowanymi brzegami (3-6 cm długości)",
-					"Kwiaty żółtawe, bardzo pachnące, zebrane w baldachogrona (czerwiec-lipiec)",
-					"Owoce kuliste z charakterystyczną przysadką - skrzydełkiem",
-					"Gładka kora, u starszych drzew lekko spękana w płytkie bruzdy",
-					"Korona gęsta, jajowata lub okrągła"],
-				SeasonalChanges = new SeasonalChanges {
-					Spring = "Młode liście jasno-zielone, często z czerwonawymi nasadami ogonków. Pąki czerwonawe",
-					Summer = "Intensywnie pachnące kwiaty przyciągają pszczoły - lipiec to \"miesiąc lipowy\" pszczelarzy",
-					Autumn = "Liście żółte, opadają wcześnie. Dojrzałe owoce z przysadkami unoszą się na wietrze",
-					Winter = "Charakterystyczne rozgałęzienie, często przystrzyżone w parkach. Pąki czerwonawe"
-				},
-				Traits = new Traits {
-					MaxHeight = 30,
-					Lifespan = "800-1000 lat",
-					NativeToPoland = true
-				}
-			},
-			new TreeSpecies() {
-				Id = Guid.NewGuid(),
-				PolishName = "Buk zwyczajny",
-				LatinName = "Fagus sylvatica",
-				Family = "Fagaceae",
-				Description = "Buk zwyczajny to \"król lasów liściastych\" w Polsce. Tworzy charakterystyczne \"katedry bukowe\" - lasy o wysokich, prostych pniach i zwartym sklepieniu koron. Drewno buka jest bardzo twarde i było używane do produkcji narzędzi, mebli i węgla drzewnego.",
-				IdentificationGuide = ["Liście owalne, faliste brzegi, wyraźne nerwowanie (6-12 cm długości)",
-					"Kora gładka, szara, charakterystyczna przez całe życie drzewa",
-					"Owoce - trójkątne orzeszki w kolczastych okrywach (żołędzie bukowe)",
-					"Pąki długie, spiczaste, brązowe, charakterystyczne dla gatunku",
-					"Korona gęsta, jajowata, rzuca głęboki cień"],
-				SeasonalChanges = new SeasonalChanges {
-					Spring = "Młode liście jasnozielone, jedwabiste, z delikatnym meszkiem. Kwitnienie w maju",
-					Summer = "Ciemnozielone liście tworzą gęsty baldachim. Pod bukami panuje charakterystyczny półmrok",
-					Autumn = "Spektakularne żółto-brązowo-miedziane ubarwienie. Opadające liście tworzą grubą ściółkę",
-					Winter = "Gładka, szara kora wyraźnie widoczna. Długie, spiczaste pąki na końcach gałązek"
-				},
-				Traits = new Traits {
-					MaxHeight = 45,
-					Lifespan = "300-500 lat",
-					NativeToPoland = true
-				}
-			},
-		];
-	}
+		try
+		{
+			// Read JSON file
+			string jsonContent = File.ReadAllText(jsonFilePath);
 
-	private TreeSubmission[] GetMockSubmissions(List<User> users, TreeSpecies[] species)
-	{
-		return [
-			new TreeSubmission(){
+			// Deserialize JSON to TreeJsonData array
+			TreeJsonData[]? treeData = JsonSerializer.Deserialize<TreeJsonData[]>(jsonContent, new JsonSerializerOptions
+			{
+				PropertyNameCaseInsensitive = true
+			});
+
+			if (treeData == null) throw new ArgumentNullException();
+
+			// Create Random instance for user selection
+			Random random = new Random();
+
+			// Convert to TreeSubmission array
+			return treeData.Select(data => new TreeSubmission
+			{
 				Id = Guid.NewGuid(),
-				UserId = users[0].Id,
-				SpeciesId = species[0].Id,
-				Location = new Location {
-					Lat = 52.2297,
-					Lng = 21.0122,
-					Address = "Warszawa, Park Łazienkowski, przy Pałacu na Wyspie"
+				UserId = users[random.Next(users.Count)].Id, // Random user assignment
+				SpeciesId = Guid.Parse(data.SpeciesId),
+				Location = new Location
+				{
+					Lat = data.Location.Lat,
+					Lng = data.Location.Lng,
+					Address = data.Location.Address
 				},
-				Circumference = 520,
-				Height = 28,
-				Condition = "excellent",
-				IsMonument = true,
-				Description = "Wspaniały okaz dębu szypułkowego w Parku Łazienkowskim. Ten majestatyczny dąb rośnie tuż przy Pałacu na Wyspie i jest jednym z najstarszych drzew w parku. Szacowany wiek około 300 lat. Drzewo ma charakterystyczną, rozłożystą koronę i imponujący pień. W cieniu tego dęba odpoczywali już królowie polscy.",
-				Images = ["https://images.pexels.com/photos/1172675/pexels-photo-1172675.jpeg?w=800&h=600&fit=crop", "https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg?w=800&h=600&fit=crop", "https://images.pexels.com/photos/1448055/pexels-photo-1448055.jpeg?w=800&h=600&fit=crop",],
-				Status = SubmissionStatus.Monument,
-				SubmissionDate = new DateTime(2024, 1, 15),
-				ApprovalDate = new DateTime(2024, 1, 20),
-			},
-			new TreeSubmission(){
-				Id = Guid.NewGuid(),
-				UserId = users[1].Id,
-				SpeciesId = species[2].Id,
-				Location = new Location {
-					Lat = 54.3520,
-					Lng = 18.6466,
-					Address = "Gdańsk, Park Oliwski, Aleja Bukowa 15"
-				},
-				Circumference = 420,
-				Height = 30,
-				Condition = "excellent",
-				IsMonument = false,
-				Description = "Potężny buk w Parku Oliwskim, jeden z najstarszych okazów w regionie. Drzewo rośnie w malowniczej alei bukowej, która jesienią zamienia się w złoty tunel. Ten konkretny okaz wyróżnia się niezwykle gładką, srebrzystą korą i idealnie symetryczną koroną. Miejscowi biegacze często zatrzymują się pod nim, aby odpocząć.",
-				Images = ["https://images.pexels.com/photos/1375849/pexels-photo-1375849.jpeg?w=800&h=600&fit=crop", "https://images.pexels.com/photos/1658967/pexels-photo-1658967.jpeg?w=800&h=600&fit=crop",],
-				Status = SubmissionStatus.Approved,
-				SubmissionDate = new DateTime(2024, 12, 20),
-				ApprovalDate = new DateTime(2024, 1, 25),
-			},
-			new TreeSubmission(){
-				Id = Guid.NewGuid(),
-				UserId = users[2].Id,
-				SpeciesId = species[1].Id,
-				Location = new Location {
-					Lat = 50.0647,
-					Lng = 19.9450,
-					Address = "Kraków, Rynek Główny, przy Sukiennicach"
-				},
-				Circumference = 380,
-				Height = 22,
-				Condition = "good",
-				IsMonument = false,
-				Description = "Piękna lipa na Rynku Głównym w Krakowie, rosnąca w pobliżu Sukiennic. To drzewo pamięta czasy średniowiecza i było świadkiem wielu historycznych wydarzeń. Każdego lata jej kwiaty wypełniają powietrze cudownym aromatem, przyciągając pszczoły z całej okolicy. Lokalni mieszkańcy nazywają ją \"Lipą Mariacką\".",
-				Images = ["https://images.pexels.com/photos/1172341/pexels-photo-1172341.jpeg?w=800&h=600&fit=crop", "https://images.pexels.com/photos/1379636/pexels-photo-1379636.jpeg?w=800&h=600&fit=crop",],
-				Status = SubmissionStatus.Pending,
-				SubmissionDate = new DateTime(2024, 11, 10),
-			},
-		];
+				Circumference = data.Circumference,
+				Height = data.Height,
+				Condition = data.Condition ?? "Unknown",
+				IsMonument = data.IsMonument,
+				Description = data.Description,
+				Images = data.Images,
+				Status = data.IsMonument ? SubmissionStatus.Monument : SubmissionStatus.Pending,
+				SubmissionDate = DateTime.Now.AddDays(-random.Next(1, 365)), // Random date within last year
+				ApprovalDate = DateTime.Now.AddDays(-random.Next(1, 30)) // Random approval date within last month
+			}).ToArray();
+		}
+		catch (Exception ex)
+		{
+			// Handle exceptions (file not found, JSON parsing errors, etc.)
+			throw new InvalidOperationException($"Failed to load mock submissions from {jsonFilePath}: {ex.Message}", ex);
+		}
 	}
 
 	private Vote[] GetMockVotes(TreeSubmission[] submissions, List<User> users)
 	{
-		return [
-			new Vote {
-				Id = Guid.NewGuid(),
-				TreeSubmissionId = submissions[0].Id,
-				UserId = users[0].Id,
-				Type = VoteType.Approve,
-				CreatedAt = new DateTime(2024, 1, 17)
-			},
-			new Vote {
-				Id = Guid.NewGuid(),
-				TreeSubmissionId = submissions[0].Id,
-				UserId = users[1].Id,
-				Type = VoteType.Approve,
-				CreatedAt = new DateTime(2024, 1, 19)
-			},
-			new Vote {
-				Id = Guid.NewGuid(),
-				TreeSubmissionId = submissions[0].Id,
-				UserId = users[2].Id,
-				Type = VoteType.Reject,
-				CreatedAt = new DateTime(2024, 2, 21, 15, 50, 00)
-			},
-			new Vote {
-				Id = Guid.NewGuid(),
-				TreeSubmissionId = submissions[1].Id,
-				UserId = users[0].Id,
-				Type = VoteType.Approve,
-				CreatedAt = new DateTime(2024, 1, 20)
-			},
-			new Vote {
-				Id = Guid.NewGuid(),
-				TreeSubmissionId = submissions[1].Id,
-				UserId = users[1].Id,
-				Type = VoteType.Approve,
-				CreatedAt = new DateTime(2024, 12, 22)
-			},
-			new Vote {
-				Id = Guid.NewGuid(),
-				TreeSubmissionId = submissions[1].Id,
-				UserId = users[2].Id,
-				Type = VoteType.Approve,
-				CreatedAt = new DateTime(2024, 12, 23, 13, 10, 52)
-			},
-			new Vote {
-				Id = Guid.NewGuid(),
-				TreeSubmissionId = submissions[1].Id,
-				UserId = users[3].Id,
-				Type = VoteType.Approve,
-				CreatedAt = new DateTime(2024, 12, 24)
-			},
-		];
+		List<Vote> votes = new List<Vote>();
+		Random random = new Random();
+
+		foreach (TreeSubmission submission in submissions)
+		{
+			// Generate random number of votes per submission (0 to 5 votes)
+			int voteCount = random.Next(0, 6);
+
+			// Keep track of users who already voted for this submission to avoid duplicates
+			HashSet<Guid> usersWhoVoted = new HashSet<Guid>();
+
+			for (int i = 0; i < voteCount; i++)
+			{
+				// Select a random user who hasn't voted yet for this submission
+				List<User> availableUsers = users.Where(u => !usersWhoVoted.Contains(u.Id)).ToList();
+
+				// If no users left to vote, break out of the loop
+				if (availableUsers.Count == 0) break;
+
+				User selectedUser = availableUsers[random.Next(availableUsers.Count)];
+				usersWhoVoted.Add(selectedUser.Id);
+
+				// Random vote type (70% chance for Approve, 30% for Reject)
+				VoteType voteType = random.NextDouble() < 0.7 ? VoteType.Approve : VoteType.Reject;
+
+				// Generate random date after submission date but before approval date (if exists)
+				DateTime voteDate;
+				if (submission.ApprovalDate.HasValue)
+				{
+					// Vote between submission date and approval date
+					TimeSpan timeSpan = submission.ApprovalDate.Value - submission.SubmissionDate;
+					TimeSpan randomTimeSpan = new TimeSpan((long)(random.NextDouble() * timeSpan.Ticks));
+					voteDate = submission.SubmissionDate.Add(randomTimeSpan);
+				}
+				else
+				{
+					// Vote between submission date and now
+					TimeSpan timeSpan = DateTime.Now - submission.SubmissionDate;
+					TimeSpan randomTimeSpan = new TimeSpan((long)(random.NextDouble() * timeSpan.Ticks));
+					voteDate = submission.SubmissionDate.Add(randomTimeSpan);
+				}
+
+				votes.Add(new Vote
+				{
+					Id = Guid.NewGuid(),
+					TreeSubmissionId = submission.Id,
+					UserId = selectedUser.Id,
+					Type = voteType,
+					CreatedAt = voteDate
+				});
+			}
+		}
+
+		return votes.ToArray();
 	}
 
 	private Comment[] GetMockComments(TreeSubmission[] submissions, List<User> users)
 	{
-		return [
-			new Comment {
-				Id = Guid.NewGuid(),
-				UserId = users[2].Id,
-				TreeSubmissionId = submissions[0].Id,
-				Content = "Ten dąb pamięta czasy króla Jana III Sobieskiego. Według lokalnej tradycji przekazywanej przez pokolenia, król odpoczywał w jego cieniu po powrocie z wiktorii wiedeńskiej w 1683 roku. Stare dokumenty z archiwum królewskiego wspominają o \"wielkim dębie przy pałacu\", który mógł być właśnie tym drzewem.",
-				DatePosted = new DateTime(2024, 1, 21),
-				IsLegend = true
-			},
-			new Comment {
-				Id = Guid.NewGuid(),
-				UserId = users[3].Id,
-				TreeSubmissionId = submissions[1].Id,
-				Content = "Wspaniały okaz! Widziałam go osobiście podczas spaceru z rodziną. Moje dzieci były zachwycone jego rozmiarami. To naprawdę żywy pomnik historii.",
-				DatePosted = new DateTime(2024, 1, 21),
-			},
-			new Comment {
-				Id = Guid.NewGuid(),
-				UserId = users[0].Id,
-				TreeSubmissionId = submissions[2].Id,
-				Content = "Potrzeba więcej zdjęć z różnych perspektyw, szczególnie kory i liści. Byłoby też dobrze dodać zdjęcie całego drzewa z większej odległości.",
-				DatePosted = new DateTime(2024, 1, 21),
-			},
-			new Comment {
-				Id = Guid.NewGuid(),
-				UserId = users[4].Id,
-				TreeSubmissionId = submissions[2].Id,
-				Content = "Ta lipa była sadzona w 1257 roku z okazji lokacji miasta Krakowa. Przez wieki była miejscem spotkań kupców i rzemieślników. W średniowieczu pod lipami na rynkach odbywały się sądy i zgromadzenia miejskie. \"Lipa Mariacka\" była świadkiem koronacji królów i ważnych wydarzeń historycznych.",
-				DatePosted = new DateTime(2024, 1, 21),
-				IsLegend = true
-			},
-			new Comment {
-				Id = Guid.NewGuid(),
-				UserId = users[3].Id,
-				TreeSubmissionId = submissions[0].Id,
-				Content = "Jako dendrolożka mogę potwierdzić, że to wyjątkowy okaz. Pierśnica 520 cm to naprawdę imponujący rozmiar. Stan zachowania jest doskonały jak na wiek drzewa.",
-				DatePosted = new DateTime(2024, 1, 21),
-			},
+		List<Comment> comments = new List<Comment>();
+		Random random = new Random();
+
+		// Sample comment templates
+		string[] commentTemplates = [
+				"Piękny okaz! Widziałem podobne drzewo w dzieciństwie.",
+				"To drzewo ma niesamowitą historię. Mieszkam tu od {0} lat i zawsze mnie fascynowało.",
+				"Wspaniały pomnik przyrody. Czy ktoś wie, jaki jest dokładny wiek tego drzewa?",
+				"Często spaceruję obok tego drzewa. To prawdziwa perła naszego miasta.",
+				"Niesamowite, jak potężne może być drzewo! Trzeba je chronić dla przyszłych pokoleń.",
+				"Czy są jakieś plany ochrony tego drzewa? Powinno być lepiej zabezpieczone.",
+				"To drzewo pamięta więcej niż my wszyscy razem wzięci.",
+				"Fascynujące! Czy ktoś zna legendy związane z tym miejscem?",
+				"Polecam odwiedzić to miejsce jesienią - widoki są przepiękne!",
+				"To jeden z najstarszych okazów w okolicy. Warto go odwiedzić.",
+				"Moje dzieci uwielbiają bawić się w pobliżu tego drzewa.",
+				"Według lokalnej tradycji, to drzewo ma szczęśliwe właściwości."
 		];
+
+		foreach (TreeSubmission submission in submissions)
+		{
+			// Generate random number of comments per submission (0 to 4 comments)
+			int commentCount = random.Next(0, 5);
+
+			// Keep track of users who already commented to avoid duplicates
+			HashSet<Guid> usersWhoCommented = new HashSet<Guid>();
+
+			for (int i = 0; i < commentCount; i++)
+			{
+				// Select a random user who hasn't commented yet for this submission
+				List<User> availableUsers = users.Where(u => !usersWhoCommented.Contains(u.Id)).ToList();
+
+				// If no users left to comment, break out of the loop
+				if (availableUsers.Count == 0) break;
+
+				User selectedUser = availableUsers[random.Next(availableUsers.Count)];
+				usersWhoCommented.Add(selectedUser.Id);
+
+				// Generate random comment content
+				string template = commentTemplates[random.Next(commentTemplates.Length)];
+				string content = template.Contains("{0}") ?
+						string.Format(template, random.Next(5, 50)) : // Random number for years/places
+						template;
+
+				// Generate random date after submission date
+				DateTime commentDate;
+				if (submission.ApprovalDate.HasValue)
+				{
+					// Comment after approval date
+					TimeSpan timeSpan = DateTime.Now - submission.ApprovalDate.Value;
+					TimeSpan randomTimeSpan = new TimeSpan((long)(random.NextDouble() * timeSpan.Ticks));
+					commentDate = submission.ApprovalDate.Value.Add(randomTimeSpan);
+				}
+				else
+				{
+					// Comment after submission date
+					TimeSpan timeSpan = DateTime.Now - submission.SubmissionDate;
+					TimeSpan randomTimeSpan = new TimeSpan((long)(random.NextDouble() * timeSpan.Ticks));
+					commentDate = submission.SubmissionDate.Add(randomTimeSpan);
+				}
+
+				// 15% chance for a comment to be marked as legend
+				bool isLegend = random.NextDouble() < 0.15;
+
+				comments.Add(new Comment
+				{
+					Id = Guid.NewGuid(),
+					UserId = selectedUser.Id,
+					TreeSubmissionId = submission.Id,
+					Content = content,
+					DatePosted = commentDate,
+					IsLegend = isLegend
+				});
+			}
+		}
+
+		return comments.ToArray();
 	}
 
 	private Like[] GetMockLikes(List<User> users, Comment[] comments)
 	{
-		return [
-			new Like{
-				Id = Guid.NewGuid(),
-				UserId = users[0].Id,
-				CommentId = comments[0].Id,
-			},
-			new Like{
-				Id = Guid.NewGuid(),
-				UserId = users[1].Id,
-				CommentId = comments[0].Id,
-			},
-			new Like{
-				Id = Guid.NewGuid(),
-				UserId = users[2].Id,
-				CommentId = comments[1].Id,
-			},
-			new Like{
-				Id = Guid.NewGuid(),
-				UserId = users[4].Id,
-				CommentId = comments[1].Id,
-			},
-			new Like{
-				Id = Guid.NewGuid(),
-				UserId = users[3].Id,
-				CommentId = comments[3].Id,
-			},
-			new Like{
-				Id = Guid.NewGuid(),
-				UserId = users[0].Id,
-				CommentId = comments[4].Id,
-			},
-			new Like{
-				Id = Guid.NewGuid(),
-				UserId = users[4].Id,
-				CommentId = comments[4].Id,
-			},
-		];
+		List<Like> likes = new List<Like>();
+		Random random = new Random();
+
+		foreach (var comment in comments)
+		{
+			// Generate random number of likes per comment (0 to 6 likes)
+			int likeCount = random.Next(0, 7);
+
+			// Keep track of users who already liked to avoid duplicates
+			HashSet<Guid> usersWhoLiked = new HashSet<Guid>();
+
+			// Don't let the comment author like their own comment
+			usersWhoLiked.Add(comment.UserId);
+
+			for (int i = 0; i < likeCount; i++)
+			{
+				// Select a random user who hasn't liked yet and isn't the comment author
+				List<User> availableUsers = users.Where(u => !usersWhoLiked.Contains(u.Id)).ToList();
+
+				// If no users left to like, break out of the loop
+				if (availableUsers.Count == 0) break;
+
+				User selectedUser = availableUsers[random.Next(availableUsers.Count)];
+				usersWhoLiked.Add(selectedUser.Id);
+
+				likes.Add(new Like
+				{
+					Id = Guid.NewGuid(),
+					UserId = selectedUser.Id,
+					CommentId = comment.Id
+				});
+			}
+		}
+
+		return likes.ToArray();
 	}
 }
