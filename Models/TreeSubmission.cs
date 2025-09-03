@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
+using DrzewaAPI.Utils;
 
 namespace DrzewaAPI.Models;
 
@@ -30,6 +31,6 @@ public class TreeSubmission
 	// Navigation Properties
 	public User User { get; set; } = default!;
 	public TreeSpecies Species { get; set; } = default!;
-	public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+	public ICollection<TreeVote> TreeVotes { get; set; } = new List<TreeVote>();
 	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

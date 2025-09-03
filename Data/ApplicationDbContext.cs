@@ -1,5 +1,6 @@
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
+using DrzewaAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Data;
@@ -10,9 +11,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<TreeSubmission> TreeSubmissions { get; set; }
 	public DbSet<TreeSpecies> TreeSpecies { get; set; }
 	public DbSet<TreeSpeciesImage> TreeSpeciesImages { get; set; }
-	public DbSet<Vote> Votes { get; set; }
+	public DbSet<TreeVote> TreeVotes { get; set; }
+	public DbSet<CommentVote> CommentVotes { get; set; }
 	public DbSet<Comment> Comments { get; set; }
-	public DbSet<Like> Likes { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -75,20 +76,36 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		});
 
 		// Vote Configuration - Unique constraint
-		modelBuilder.Entity<Vote>(entity =>
+		modelBuilder.Entity<TreeVote>(entity =>
 		{
 			entity.HasKey(e => e.Id);
 			entity.HasIndex(e => new { e.UserId, e.TreeSubmissionId }).IsUnique();
 
 			entity.HasOne(e => e.User)
-									.WithMany(e => e.Votes)
+									.WithMany(e => e.TreeVotes)
 									.HasForeignKey(e => e.UserId)
 									.OnDelete(DeleteBehavior.Cascade);
 
 			entity.HasOne(e => e.TreeSubmission)
-									.WithMany(e => e.Votes)
+									.WithMany(e => e.TreeVotes)
 									.HasForeignKey(e => e.TreeSubmissionId)
 									.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		modelBuilder.Entity<CommentVote>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.HasIndex(e => new { e.UserId, e.CommentId }).IsUnique();
+
+			entity.HasOne(e => e.User)
+									.WithMany(e => e.CommentVotes)
+									.HasForeignKey(e => e.UserId)
+									.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(e => e.Comment)
+									.WithMany(e => e.CommentVotes)
+									.HasForeignKey(e => e.CommentId)
+									.OnDelete(DeleteBehavior.NoAction);
 		});
 
 		// Comment Configuration
@@ -105,23 +122,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasOne(e => e.TreeSubmission)
 									.WithMany(e => e.Comments)
 									.HasForeignKey(e => e.TreeSubmissionId)
-									.OnDelete(DeleteBehavior.Cascade);
-		});
-
-		// Like Configuration
-		modelBuilder.Entity<Like>(entity =>
-		{
-			entity.HasKey(e => e.Id);
-			entity.HasIndex(e => new { e.UserId, e.CommentId }).IsUnique();
-
-			entity.HasOne(e => e.User)
-									.WithMany(e => e.Likes)
-									.HasForeignKey(e => e.UserId)
-									.OnDelete(DeleteBehavior.NoAction);
-
-			entity.HasOne(e => e.Comment)
-									.WithMany(e => e.Likes)
-									.HasForeignKey(e => e.CommentId)
 									.OnDelete(DeleteBehavior.Cascade);
 		});
 	}

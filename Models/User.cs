@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DrzewaAPI.Models.Enums;
+using DrzewaAPI.Utils;
 
 namespace DrzewaAPI.Models;
 
@@ -36,7 +37,7 @@ public class User
 
 	// Navigation Properties
 	public ICollection<TreeSubmission> TreeSubmissions { get; set; } = new List<TreeSubmission>();
-	public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+	public ICollection<TreeVote> TreeVotes { get; set; } = new List<TreeVote>();
+	public ICollection<CommentVote> CommentVotes { get; set; } = new List<CommentVote>();
 	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-	public ICollection<Like> Likes { get; set; } = new List<Like>();
 }

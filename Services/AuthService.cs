@@ -162,8 +162,6 @@ public class AuthService : IAuthService
 			Name = user.FullName,
 			Avatar = user.Avatar,
 			RegistrationDate = user.RegistrationDate,
-			SubmissionsCount = user.TreeSubmissions.Count,
-			VerificationsCount = user.Votes.Count(v => v.Type == VoteType.Approve)
 		};
 	}
 }

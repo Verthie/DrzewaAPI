@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DrzewaAPI.Utils;
 
 namespace DrzewaAPI.Models;
 
@@ -16,5 +17,5 @@ public class Comment
 	// Navigation Properties
 	public User User { get; set; } = default!;
 	public TreeSubmission TreeSubmission { get; set; } = default!;
-	public ICollection<Like> Likes { get; set; } = new List<Like>();
+	public ICollection<CommentVote> CommentVotes { get; set; } = new List<CommentVote>();
 }

@@ -85,6 +85,8 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
         }
     }
 
+    // :TODO Approve Tree Functionality for Moderator
+
     [Authorize]
     [HttpPut("{id}/vote")]
     public async Task<ActionResult<VotesCount>> UpdateVote(string id, [FromBody] VoteRequestDto request)

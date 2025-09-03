@@ -33,16 +33,16 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		if (!await _db.TreeSubmissions.AnyAsync(ct)) _db.TreeSubmissions.AddRange(submissions);
 		else submissions = await _db.TreeSubmissions.ToArrayAsync(ct);
 
-		Vote[] votes = GetMockVotes(submissions, users);
-		if (!await _db.Votes.AnyAsync(ct)) _db.Votes.AddRange(votes);
+		TreeVote[] treeVotes = GetMockTreeVotes(submissions, users);
+		if (!await _db.TreeVotes.AnyAsync(ct)) _db.TreeVotes.AddRange(treeVotes);
 		// else votes = await _db.Votes.ToArrayAsync(ct);
 
 		Comment[] comments = GetMockComments(submissions, users);
 		if (!await _db.Comments.AnyAsync(ct)) _db.Comments.AddRange(comments);
 		else comments = await _db.Comments.ToArrayAsync(ct);
 
-		Like[] likes = GetMockLikes(users, comments);
-		if (!await _db.Likes.AnyAsync(ct)) _db.Likes.AddRange(likes);
+		CommentVote[] commentVotes = GetMockCommentVotes(comments, users);
+		if (!await _db.CommentVotes.AnyAsync(ct)) _db.CommentVotes.AddRange(commentVotes);
 		// else likes = await _db.Likes.ToArrayAsync(ct);
 
 		if (!_db.ChangeTracker.Entries().Any()) return;
@@ -309,9 +309,9 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		}
 	}
 
-	private Vote[] GetMockVotes(TreeSubmission[] submissions, List<User> users)
+	private TreeVote[] GetMockTreeVotes(TreeSubmission[] submissions, List<User> users)
 	{
-		List<Vote> votes = new List<Vote>();
+		List<TreeVote> votes = new List<TreeVote>();
 		Random random = new Random();
 
 		foreach (TreeSubmission submission in submissions)
@@ -333,8 +333,8 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 				User selectedUser = availableUsers[random.Next(availableUsers.Count)];
 				usersWhoVoted.Add(selectedUser.Id);
 
-				// Random vote type (70% chance for Approve, 30% for Reject)
-				VoteType voteType = random.NextDouble() < 0.7 ? VoteType.Approve : VoteType.Reject;
+				// Random vote type (70% chance for Like, 30% for Dislike)
+				VoteType voteType = random.NextDouble() < 0.7 ? VoteType.Like : VoteType.Dislike;
 
 				// Generate random date after submission date but before approval date (if exists)
 				DateTime voteDate;
@@ -353,7 +353,7 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 					voteDate = submission.SubmissionDate.Add(randomTimeSpan);
 				}
 
-				votes.Add(new Vote
+				votes.Add(new TreeVote
 				{
 					Id = Guid.NewGuid(),
 					TreeSubmissionId = submission.Id,
@@ -448,42 +448,53 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		return comments.ToArray();
 	}
 
-	private Like[] GetMockLikes(List<User> users, Comment[] comments)
+	private CommentVote[] GetMockCommentVotes(Comment[] comments, List<User> users)
 	{
-		List<Like> likes = new List<Like>();
+		List<CommentVote> votes = new List<CommentVote>();
 		Random random = new Random();
 
-		foreach (var comment in comments)
+		foreach (Comment comment in comments)
 		{
-			// Generate random number of likes per comment (0 to 6 likes)
-			int likeCount = random.Next(0, 7);
+			// Generate random number of votes per submission (0 to 5 votes)
+			int voteCount = random.Next(0, 6);
 
-			// Keep track of users who already liked to avoid duplicates
-			HashSet<Guid> usersWhoLiked = new HashSet<Guid>();
+			// Keep track of users who already voted for this submission to avoid duplicates
+			HashSet<Guid> usersWhoVoted = new HashSet<Guid>();
 
-			// Don't let the comment author like their own comment
-			usersWhoLiked.Add(comment.UserId);
-
-			for (int i = 0; i < likeCount; i++)
+			for (int i = 0; i < voteCount; i++)
 			{
-				// Select a random user who hasn't liked yet and isn't the comment author
-				List<User> availableUsers = users.Where(u => !usersWhoLiked.Contains(u.Id)).ToList();
+				// Select a random user who hasn't voted yet for this submission
+				List<User> availableUsers = users.Where(u => !usersWhoVoted.Contains(u.Id)).ToList();
 
-				// If no users left to like, break out of the loop
+				// If no users left to vote, break out of the loop
 				if (availableUsers.Count == 0) break;
 
 				User selectedUser = availableUsers[random.Next(availableUsers.Count)];
-				usersWhoLiked.Add(selectedUser.Id);
+				usersWhoVoted.Add(selectedUser.Id);
 
-				likes.Add(new Like
+				// Random vote type (70% chance for Like, 30% for Dislike)
+				VoteType voteType = random.NextDouble() < 0.7 ? VoteType.Like : VoteType.Dislike;
+
+				// Generate random date after comment date
+				DateTime voteDate;
+
+				// Vote between comment date and now
+				TimeSpan timeSpan = DateTime.Now - comment.DatePosted;
+				TimeSpan randomTimeSpan = new TimeSpan((long)(random.NextDouble() * timeSpan.Ticks));
+				voteDate = comment.DatePosted.Add(randomTimeSpan);
+
+				votes.Add(new CommentVote
 				{
 					Id = Guid.NewGuid(),
+					CommentId = comment.Id,
 					UserId = selectedUser.Id,
-					CommentId = comment.Id
+					Type = voteType,
+					CreatedAt = voteDate
 				});
 			}
 		}
 
-		return likes.ToArray();
+		return votes.ToArray();
 	}
+
 }

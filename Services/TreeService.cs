@@ -3,6 +3,7 @@ using DrzewaAPI.Dtos.TreeSubmissions;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
+using DrzewaAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
@@ -15,7 +16,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		{
 			List<TreeSubmissionDto> submissions = await _context.TreeSubmissions
 				.Include(s => s.Species)
-				.Include(s => s.Votes)
+				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
 				.Select(s => MapToTreeSubmissionDto(s))
 				.ToListAsync();
@@ -35,7 +36,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		{
 			TreeSubmission? submission = await _context.TreeSubmissions
 				.Include(s => s.Species)
-				.Include(s => s.Votes)
+				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
 				.FirstOrDefaultAsync(s => s.Id == treeId);
 
@@ -80,7 +81,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			// Load navigation properties
 			await _context.Entry(submission).Reference(s => s.Species).LoadAsync();
-			await _context.Entry(submission).Collection(s => s.Votes).LoadAsync();
+			await _context.Entry(submission).Collection(s => s.TreeVotes).LoadAsync();
 
 			return MapToTreeSubmissionDto(submission);
 		}
@@ -99,20 +100,20 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			if (submission == null) return null;
 
-			Vote? existing = await _context.Votes
+			TreeVote? existing = await _context.TreeVotes
 				.SingleOrDefaultAsync(v => v.TreeSubmissionId == treeId && v.UserId == userId);
 
 			if (type == null)
 			{
 				// remove existing vote
-				if (existing != null) _context.Votes.Remove(existing);
+				if (existing != null) _context.TreeVotes.Remove(existing);
 			}
 			else
 			{
 				if (existing == null)
 				{
 					// add new vote
-					_context.Votes.Add(new Vote
+					_context.TreeVotes.Add(new TreeVote
 					{
 						Id = Guid.NewGuid(),
 						TreeSubmissionId = submission.Id,
@@ -128,13 +129,13 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			await _context.SaveChangesAsync();
 
-			var counts = await _context.Votes
+			var counts = await _context.TreeVotes
 				.Where(v => v.TreeSubmissionId == treeId)
 				.GroupBy(_ => 1)
 				.Select(g => new VotesCount
 				{
-					Approve = g.Count(v => v.Type == VoteType.Approve),
-					Reject = g.Count(v => v.Type == VoteType.Reject)
+					Like = g.Count(v => v.Type == VoteType.Like),
+					Dislike = g.Count(v => v.Type == VoteType.Dislike)
 				})
 				.FirstOrDefaultAsync() ?? new VotesCount();
 
@@ -173,8 +174,8 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			ApprovalDate = s.ApprovalDate,
 			Votes = new VotesCount
 			{
-				Approve = s.Votes.Count(v => v.Type == VoteType.Approve),
-				Reject = s.Votes.Count(v => v.Type == VoteType.Reject)
+				Like = s.TreeVotes.Count(v => v.Type == VoteType.Like),
+				Dislike = s.TreeVotes.Count(v => v.Type == VoteType.Dislike)
 			},
 		};
 	}

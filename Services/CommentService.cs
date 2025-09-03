@@ -2,6 +2,7 @@ using System;
 using DrzewaAPI.Data;
 using DrzewaAPI.Dtos.Comment;
 using DrzewaAPI.Models;
+using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,13 +10,35 @@ namespace DrzewaAPI.Services;
 
 public class CommentService(ApplicationDbContext _context, ILogger<CommentService> _logger) : ICommentService
 {
+
+	public async Task<List<CommentDto>> GetCommentsAsync()
+	{
+		try
+		{
+			List<CommentDto> comments = await _context.Comments
+				.Include(c => c.User)
+				.Include(c => c.CommentVotes)
+				.Include(c => c.TreeSubmission)
+					.ThenInclude(s => s.Species)
+				.Select(c => MapToCommentDto(c))
+				.ToListAsync();
+
+			return comments;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas pobierania listy drzew");
+			throw;
+		}
+	}
+
 	public async Task<CommentDto?> GetCommentByIdAsync(Guid commentId)
 	{
 		try
 		{
 			Comment? comment = await _context.Comments
 				.Include(c => c.User)
-				.Include(c => c.Likes)
+				.Include(c => c.CommentVotes)
 				.FirstOrDefaultAsync(c => c.Id == commentId);
 
 			if (comment == null) return null;
@@ -35,7 +58,7 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 		{
 			List<CommentDto> comments = await _context.Comments
 				.Include(c => c.User)
-				.Include(c => c.Likes)
+				.Include(c => c.CommentVotes)
 				.Where(c => c.TreeSubmissionId == treeId)
 				.Select(c => MapToCommentDto(c))
 				.ToListAsync();
@@ -67,8 +90,8 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 			await _context.SaveChangesAsync();
 
 			// Load navigation properties
-			await _context.Entry(comment).Reference(s => s.User).LoadAsync();
-			await _context.Entry(comment).Collection(s => s.Likes).LoadAsync();
+			await _context.Entry(comment).Reference(c => c.User).LoadAsync();
+			await _context.Entry(comment).Collection(c => c.CommentVotes).LoadAsync();
 
 			return MapToCommentDto(comment);
 		}
@@ -79,20 +102,81 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 		}
 	}
 
-	private static CommentDto MapToCommentDto(Comment s)
+	public async Task<VotesCount?> SetVoteAsync(Guid commentId, Guid userId, VoteType? type)
+	{
+		try
+		{
+			Comment? comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
+
+			if (comment == null) return null;
+
+			CommentVote? existing = await _context.CommentVotes
+				.SingleOrDefaultAsync(v => v.CommentId == commentId && v.UserId == userId);
+
+			if (type == null)
+			{
+				// remove existing vote
+				if (existing != null) _context.CommentVotes.Remove(existing);
+			}
+			else
+			{
+				if (existing == null)
+				{
+					// add new vote
+					_context.CommentVotes.Add(new CommentVote
+					{
+						Id = Guid.NewGuid(),
+						CommentId = comment.Id,
+						UserId = userId,
+						Type = type.Value,
+					});
+				}
+				else if (existing.Type != type.Value)
+				{
+					existing.Type = type.Value; // change the vote from one type to another
+				}
+			}
+
+			await _context.SaveChangesAsync();
+
+			var counts = await _context.CommentVotes
+				.Where(v => v.CommentId == commentId)
+				.GroupBy(_ => 1)
+				.Select(g => new VotesCount
+				{
+					Like = g.Count(v => v.Type == VoteType.Like),
+					Dislike = g.Count(v => v.Type == VoteType.Dislike)
+				})
+				.FirstOrDefaultAsync() ?? new VotesCount();
+
+			return counts;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas nadawania głosu");
+			throw;
+		}
+	}
+
+	private static CommentDto MapToCommentDto(Comment c)
 	{
 		return new CommentDto
 		{
-			Id = s.Id,
+			Id = c.Id,
+			TreePolishName = c.TreeSubmission?.Species.PolishName,
 			UserData = new UserData
 			{
-				UserName = s.User.FullName,
-				Avatar = s.User.Avatar
+				UserName = c.User.FullName,
+				Avatar = c.User.Avatar
 			},
-			Content = s.Content,
-			DatePosted = s.DatePosted,
-			IsLegend = s.IsLegend,
-			LikesCount = s.Likes.Count
+			Content = c.Content,
+			DatePosted = c.DatePosted,
+			IsLegend = c.IsLegend,
+			Votes = new VotesCount
+			{
+				Like = c.CommentVotes.Count(v => v.Type == VoteType.Like),
+				Dislike = c.CommentVotes.Count(v => v.Type == VoteType.Dislike)
+			},
 		};
 	}
 }

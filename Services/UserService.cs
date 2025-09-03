@@ -14,8 +14,6 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		try
 		{
 			List<UserDto> users = await _context.Users
-				.Include(u => u.TreeSubmissions)
-				.Include(u => u.Votes)
 				.Select(u => MapToUserDto(u))
 				.ToListAsync();
 
@@ -34,7 +32,6 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		{
 			User? user = await _context.Users
 				.Include(u => u.TreeSubmissions)
-				.Include(u => u.Votes)
 				.FirstOrDefaultAsync(u => u.Id == userId);
 
 			ArgumentNullException.ThrowIfNull(user);
@@ -86,8 +83,6 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 			Name = u.FullName,
 			Avatar = u.Avatar,
 			RegistrationDate = u.RegistrationDate,
-			SubmissionsCount = u.TreeSubmissions.Count,
-			VerificationsCount = u.Votes.Count(v => v.Type == VoteType.Approve),
 		};
 	}
 }

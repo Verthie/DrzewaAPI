@@ -10,6 +10,4 @@ public record UserDto
 	public required string Name { get; init; }
 	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; init; }
-	public int SubmissionsCount { get; init; }
-	public int VerificationsCount { get; init; }
 }
