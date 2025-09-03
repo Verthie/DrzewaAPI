@@ -111,11 +111,24 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		};
 		user5.PasswordHash = _hasher.HashPassword(user5, "string");
 
+		User user6 = new User
+		{
+			Id = Guid.NewGuid(),
+			FirstName = "Mod",
+			LastName = "Erator",
+			Email = "mod@example.com",
+			Avatar = "https://images.pexels.com/users/avatars/2942047/natureday-com-m-434.jpeg?fit=crop&h=100&w=100",
+			RegistrationDate = DateTime.UtcNow,
+			Role = UserRole.Moderator
+		};
+		user6.PasswordHash = _hasher.HashPassword(user6, "string");
+
 		users.Add(user1);
 		users.Add(user2);
 		users.Add(user3);
 		users.Add(user4);
 		users.Add(user5);
+		users.Add(user6);
 
 		return users;
 	}

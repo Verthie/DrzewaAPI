@@ -24,6 +24,12 @@ public class User
 	[Phone]
 	[MaxLength(15)]
 	public string? Phone { get; set; }
+	[MaxLength(150)]
+	public string? Address { get; set; }
+	[MaxLength(50)]
+	public string? City { get; set; }
+	[MaxLength(50)]
+	public string? PostalCode { get; set; }
 	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; set; } = DateTime.UtcNow;
 	public UserRole Role { get; set; } = UserRole.User;

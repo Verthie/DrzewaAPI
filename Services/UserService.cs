@@ -60,6 +60,9 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 			// Field update
 			user.Phone = updateDto.Phone?.Trim();
 			user.Avatar = updateDto.Avatar?.Trim();
+			user.Address = updateDto.Address?.Trim();
+			user.City = updateDto.City?.Trim();
+			user.PostalCode = updateDto.PostalCode?.Trim();
 
 			await _context.SaveChangesAsync();
 
@@ -81,6 +84,10 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 			Id = u.Id,
 			Email = u.Email,
 			Name = u.FullName,
+			Phone = u.Phone,
+			Address = u.Address,
+			City = u.City,
+			PostalCode = u.PostalCode,
 			Avatar = u.Avatar,
 			RegistrationDate = u.RegistrationDate,
 		};

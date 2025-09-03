@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using DrzewaAPI.Dtos.Auth;
 using DrzewaAPI.Dtos.User;
+using DrzewaAPI.Extensions;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -71,13 +72,8 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
             }
 
             // Check if user can edit this profile
-            string? currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Guid currentUserId = User.GetCurrentUserId();
             string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-            if (!Guid.TryParse(currentUserIdClaim, out Guid currentUserId))
-            {
-                return Unauthorized(new ErrorResponseDto { Error = "Nieprawidłowy token" });
-            }
 
             // User can edit only his own profile, unless he is a moderator
             if (currentUserId != userId && currentUserRole != UserRole.Moderator.ToString())
