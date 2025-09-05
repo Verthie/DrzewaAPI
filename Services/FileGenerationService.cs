@@ -70,8 +70,6 @@ public class FileGenerationService(IWebHostEnvironment _environment, ILogger<Fil
 				}
 			});
 
-			// await File.WriteAllTextAsync(filePath.Replace(".pdf", ".html"), htmlContent);
-
 			_logger.LogInformation($"PDF wygenerowany: {filePath}");
 			return $"/pdfs/{fileName}";
 		}

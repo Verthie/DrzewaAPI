@@ -7,13 +7,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class SpeciesService(ApplicationDbContext _dbContext, ILogger<SpeciesService> _logger) : ISpeciesService
+public class SpeciesService(ApplicationDbContext _context, ILogger<SpeciesService> _logger) : ISpeciesService
 {
 	public async Task<List<TreeSpeciesDto>> GetAllSpeciesAsync()
 	{
 		try
 		{
-			List<TreeSpeciesDto> species = await _dbContext.TreeSpecies.Include(s => s.Images).Select(s => MapToTreeSpeciesDto(s)).ToListAsync();
+			List<TreeSpeciesDto> species = await _context.TreeSpecies.Include(s => s.Images).Select(s => MapToTreeSpeciesDto(s)).ToListAsync();
 
 			return species;
 		}
@@ -28,7 +28,7 @@ public class SpeciesService(ApplicationDbContext _dbContext, ILogger<SpeciesServ
 	{
 		try
 		{
-			TreeSpecies? species = await _dbContext.TreeSpecies.Include(s => s.Images).FirstOrDefaultAsync(s => s.Id == speciesId);
+			TreeSpecies? species = await _context.TreeSpecies.Include(s => s.Images).FirstOrDefaultAsync(s => s.Id == speciesId);
 
 			if (species == null) return null;
 

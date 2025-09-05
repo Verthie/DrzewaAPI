@@ -32,6 +32,24 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
         }
     }
 
+    [HttpGet("user")]
+    public async Task<IActionResult> GetCurrentUserTreeSubmissions()
+    {
+        try
+        {
+            Guid userId = User.GetCurrentUserId();
+
+            List<TreeSubmissionDto> trees = await _treeService.GetCurrentUserTreeSubmissionsAsync(userId);
+
+            return Ok(trees);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Błąd podczas pobierania listy drzew");
+            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTreeSubmissionById(string id)
     {

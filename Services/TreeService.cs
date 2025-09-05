@@ -30,6 +30,27 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		}
 	}
 
+	public async Task<List<TreeSubmissionDto>> GetCurrentUserTreeSubmissionsAsync(Guid userId)
+	{
+		try
+		{
+			List<TreeSubmissionDto> submissions = await _context.TreeSubmissions
+				.Where(s => s.UserId == userId)
+				.Include(s => s.Species)
+				.Include(s => s.TreeVotes)
+				.Include(s => s.User)
+				.Select(s => MapToTreeSubmissionDto(s))
+				.ToListAsync();
+
+			return submissions;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas pobierania listy drzew");
+			throw;
+		}
+	}
+
 	public async Task<TreeSubmissionDto?> GetTreeSubmissionByIdAsync(Guid treeId)
 	{
 		try
