@@ -46,4 +46,5 @@ public class User
 	public ICollection<TreeVote> TreeVotes { get; set; } = new List<TreeVote>();
 	public ICollection<CommentVote> CommentVotes { get; set; } = new List<CommentVote>();
 	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+	public ICollection<Application> Applications { get; set; } = new List<Application>();
 }

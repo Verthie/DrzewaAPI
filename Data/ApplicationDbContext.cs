@@ -1,3 +1,5 @@
+using System.Text.Json;
+using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Utils;
@@ -14,6 +16,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<TreeVote> TreeVotes { get; set; }
 	public DbSet<CommentVote> CommentVotes { get; set; }
 	public DbSet<Comment> Comments { get; set; }
+	public DbSet<Application> Applications { get; set; }
+	public DbSet<ApplicationTemplate> ApplicationTemplates { get; set; }
+	public DbSet<Municipality> Municipalities { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -123,6 +128,67 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 									.WithMany(e => e.Comments)
 									.HasForeignKey(e => e.TreeSubmissionId)
 									.OnDelete(DeleteBehavior.Cascade);
+		});
+
+		// Application Configuration
+		modelBuilder.Entity<Application>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.FormData).HasJsonConversion();
+			entity.Property(e => e.Status).HasConversion<string>();
+
+			entity.HasOne(e => e.User)
+								.WithMany(u => u.Applications)
+								.HasForeignKey(e => e.UserId)
+								.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(e => e.TreeSubmission)
+								.WithMany(ts => ts.Applications)
+								.HasForeignKey(e => e.TreeSubmissionId)
+								.OnDelete(DeleteBehavior.Cascade);
+
+			entity.HasOne(e => e.Municipality)
+								.WithMany(at => at.Applications)
+								.HasForeignKey(e => e.MunicipalityId)
+								.OnDelete(DeleteBehavior.Restrict);
+
+			entity.HasOne(e => e.ApplicationTemplate)
+								.WithMany(at => at.Applications)
+								.HasForeignKey(e => e.ApplicationTemplateId)
+								.OnDelete(DeleteBehavior.Restrict);
+		});
+
+		// ApplicationTemplate Configuration
+		modelBuilder.Entity<ApplicationTemplate>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+			entity.Property(e => e.Description).HasMaxLength(500);
+			entity.Property(e => e.HtmlTemplate).IsRequired();
+			entity.Property(e => e.Fields).HasJsonConversion();
+			entity.HasIndex(e => new { e.MunicipalityId, e.Name }).IsUnique();
+
+			entity.HasOne(e => e.Municipality)
+								.WithMany(at => at.ApplicationTemplates)
+								.HasForeignKey(e => e.MunicipalityId)
+								.OnDelete(DeleteBehavior.Restrict);
+
+		});
+
+		// Municipality configuration
+		modelBuilder.Entity<Municipality>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+			entity.Property(e => e.Address).IsRequired().HasMaxLength(200);
+			entity.Property(e => e.City).IsRequired().HasMaxLength(100);
+			entity.Property(e => e.Province).IsRequired().HasMaxLength(100);
+			entity.Property(e => e.PostalCode).HasMaxLength(10);
+			entity.Property(e => e.Phone).HasMaxLength(15);
+			entity.Property(e => e.Email).HasMaxLength(100);
+			entity.Property(e => e.Website).HasMaxLength(100);
+
+			entity.HasIndex(e => e.Name).IsUnique();
 		});
 	}
 };
