@@ -115,9 +115,9 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 	{
 		var application = await _context.Applications
 				.Include(a => a.ApplicationTemplate)
+					.ThenInclude(at => at.Municipality)
 				.Include(a => a.TreeSubmission)
 						.ThenInclude(ts => ts.Species)
-				.Include(a => a.Municipality)
 				.Include(a => a.User)
 				.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId);
 
@@ -125,7 +125,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			return null;
 
 		// Get prefilled data from user and tree submission
-		var prefilledData = GetPrefilledData(application.User, application.TreeSubmission, application.Municipality);
+		var prefilledData = GetPrefilledData(application.User, application.TreeSubmission, application.ApplicationTemplate.Municipality);
 
 		// Merge with existing form data
 		foreach (var item in application.FormData)
@@ -163,6 +163,9 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			["user_postal_code"] = user.PostalCode ?? "",
 			["tree_species_polish"] = treeSubmission.Species.PolishName,
 			["tree_species_latin"] = treeSubmission.Species.LatinName,
+			["geographic_location_lat"] = treeSubmission.Location.Lat,
+			["geographic_location_long"] = treeSubmission.Location.Lng,
+			["geographic_location_address"] = treeSubmission.Location.Address,
 			["tree_circumference"] = treeSubmission.Circumference,
 			["tree_height"] = treeSubmission.Height ?? 0,
 			["tree_condition"] = treeSubmission.Condition,
@@ -187,6 +190,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 	{
 		var application = await _context.Applications
 				.Include(a => a.ApplicationTemplate)
+					.ThenInclude(at => at.Municipality)
 				.Include(a => a.TreeSubmission)
 						.ThenInclude(ts => ts.Species)
 				.Include(a => a.User)
@@ -209,7 +213,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		application.SubmittedDate = DateTime.UtcNow;
 
 		// Generate HTML content
-		var prefilledData = GetPrefilledData(application.User, application.TreeSubmission, application.Municipality);
+		var prefilledData = GetPrefilledData(application.User, application.TreeSubmission, application.ApplicationTemplate.Municipality);
 		var allData = new Dictionary<string, object>(prefilledData);
 		foreach (var item in submitDto.FormData)
 		{

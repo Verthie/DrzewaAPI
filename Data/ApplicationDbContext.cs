@@ -32,7 +32,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
 			entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
 			entity.Property(e => e.PasswordHash).IsRequired();
-			entity.Property(e => e.Phone).HasMaxLength(15);
+			entity.Property(e => e.Phone).HasMaxLength(20);
 			entity.Property(e => e.Avatar).HasMaxLength(500);
 			entity.Property(e => e.RegistrationDate).HasDefaultValueSql("GETUTCDATE()");
 			entity.Property(e => e.Role).HasDefaultValue(UserRole.User);
@@ -147,11 +147,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 								.HasForeignKey(e => e.TreeSubmissionId)
 								.OnDelete(DeleteBehavior.Cascade);
 
-			entity.HasOne(e => e.Municipality)
-								.WithMany(at => at.Applications)
-								.HasForeignKey(e => e.MunicipalityId)
-								.OnDelete(DeleteBehavior.Restrict);
-
 			entity.HasOne(e => e.ApplicationTemplate)
 								.WithMany(at => at.Applications)
 								.HasForeignKey(e => e.ApplicationTemplateId)
@@ -184,7 +179,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.City).IsRequired().HasMaxLength(100);
 			entity.Property(e => e.Province).IsRequired().HasMaxLength(100);
 			entity.Property(e => e.PostalCode).HasMaxLength(10);
-			entity.Property(e => e.Phone).HasMaxLength(15);
+			entity.Property(e => e.Phone).HasMaxLength(20);
 			entity.Property(e => e.Email).HasMaxLength(100);
 			entity.Property(e => e.Website).HasMaxLength(100);
 

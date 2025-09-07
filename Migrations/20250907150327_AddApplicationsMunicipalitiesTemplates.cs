@@ -11,6 +11,17 @@ namespace DrzewaAPI.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<string>(
+                name: "Phone",
+                table: "Users",
+                type: "nvarchar(20)",
+                maxLength: 20,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(15)",
+                oldMaxLength: 15,
+                oldNullable: true);
+
             migrationBuilder.CreateTable(
                 name: "Municipalities",
                 columns: table => new
@@ -21,7 +32,7 @@ namespace DrzewaAPI.Migrations
                     City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Province = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     PostalCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
-                    Phone = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
+                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Website = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -65,14 +76,14 @@ namespace DrzewaAPI.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TreeSubmissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ApplicationTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MunicipalityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FormData = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SubmittedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ProcessedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     GeneratedHtmlContent = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    GeneratedPdfPath = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    GeneratedPdfPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MunicipalityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,8 +98,7 @@ namespace DrzewaAPI.Migrations
                         name: "FK_Applications_Municipalities_MunicipalityId",
                         column: x => x.MunicipalityId,
                         principalTable: "Municipalities",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Applications_TreeSubmissions_TreeSubmissionId",
                         column: x => x.TreeSubmissionId,
@@ -147,6 +157,17 @@ namespace DrzewaAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Municipalities");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Phone",
+                table: "Users",
+                type: "nvarchar(15)",
+                maxLength: 15,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(20)",
+                oldMaxLength: 20,
+                oldNullable: true);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace DrzewaAPI.Migrations
                     b.Property<string>("GeneratedPdfPath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("MunicipalityId")
+                    b.Property<Guid?>("MunicipalityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("ProcessedDate")
@@ -214,8 +214,8 @@ namespace DrzewaAPI.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("PostalCode")
                         .HasMaxLength(10)
@@ -423,8 +423,8 @@ namespace DrzewaAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("PostalCode")
                         .HasMaxLength(50)
@@ -456,11 +456,9 @@ namespace DrzewaAPI.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DrzewaAPI.Models.Municipality", "Municipality")
+                    b.HasOne("DrzewaAPI.Models.Municipality", null)
                         .WithMany("Applications")
-                        .HasForeignKey("MunicipalityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("MunicipalityId");
 
                     b.HasOne("DrzewaAPI.Models.TreeSubmission", "TreeSubmission")
                         .WithMany("Applications")
@@ -475,8 +473,6 @@ namespace DrzewaAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationTemplate");
-
-                    b.Navigation("Municipality");
 
                     b.Navigation("TreeSubmission");
 

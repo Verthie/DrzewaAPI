@@ -22,7 +22,7 @@ public class User
 	[Required]
 	public string PasswordHash { get; set; } = "";
 	[Phone]
-	[MaxLength(15)]
+	[MaxLength(20)]
 	public string? Phone { get; set; }
 	[MaxLength(150)]
 	public string? Address { get; set; }

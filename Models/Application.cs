@@ -10,7 +10,6 @@ public class Application
 	public Guid UserId { get; set; }
 	public Guid TreeSubmissionId { get; set; }
 	public Guid ApplicationTemplateId { get; set; }
-	public Guid MunicipalityId { get; set; }
 	public required Dictionary<string, object> FormData { get; set; } = new();
 	public ApplicationStatus Status { get; set; } = ApplicationStatus.Draft;
 	public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -24,5 +23,4 @@ public class Application
 	public User User { get; set; } = default!;
 	public TreeSubmission TreeSubmission { get; set; } = default!;
 	public ApplicationTemplate ApplicationTemplate { get; set; } = default!;
-	public Municipality Municipality { get; set; } = default!;
 }

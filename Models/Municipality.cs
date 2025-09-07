@@ -27,7 +27,7 @@ public class Municipality
 	public string? PostalCode { get; set; }
 
 	[Phone]
-	[MaxLength(15)]
+	[MaxLength(20)]
 	public string? Phone { get; set; }
 
 	[EmailAddress]
