@@ -12,7 +12,6 @@ namespace DrzewaAPI.Controllers;
 public class MunicipalitiesController(IMunicipalityService _municipalityService, ILogger<MunicipalitiesController> _logger) : ControllerBase
 {
     [HttpGet]
-    [Authorize(Roles = "Moderator")]
     public async Task<IActionResult> GetAllMunicipalities()
     {
         try

@@ -13,8 +13,6 @@ public class MunicipalityService(ApplicationDbContext _context) : IMunicipalityS
 	public async Task<List<MunicipalityDto>> GetAllMunicipalitiesAsync()
 	{
 		var municipalities = await _context.Municipalities
-				.Include(m => m.ApplicationTemplates.Where(t => t.IsActive))
-				.Include(m => m.Applications)
 				.OrderBy(m => m.Province)
 				.ThenBy(m => m.Name)
 				.Select(m => MapMunicipalityToDto(m))
@@ -26,8 +24,6 @@ public class MunicipalityService(ApplicationDbContext _context) : IMunicipalityS
 	public async Task<MunicipalityDto?> GetMunicipalityByIdAsync(Guid id)
 	{
 		var municipality = await _context.Municipalities
-				.Include(m => m.ApplicationTemplates.Where(t => t.IsActive))
-				.Include(m => m.Applications)
 				.FirstOrDefaultAsync(m => m.Id == id);
 
 		return municipality != null ? MapMunicipalityToDto(municipality) : null;
@@ -65,8 +61,6 @@ public class MunicipalityService(ApplicationDbContext _context) : IMunicipalityS
 	public async Task<MunicipalityDto?> UpdateMunicipalityAsync(Guid id, UpdateMunicipalityDto updateDto)
 	{
 		var municipality = await _context.Municipalities
-				.Include(m => m.ApplicationTemplates)
-				.Include(m => m.Applications)
 				.FirstOrDefaultAsync(m => m.Id == id);
 
 		if (municipality == null)
@@ -115,8 +109,6 @@ public class MunicipalityService(ApplicationDbContext _context) : IMunicipalityS
 	public async Task<bool> DeleteMunicipalityAsync(Guid id)
 	{
 		var municipality = await _context.Municipalities
-				.Include(m => m.Applications)
-				.Include(m => m.ApplicationTemplates)
 				.FirstOrDefaultAsync(m => m.Id == id);
 
 		if (municipality == null)
