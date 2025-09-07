@@ -124,8 +124,8 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		if (application == null)
 			return null;
 
-		// Get prefilled data from user and tree submission
-		var prefilledData = GetPrefilledData(application.User, application.TreeSubmission, application.ApplicationTemplate.Municipality);
+		// Get prefilled data from user, tree submission and municipality
+		var prefilledData = GetPrefilledData(application);
 
 		// Merge with existing form data
 		foreach (var item in application.FormData)
@@ -134,10 +134,40 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		}
 
 		// Find missing required fields
-		var requiredFields = application.ApplicationTemplate.Fields
+		List<ApplicationField> requiredFields = new List<ApplicationField>();
+
+		foreach (var item in prefilledData)
+		{
+			if (item.Value.ToString() == "")
+			{
+				requiredFields.Add(
+					new ApplicationField
+					{
+						Name = item.Key,
+						Label = (char.ToUpper(item.Key[0]) + item.Key.Substring(1).ToLower()).Replace("_", " "),
+						Type = item.Key switch
+						{
+							"user_phone" => ApplicationFieldType.Phone,
+							"tree_description" => ApplicationFieldType.TextArea,
+							_ => ApplicationFieldType.Text
+						},
+						IsRequired = true,
+						Order = requiredFields.Count + 1
+					}
+				);
+			}
+		}
+
+		var additionalTemplateFields = application.ApplicationTemplate.Fields
 				.Where(f => !prefilledData.ContainsKey(f.Name))
 				.OrderBy(f => f.Order)
 				.ToList();
+
+		foreach (var field in additionalTemplateFields)
+		{
+			field.Order = requiredFields.Count + 1;
+			requiredFields.Add(field);
+		}
 
 		return new ApplicationFormSchemaDto
 		{
@@ -149,8 +179,12 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		};
 	}
 
-	private Dictionary<string, object> GetPrefilledData(User user, TreeSubmission treeSubmission, Municipality municipality)
+	private Dictionary<string, object> GetPrefilledData(Application application)
 	{
+		User user = application.User;
+		TreeSubmission treeSubmission = application.TreeSubmission;
+		Municipality municipality = application.ApplicationTemplate.Municipality;
+
 		return new Dictionary<string, object>
 		{
 			["user_first_name"] = user.FirstName,
@@ -167,11 +201,10 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			["geographic_location_long"] = treeSubmission.Location.Lng,
 			["geographic_location_address"] = treeSubmission.Location.Address,
 			["tree_circumference"] = treeSubmission.Circumference,
-			["tree_height"] = treeSubmission.Height ?? 0,
+			["tree_height"] = treeSubmission.Height,
 			["tree_condition"] = treeSubmission.Condition,
-			["tree_estimated_age"] = treeSubmission.EstimatedAge ?? 0,
+			["tree_estimated_age"] = treeSubmission.EstimatedAge,
 			["tree_is_alive"] = treeSubmission.IsAlive,
-			["tree_is_monument"] = treeSubmission.IsMonument,
 			["tree_location_latitude"] = treeSubmission.Location.Lat,
 			["tree_location_longitude"] = treeSubmission.Location.Lng,
 			["tree_description"] = treeSubmission.Description ?? "",
@@ -180,9 +213,9 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			["municipality_address"] = municipality.Address,
 			["municipality_city"] = municipality.City,
 			["municipality_province"] = municipality.Province,
-			["municipality_postal_code"] = municipality.PostalCode ?? "",
-			["municipality_phone"] = municipality.Phone ?? "",
-			["municipality_email"] = municipality.Email ?? "",
+			["municipality_postal_code"] = municipality.PostalCode,
+			["municipality_phone"] = municipality.Phone,
+			["municipality_email"] = municipality.Email,
 		};
 	}
 
@@ -213,7 +246,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		application.SubmittedDate = DateTime.UtcNow;
 
 		// Generate HTML content
-		var prefilledData = GetPrefilledData(application.User, application.TreeSubmission, application.ApplicationTemplate.Municipality);
+		var prefilledData = GetPrefilledData(application);
 		var allData = new Dictionary<string, object>(prefilledData);
 		foreach (var item in submitDto.FormData)
 		{

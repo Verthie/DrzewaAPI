@@ -23,6 +23,8 @@ public class FileGenerationService(IWebHostEnvironment _environment, ILogger<Fil
 				html = html.Replace(placeholder, value);
 			}
 
+			html = html.Replace("{{generation_date}}", DateTime.Now.ToString("dd.MM.yyyy"));
+
 			return await Task.FromResult(html);
 		}
 		catch (Exception ex)
