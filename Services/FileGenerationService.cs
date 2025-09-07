@@ -13,12 +13,12 @@ public class FileGenerationService(IWebHostEnvironment _environment, ILogger<Fil
 	{
 		try
 		{
-			// Simple template engine - replace {key} with values
+			// Simple template engine - replace {{key}} with values
 			var html = template;
 
 			foreach (var item in data)
 			{
-				var placeholder = $"{item.Key}";
+				var placeholder = "{{" + item.Key + "}}";
 				var value = item.Value?.ToString() ?? "";
 				html = html.Replace(placeholder, value);
 			}
