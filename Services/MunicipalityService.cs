@@ -128,34 +128,6 @@ public class MunicipalityService(ApplicationDbContext _context) : IMunicipalityS
 		return true;
 	}
 
-	public async Task<List<ApplicationTemplateDto>> GetMunicipalityTemplatesAsync(Guid municipalityId)
-	{
-		var templates = await _context.ApplicationTemplates
-				.Include(t => t.Municipality)
-				.Where(t => t.MunicipalityId == municipalityId && t.IsActive)
-				.OrderBy(t => t.Name)
-				.Select(t => t.MapToDto())
-				.ToListAsync();
-
-		return templates;
-	}
-
-	public async Task<List<ApplicationDto>> GetMunicipalityApplicationsAsync(Guid municipalityId)
-	{
-		var applications = await _context.Applications
-				.Include(a => a.User)
-				.Include(a => a.TreeSubmission)
-						.ThenInclude(ts => ts.Species)
-				.Include(a => a.ApplicationTemplate)
-				.Include(a => a.Municipality)
-				.Where(a => a.MunicipalityId == municipalityId)
-				.OrderByDescending(a => a.CreatedDate)
-				.Select(a => a.MapToDto())
-				.ToListAsync();
-
-		return applications;
-	}
-
 	private static MunicipalityDto MapMunicipalityToDto(Municipality municipality)
 	{
 		return new MunicipalityDto

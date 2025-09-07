@@ -68,6 +68,26 @@ public class ApplicationTemplatesController(IApplicationTemplateService _templat
 		}
 	}
 
+	[HttpGet("municipality/{municipalityId}")]
+	public async Task<IActionResult> GetTemplatesByMunicipalityId(string municipalityId)
+	{
+		try
+		{
+			if (!Guid.TryParse(municipalityId, out var guid))
+			{
+				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
+			}
+
+			var templates = await _templateService.GetTemplatesByMunicipalityIdAsync(guid);
+			return Ok(templates);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas pobierania szablonów gminy: {MunicipalityId}", municipalityId);
+			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
+		}
+	}
+
 	[HttpPost]
 	[Authorize(Roles = "Moderator")]
 	public async Task<IActionResult> CreateTemplate([FromBody] CreateApplicationTemplateDto createDto)
@@ -102,12 +122,12 @@ public class ApplicationTemplatesController(IApplicationTemplateService _templat
 				return BadRequest(ModelState);
 			}
 
-			if (!Guid.TryParse(id, out var templateId))
+			if (!Guid.TryParse(id, out var guid))
 			{
 				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
 			}
 
-			var template = await _templateService.UpdateTemplateAsync(templateId, updateDto);
+			var template = await _templateService.UpdateTemplateAsync(guid, updateDto);
 
 			if (template == null)
 			{
@@ -129,12 +149,12 @@ public class ApplicationTemplatesController(IApplicationTemplateService _templat
 	{
 		try
 		{
-			if (!Guid.TryParse(id, out var templateId))
+			if (!Guid.TryParse(id, out var guid))
 			{
 				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
 			}
 
-			var result = await _templateService.DeleteTemplateAsync(templateId);
+			var result = await _templateService.DeleteTemplateAsync(guid);
 
 			if (!result)
 			{

@@ -53,47 +53,6 @@ public class MunicipalitiesController(IMunicipalityService _municipalityService,
         }
     }
 
-    [HttpGet("{id}/templates")]
-    public async Task<IActionResult> GetMunicipalityTemplates(string id)
-    {
-        try
-        {
-            if (!Guid.TryParse(id, out var municipalityId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
-
-            var templates = await _municipalityService.GetMunicipalityTemplatesAsync(municipalityId);
-            return Ok(templates);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas pobierania szablonów gminy: {MunicipalityId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
-    }
-
-    [HttpGet("{id}/applications")]
-    [Authorize(Roles = "Moderator")]
-    public async Task<IActionResult> GetMunicipalityApplications(string id)
-    {
-        try
-        {
-            if (!Guid.TryParse(id, out var municipalityId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
-
-            var applications = await _municipalityService.GetMunicipalityApplicationsAsync(municipalityId);
-            return Ok(applications);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas pobierania wniosków gminy: {MunicipalityId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
-    }
-
     [HttpPost]
     [Authorize(Roles = "Moderator")]
     public async Task<IActionResult> CreateMunicipality([FromBody] CreateMunicipalityDto createDto)

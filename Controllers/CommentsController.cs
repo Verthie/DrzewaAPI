@@ -56,12 +56,12 @@ public class CommentsController(ICommentService _commentService, ILogger<Comment
 	{
 		try
 		{
-			if (!Guid.TryParse(treeId, out var treeGuid))
+			if (!Guid.TryParse(treeId, out var guid))
 			{
 				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
 			}
 
-			List<CommentDto> comments = await _commentService.GetTreeCommentsAsync(treeGuid);
+			List<CommentDto> comments = await _commentService.GetTreeCommentsAsync(guid);
 
 			return Ok(comments);
 		}
@@ -81,14 +81,14 @@ public class CommentsController(ICommentService _commentService, ILogger<Comment
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			if (!Guid.TryParse(treeId, out var treeGuid))
+			if (!Guid.TryParse(treeId, out var guid))
 			{
 				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
 			}
 
 			Guid userId = User.GetCurrentUserId();
 
-			var result = await _commentService.CreateCommentAsync(request, userId, treeGuid);
+			var result = await _commentService.CreateCommentAsync(request, userId, guid);
 
 			if (result == null)
 			{

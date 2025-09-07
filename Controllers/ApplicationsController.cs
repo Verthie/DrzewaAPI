@@ -11,7 +11,7 @@ namespace DrzewaAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class ApplicationsController(IApplicationService _applicationService, ILogger<ApplicationsController> logger) : ControllerBase
+public class ApplicationsController(IApplicationService _applicationService, ILogger<ApplicationsController> _logger) : ControllerBase
 {
 	[HttpGet]
 	public async Task<IActionResult> GetUserApplications()
@@ -24,7 +24,7 @@ public class ApplicationsController(IApplicationService _applicationService, ILo
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Błąd podczas pobierania wniosków użytkownika");
+			_logger.LogError(ex, "Błąd podczas pobierania wniosków użytkownika");
 			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
 		}
 	}
@@ -51,7 +51,7 @@ public class ApplicationsController(IApplicationService _applicationService, ILo
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Błąd podczas pobierania wniosku: {ApplicationId}", id);
+			_logger.LogError(ex, "Błąd podczas pobierania wniosku: {ApplicationId}", id);
 			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
 		}
 	}
@@ -78,7 +78,7 @@ public class ApplicationsController(IApplicationService _applicationService, ILo
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Błąd podczas tworzenia wniosku");
+			_logger.LogError(ex, "Błąd podczas tworzenia wniosku");
 			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
 		}
 	}
@@ -114,7 +114,7 @@ public class ApplicationsController(IApplicationService _applicationService, ILo
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Błąd podczas aktualizacji wniosku: {ApplicationId}", id);
+			_logger.LogError(ex, "Błąd podczas aktualizacji wniosku: {ApplicationId}", id);
 			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
 		}
 	}
@@ -145,7 +145,7 @@ public class ApplicationsController(IApplicationService _applicationService, ILo
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Błąd podczas usuwania wniosku: {ApplicationId}", id);
+			_logger.LogError(ex, "Błąd podczas usuwania wniosku: {ApplicationId}", id);
 			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
 		}
 	}
@@ -172,7 +172,47 @@ public class ApplicationsController(IApplicationService _applicationService, ILo
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Błąd podczas pobierania schematu formularza: {ApplicationId}", id);
+			_logger.LogError(ex, "Błąd podczas pobierania schematu formularza: {ApplicationId}", id);
+			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
+		}
+	}
+
+	[HttpPost("{id}/submit")]
+	public async Task<IActionResult> SubmitApplication(string id, [FromBody] SubmitApplicationDto submitDto)
+	{
+		try
+		{
+			if (!ModelState.IsValid)
+			{
+				return BadRequest(ModelState);
+			}
+
+			if (!Guid.TryParse(id, out var applicationId))
+			{
+				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
+			}
+
+			var userId = User.GetCurrentUserId();
+			var application = await _applicationService.SubmitApplicationAsync(applicationId, userId, submitDto);
+
+			if (application == null)
+			{
+				return NotFound(new ErrorResponseDto { Error = "Wniosek nie został znaleziony" });
+			}
+
+			return Ok(application);
+		}
+		catch (InvalidOperationException ex)
+		{
+			return BadRequest(new ErrorResponseDto { Error = ex.Message });
+		}
+		catch (ArgumentException ex)
+		{
+			return BadRequest(new ErrorResponseDto { Error = ex.Message });
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas przesyłania wniosku: {ApplicationId}", id);
 			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
 		}
 	}
@@ -202,7 +242,7 @@ public class ApplicationsController(IApplicationService _applicationService, ILo
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Błąd podczas generowania PDF: {ApplicationId}", id);
+			_logger.LogError(ex, "Błąd podczas generowania PDF: {ApplicationId}", id);
 			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
 		}
 	}
