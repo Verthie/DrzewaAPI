@@ -11,10 +11,10 @@ public record TreeSubmissionDto
 	public required string SpeciesLatin { get; init; }
 	public required Location Location { get; init; }
 	public required int Circumference { get; init; }
-	public double? Height { get; set; }
+	public double Height { get; set; }
 	public required string Condition { get; init; }
 	public bool IsAlive { get; init; } = true;
-	public int? EstimatedAge { get; set; }
+	public int EstimatedAge { get; set; }
 	public string? Description { get; set; }
 	public required List<string> Images { get; set; }
 	public bool IsMonument { get; init; } = false;

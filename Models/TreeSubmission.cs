@@ -16,11 +16,13 @@ public class TreeSubmission
 	public required Location Location { get; set; }
 	[Required]
 	public required int Circumference { get; set; } // Pierśnica
-	public double? Height { get; set; }
+	[Required]
+	public required double Height { get; set; }
 	[Required]
 	public required string Condition { get; set; }
 	public bool IsAlive { get; set; } = true;
-	public int? EstimatedAge { get; set; }
+	[Required]
+	public required int EstimatedAge { get; set; }
 	public string? Description { get; set; }
 	public required List<string> Images { get; set; }
 	public bool IsMonument { get; set; } = false;

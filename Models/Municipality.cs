@@ -23,16 +23,19 @@ public class Municipality
 	[MaxLength(100)]
 	public required string Province { get; set; } // Województwo
 
+	[Required]
 	[MaxLength(10)]
-	public string? PostalCode { get; set; }
+	public required string PostalCode { get; set; }
 
+	[Required]
 	[Phone]
 	[MaxLength(20)]
-	public string? Phone { get; set; }
+	public required string Phone { get; set; }
 
+	[Required]
 	[EmailAddress]
 	[MaxLength(100)]
-	public string? Email { get; set; }
+	public required string Email { get; set; }
 
 	[MaxLength(100)]
 	public string? Website { get; set; }

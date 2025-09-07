@@ -178,9 +178,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.Address).IsRequired().HasMaxLength(200);
 			entity.Property(e => e.City).IsRequired().HasMaxLength(100);
 			entity.Property(e => e.Province).IsRequired().HasMaxLength(100);
-			entity.Property(e => e.PostalCode).HasMaxLength(10);
-			entity.Property(e => e.Phone).HasMaxLength(20);
-			entity.Property(e => e.Email).HasMaxLength(100);
+			entity.Property(e => e.PostalCode).IsRequired().HasMaxLength(10);
+			entity.Property(e => e.Phone).IsRequired().HasMaxLength(20);
+			entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
 			entity.Property(e => e.Website).HasMaxLength(100);
 
 			entity.HasIndex(e => e.Name).IsUnique();

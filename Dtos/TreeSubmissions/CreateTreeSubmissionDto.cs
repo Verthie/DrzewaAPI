@@ -14,12 +14,15 @@ public record CreateTreeSubmissionDto
 	[Required(ErrorMessage = "Pierśnica jest wymagana")]
 	[Range(0, int.MaxValue)]
 	public required int Circumference { get; init; }
+	[Required(ErrorMessage = "Wysokość jest wymagana")]
 	[Range(0, int.MaxValue)]
-	public double? Height { get; set; }
+	public required double Height { get; set; }
 	[Required(ErrorMessage = "Kondycja jest wymagana")]
 	public required string Condition { get; init; }
 	public bool IsAlive { get; init; } = true;
-	public int? EstimatedAge { get; set; }
+	[Required(ErrorMessage = "Wiek jest wymagany")]
+	[Range(0, int.MaxValue)]
+	public required int EstimatedAge { get; set; }
 	public string? Description { get; set; }
 	[Required(ErrorMessage = "Przynajmniej jeden załącznik jest wymagany")]
 	public required List<string> Images { get; set; }
