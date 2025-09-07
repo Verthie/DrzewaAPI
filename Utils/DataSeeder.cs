@@ -534,6 +534,17 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			},
 			new Municipality {
 				Id = Guid.Parse("e677fa5e-876f-44f4-9542-8d90533ea4f2"),
+				Name = "Gmina Kraków",
+				Address = "Pl. Wszystkich Świętych 3-4",
+				City = "Kraków ",
+				Province = "Małopolskie",
+				PostalCode = "31-004",
+				Phone = "+48 12 616 5555",
+				Email = "ws.umk@um.krakow.pl",
+				Website = "https://www.krakow.pl"
+			},
+			new Municipality {
+				Id = Guid.Parse("e677fa5e-876f-44f4-9542-8d90533ea4f3"),
 				Name = "Gmina Piaseczno",
 				Address = "ul. Kościuszki 5",
 				City = "Piaseczno",
@@ -544,16 +555,14 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 
 	private ApplicationTemplate[] GetMockTemplates(Municipality[] municipalities)
 	{
-		var rnd = new Random();
-
-		var predefinedTemplates = new List<ApplicationTemplate>
-		{
+		return [
 				new ApplicationTemplate
 				{
 						Id = Guid.NewGuid(),
+						MunicipalityId = municipalities[0].Id,
 						Name = "Wniosek o rejestrację pomnika przyrody",
 						Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
-						HtmlTemplate = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Wniosek o rejestrację pomnika przyrody</title></head><body><h1>WNIOSEK O REJESTRACJĘ POMNIKA PRZYRODY</h1><div><h3>{{municipality_name}}</h3><p>{{municipality_address}}, {{municipality_city}} {{municipality_postal_code}}</p></div><div><h3>Dane wnioskodawcy:</h3><p>Imię i nazwisko: {{user_full_name}}</p><p>Adres: {{user_address}}, {{user_city}} {{user_postal_code}}</p><p>Telefon: {{user_phone}}</p><p>Email: {{user_email}}</p></div><div><h3>Dane drzewa:</h3><p>Gatunek: {{tree_species}}</p><p>Obwód: {{tree_circumference}} cm</p><p>Wysokość: {{tree_height}} m</p><p>Wiek: {{tree_estimated_age}} lat</p><p>Stan: {{tree_condition}}</p></div><div><h3>Dodatkowe informacje:</h3><p>Uzasadnienie: {{justification}}</p><p>Przewidywany koszt opieki: {{estimated_care_cost}} zł/rok</p><p>Osoba odpowiedzialna: {{responsible_person}}</p><p>Telefon kontaktowy: {{contact_phone}}</p></div><div><p>Data: {{current_date}}</p><p>Podpis: ................................</p></div></body></html>",
+						HtmlTemplate = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Wniosek o rejestrację pomnika przyrody</title></head><body><h1>WNIOSEK O REJESTRACJĘ POMNIKA PRZYRODY</h1><div><h3>{{municipality_name}}</h3><p>{{municipality_address}}, {{municipality_city}} {{municipality_postal_code}}</p></div><div><h3>Dane wnioskodawcy:</h3><p>Imię i nazwisko: {{user_full_name}}</p><p>Adres: {{user_address}}, {{user_city}} {{user_postal_code}}</p><p>Telefon: {{user_phone}}</p><p>Email: {{user_email}}</p></div><div><h3>Dane drzewa:</h3><p>Gatunek: {{tree_species_polish}}</p><p>Obwód: {{tree_circumference}} cm</p><p>Wysokość: {{tree_height}} m</p><p>Wiek: {{tree_estimated_age}} lat</p><p>Stan: {{tree_condition}}</p></div><div><h3>Dodatkowe informacje:</h3><p>Uzasadnienie: {{justification}}</p><p>Przewidywany koszt opieki: {{estimated_care_cost}} zł/rok</p><p>Osoba odpowiedzialna: {{responsible_person}}</p><p>Telefon kontaktowy: {{contact_phone}}</p></div><div><p>Data: {{submission_date}}</p><p>Podpis: ................................</p></div></body></html>",
 						Fields = new List<ApplicationField>
 						{
 								new ApplicationField
@@ -627,24 +636,123 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 										Order = 5
 								}
 						}
-				}
-		};
-
-		// Assigning Municipilities Randomly
-		var result = municipalities.Select(m =>
+				},
+				new ApplicationTemplate
 				{
-					var template = predefinedTemplates[rnd.Next(predefinedTemplates.Count)];
-
-					// Głębokie klonowanie JSONem
-					var clone = JsonSerializer.Deserialize<ApplicationTemplate>(
-					JsonSerializer.Serialize(template))!;
-
-					clone.Id = Guid.NewGuid();
-					clone.MunicipalityId = m.Id;
-
-					return clone;
-				}).ToArray();
-
-		return result;
+						Id = Guid.NewGuid(),
+						MunicipalityId = municipalities[1].Id,
+						Name = "Uznanie obiektu przyrodniczego za pomnik przyrody WS-13",
+						Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
+						HtmlTemplate = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Wniosek o rejestrację pomnika przyrody</title></head><body><h1>WNIOSEK O REJESTRACJĘ POMNIKA PRZYRODY</h1><div><h3>{{municipality_name}}</h3><p>{{municipality_address}}, {{municipality_city}} {{municipality_postal_code}}</p></div><div><h3>Dane wnioskodawcy:</h3><p>Imię i nazwisko: {{user_full_name}}</p><p>Adres: {{user_address}}, {{user_city}} {{user_postal_code}}</p><p>Telefon: {{user_phone}}</p><p>Email: {{user_email}}</p></div><div><h3>Dane drzewa:</h3><p>Gatunek: {{tree_species_polish}}</p><p>Obwód: {{tree_circumference}} cm</p><p>Wysokość: {{tree_height}} m</p><p>Wiek: {{tree_estimated_age}} lat</p><p>Stan: {{tree_condition}}</p></div><div><h3>Dodatkowe informacje:</h3><p>Uzasadnienie: {{justification}}</p><p>Przewidywany koszt opieki: {{estimated_care_cost}} zł/rok</p><p>Osoba odpowiedzialna: {{responsible_person}}</p><p>Telefon kontaktowy: {{contact_phone}}</p></div><div><p>Data: {{submission_date}}</p><p>Podpis: ................................</p></div></body></html>",
+						Fields = new List<ApplicationField>
+						{
+								new ApplicationField
+								{
+										Name = "plot",
+										Label = "Działka",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać działkę na której znajduje się pomnik przyrody",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 1
+								},
+								new ApplicationField
+								{
+										Name = "cadastral_district",
+										Label = "Obręb ewidencyjny",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać obręb ewidencyjny",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 2
+								},
+								new ApplicationField
+								{
+										Name = "record_keeping_unit",
+										Label = "Jednostka ewidencyjna",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać jednostkę ewidencyjną",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 3
+								},
+								new ApplicationField
+								{
+										Name = "ownership_form",
+										Label = "Forma własności",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać formę własności",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 4
+								},
+								new ApplicationField
+								{
+										Name = "land_type",
+										Label = "Rodzaj gruntów",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać rodzaj gruntów",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 5
+								},
+								new ApplicationField
+								{
+										Name = "study_name",
+										Label = "Nazwa opracowania",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać nazwę opracowania",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 6
+								},
+								new ApplicationField
+								{
+										Name = "study_author",
+										Label = "Autor",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać imię i nazwisko autora opracowania",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 7
+								},
+						}
+				}
+		 ];
 	}
 }
