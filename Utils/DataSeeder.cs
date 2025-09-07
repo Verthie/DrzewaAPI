@@ -45,6 +45,14 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		if (!await _db.CommentVotes.AnyAsync(ct)) _db.CommentVotes.AddRange(commentVotes);
 		// else likes = await _db.Likes.ToArrayAsync(ct);
 
+		Municipality[] municipalities = GetMockMunicipalities();
+		if (!await _db.Municipalities.AnyAsync(ct)) _db.Municipalities.AddRange(municipalities);
+		else municipalities = await _db.Municipalities.ToArrayAsync(ct);
+
+		ApplicationTemplate[] applicationTemplates = GetMockTemplates(municipalities);
+		if (!await _db.ApplicationTemplates.AnyAsync(ct)) _db.ApplicationTemplates.AddRange(applicationTemplates);
+		else applicationTemplates = await _db.ApplicationTemplates.ToArrayAsync(ct);
+
 		if (!_db.ChangeTracker.Entries().Any()) return;
 
 		await _db.SaveChangesAsync(ct);
@@ -510,4 +518,133 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		return votes.ToArray();
 	}
 
+	private Municipality[] GetMockMunicipalities()
+	{
+		return [
+			new Municipality {
+				Id = Guid.Parse("e677fa5e-876f-44f4-9542-8d90533ea4f1"),
+				Name = "Gmina Warszawa",
+				Address = "Plac Bankowy 3/5",
+				City = "Warszawa",
+				Province = "Mazowieckie",
+				PostalCode = "00-950",
+				Phone = "+48 22 443 01 00",
+				Email = "sekretariat@um.warszawa.pl",
+				Website = "https://www.warszawa.pl"
+			},
+			new Municipality {
+				Id = Guid.Parse("e677fa5e-876f-44f4-9542-8d90533ea4f2"),
+				Name = "Gmina Piaseczno",
+				Address = "ul. Kościuszki 5",
+				City = "Piaseczno",
+				Province = "Mazowieckie",
+			}
+		];
+	}
+
+	private ApplicationTemplate[] GetMockTemplates(Municipality[] municipalities)
+	{
+		var rnd = new Random();
+
+		var predefinedTemplates = new List<ApplicationTemplate>
+		{
+				new ApplicationTemplate
+				{
+						Id = Guid.NewGuid(),
+						Name = "Wniosek o rejestrację pomnika przyrody",
+						Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
+						HtmlTemplate = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Wniosek o rejestrację pomnika przyrody</title></head><body><h1>WNIOSEK O REJESTRACJĘ POMNIKA PRZYRODY</h1><div><h3>{{municipality_name}}</h3><p>{{municipality_address}}, {{municipality_city}} {{municipality_postal_code}}</p></div><div><h3>Dane wnioskodawcy:</h3><p>Imię i nazwisko: {{user_full_name}}</p><p>Adres: {{user_address}}, {{user_city}} {{user_postal_code}}</p><p>Telefon: {{user_phone}}</p><p>Email: {{user_email}}</p></div><div><h3>Dane drzewa:</h3><p>Gatunek: {{tree_species}}</p><p>Obwód: {{tree_circumference}} cm</p><p>Wysokość: {{tree_height}} m</p><p>Wiek: {{tree_estimated_age}} lat</p><p>Stan: {{tree_condition}}</p></div><div><h3>Dodatkowe informacje:</h3><p>Uzasadnienie: {{justification}}</p><p>Przewidywany koszt opieki: {{estimated_care_cost}} zł/rok</p><p>Osoba odpowiedzialna: {{responsible_person}}</p><p>Telefon kontaktowy: {{contact_phone}}</p></div><div><p>Data: {{current_date}}</p><p>Podpis: ................................</p></div></body></html>",
+						Fields = new List<ApplicationField>
+						{
+								new ApplicationField
+								{
+										Name = "justification",
+										Label = "Uzasadnienie wniosku",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę opisać dlaczego drzewo powinno zostać objęte ochroną...",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 50,
+												MaxLength = 1000,
+												ValidationMessage = "Uzasadnienie musi mieć od 50 do 1000 znaków"
+										},
+										HelpText = "Opisz walory przyrodnicze, historyczne lub krajobrazowe drzewa",
+										Order = 1
+								},
+								new ApplicationField
+								{
+										Name = "estimated_care_cost",
+										Label = "Szacowany koszt rocznej opieki (zł)",
+										Type = ApplicationFieldType.Number,
+										IsRequired = true,
+										Placeholder = "np. 500",
+										Validation = new ApplicationFieldValidation
+										{
+												Min = 0,
+												Max = 10000,
+												ValidationMessage = "Koszt musi być liczbą od 0 do 10000"
+										},
+										HelpText = "Przewidywany koszt opieki nad drzewem w ciągu roku",
+										Order = 2
+								},
+								new ApplicationField
+								{
+										Name = "responsible_person",
+										Label = "Osoba odpowiedzialna za opiekę",
+										Type = ApplicationFieldType.Text,
+										IsRequired = true,
+										Placeholder = "Imię i nazwisko",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 3,
+												MaxLength = 100
+										},
+										Order = 3
+								},
+								new ApplicationField
+								{
+										Name = "contact_phone",
+										Label = "Telefon kontaktowy osoby odpowiedzialnej",
+										Type = ApplicationFieldType.Phone,
+										IsRequired = true,
+										Placeholder = "+48 123 456 789",
+										Validation = new ApplicationFieldValidation
+										{
+												Pattern = @"^\+?[0-9\s\-\(\)]{9,15}$",
+												ValidationMessage = "Numer telefonu musi zawierać 9-15 cyfr"
+										},
+										Order = 4
+								},
+								new ApplicationField
+								{
+										Name = "care_agreement",
+										Label = "Zobowiązuję się do sprawowania opieki nad drzewem",
+										Type = ApplicationFieldType.Checkbox,
+										IsRequired = true,
+										DefaultValue = "false",
+										HelpText = "Wymagane potwierdzenie zobowiązania",
+										Order = 5
+								}
+						}
+				}
+		};
+
+		// Assigning Municipilities Randomly
+		var result = municipalities.Select(m =>
+				{
+					var template = predefinedTemplates[rnd.Next(predefinedTemplates.Count)];
+
+					// Głębokie klonowanie JSONem
+					var clone = JsonSerializer.Deserialize<ApplicationTemplate>(
+					JsonSerializer.Serialize(template))!;
+
+					clone.Id = Guid.NewGuid();
+					clone.MunicipalityId = m.Id;
+
+					return clone;
+				}).ToArray();
+
+		return result;
+	}
 }
