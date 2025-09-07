@@ -11,5 +11,4 @@ public record ApplicationDto
 	public DateTime CreatedDate { get; init; }
 	public DateTime? SubmittedDate { get; init; }
 	public DateTime? ProcessedDate { get; init; }
-	public ApplicationTemplateDto? ApplicationTemplate { get; set; }
 }

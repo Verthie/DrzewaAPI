@@ -17,7 +17,6 @@ public static class ApplicationExtensions
 			CreatedDate = application.CreatedDate,
 			SubmittedDate = application.SubmittedDate,
 			ProcessedDate = application.ProcessedDate,
-			ApplicationTemplate = application.ApplicationTemplate != null ? application.ApplicationTemplate.MapToDto() : null
 		};
 	}
 
