@@ -50,13 +50,13 @@ public class ApplicationTemplateService(ApplicationDbContext _context) : IApplic
 		return template != null ? template.MapToDto() : null;
 	}
 
-	public async Task<List<ApplicationTemplateDto>> GetTemplatesByMunicipalityIdAsync(Guid municipalityId)
+	public async Task<List<ShortApplicationTemplateDto>> GetTemplatesByMunicipalityIdAsync(Guid municipalityId)
 	{
 		var templates = await _context.ApplicationTemplates
 				.Include(t => t.Municipality)
 				.Where(t => t.MunicipalityId == municipalityId && t.IsActive)
 				.OrderBy(t => t.Name)
-				.Select(t => t.MapToDto())
+				.Select(t => t.MapToShortDto())
 				.ToListAsync();
 
 		return templates;

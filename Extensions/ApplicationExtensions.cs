@@ -35,4 +35,17 @@ public static class ApplicationExtensions
 			LastModifiedDate = template.LastModifiedDate,
 		};
 	}
+
+	public static ShortApplicationTemplateDto MapToShortDto(this ApplicationTemplate template)
+	{
+		return new ShortApplicationTemplateDto
+		{
+			Id = template.Id,
+			Name = template.Name,
+			Description = template.Description,
+			IsActive = template.IsActive,
+			CreatedDate = template.CreatedDate,
+			LastModifiedDate = template.LastModifiedDate,
+		};
+	}
 }
