@@ -22,4 +22,5 @@ public record TreeSubmissionDto
 	public DateTime SubmissionDate { get; init; }
 	public DateTime? ApprovalDate { get; set; }
 	public required VotesCount Votes { get; init; }
+	public required int CommentCount { get; init; }
 }

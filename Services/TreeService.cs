@@ -18,6 +18,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 				.Include(s => s.Species)
 				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
+				.Include(s => s.Comments)
 				.Select(s => MapToTreeSubmissionDto(s))
 				.ToListAsync();
 
@@ -39,6 +40,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 				.Include(s => s.Species)
 				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
+				.Include(s => s.Comments)
 				.Select(s => MapToTreeSubmissionDto(s))
 				.ToListAsync();
 
@@ -59,6 +61,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 				.Include(s => s.Species)
 				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
+				.Include(s => s.Comments)
 				.FirstOrDefaultAsync(s => s.Id == treeId);
 
 			if (submission == null) return null;
@@ -104,6 +107,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			await _context.Entry(submission).Reference(s => s.User).LoadAsync();
 			await _context.Entry(submission).Reference(s => s.Species).LoadAsync();
 			await _context.Entry(submission).Collection(s => s.TreeVotes).LoadAsync();
+			await _context.Entry(submission).Collection(s => s.Comments).LoadAsync();
 
 			return MapToTreeSubmissionDto(submission);
 		}
@@ -199,6 +203,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 				Like = s.TreeVotes.Count(v => v.Type == VoteType.Like),
 				Dislike = s.TreeVotes.Count(v => v.Type == VoteType.Dislike)
 			},
+			CommentCount = s.Comments.Count
 		};
 	}
 
