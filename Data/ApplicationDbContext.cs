@@ -74,6 +74,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		{
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.ImageUrl).IsRequired();
+
 			entity.HasOne(e => e.TreeSpecies)
 									.WithMany(e => e.Images)
 									.HasForeignKey(e => e.TreeSpeciesId)
@@ -89,7 +90,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.TreeVotes)
 									.HasForeignKey(e => e.UserId)
-									.OnDelete(DeleteBehavior.Cascade);
+									.OnDelete(DeleteBehavior.Restrict);
 
 			entity.HasOne(e => e.TreeSubmission)
 									.WithMany(e => e.TreeVotes)
@@ -105,12 +106,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.CommentVotes)
 									.HasForeignKey(e => e.UserId)
-									.OnDelete(DeleteBehavior.Cascade);
+									.OnDelete(DeleteBehavior.Restrict);
 
 			entity.HasOne(e => e.Comment)
 									.WithMany(e => e.CommentVotes)
 									.HasForeignKey(e => e.CommentId)
-									.OnDelete(DeleteBehavior.NoAction);
+									.OnDelete(DeleteBehavior.Cascade);
 		});
 
 		// Comment Configuration
@@ -122,7 +123,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.Comments)
 									.HasForeignKey(e => e.UserId)
-									.OnDelete(DeleteBehavior.Cascade);
+									.OnDelete(DeleteBehavior.Restrict);
 
 			entity.HasOne(e => e.TreeSubmission)
 									.WithMany(e => e.Comments)
@@ -140,7 +141,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasOne(e => e.User)
 								.WithMany(u => u.Applications)
 								.HasForeignKey(e => e.UserId)
-								.OnDelete(DeleteBehavior.Cascade);
+								.OnDelete(DeleteBehavior.Restrict);
 
 			entity.HasOne(e => e.TreeSubmission)
 								.WithMany(ts => ts.Applications)

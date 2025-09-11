@@ -4,6 +4,7 @@ using DrzewaAPI.Dtos.Auth;
 using DrzewaAPI.Dtos.TreeSubmissions;
 using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
+using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
 using DrzewaAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -99,6 +100,41 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
         catch (Exception ex)
         {
             _logger.LogError(ex, "Błąd podczas tworzenia drzewa");
+            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTreeSubmission(string id)
+    {
+        try
+        {
+            if (!Guid.TryParse(id, out var treeId))
+            {
+                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
+            }
+
+            var userId = User.GetCurrentUserId();
+            string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            bool isModerator = currentUserRole == UserRole.Moderator.ToString();
+
+            var result = await _treeService.DeleteTreeSubmissionAsync(treeId, userId, isModerator);
+
+            if (!result)
+            {
+                return NotFound(new ErrorResponseDto { Error = "Drzwo nie zostało znalezione" });
+            }
+
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new ErrorResponseDto { Error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Błąd podczas usuwania drzewa: {TreeId}", id);
             return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
         }
     }

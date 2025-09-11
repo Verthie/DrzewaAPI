@@ -75,8 +75,10 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
             Guid currentUserId = User.GetCurrentUserId();
             string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
+            bool isModerator = currentUserRole == UserRole.Moderator.ToString();
+
             // User can edit only his own profile, unless he is a moderator
-            if (currentUserId != userId && currentUserRole != UserRole.Moderator.ToString())
+            if (currentUserId != userId && !isModerator)
             {
                 return Forbid();
             }

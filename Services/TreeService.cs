@@ -118,6 +118,29 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		}
 	}
 
+	public async Task<bool> DeleteTreeSubmissionAsync(Guid treeId, Guid userId, bool isModerator)
+	{
+		try
+		{
+			TreeSubmission? submission = isModerator
+					? await _context.TreeSubmissions.FirstOrDefaultAsync(a => a.Id == treeId)
+					: await _context.TreeSubmissions.FirstOrDefaultAsync(a => a.Id == treeId && a.UserId == userId);
+
+			if (submission == null)
+				return false;
+
+			_context.TreeSubmissions.Remove(submission);
+			await _context.SaveChangesAsync();
+
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas usuwania drzewa");
+			throw;
+		}
+	}
+
 	public async Task<VotesCount?> SetVoteAsync(Guid treeId, Guid userId, VoteType? type)
 	{
 		try
