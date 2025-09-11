@@ -70,7 +70,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			FirstName = "Adam",
 			LastName = "Kowalski",
 			Email = "adam.wolkin@email.com",
-			Avatar = "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100&h=100&fit=crop",
 			RegistrationDate = new DateTime(2024, 1, 15),
 		};
 		user1.PasswordHash = _hasher.HashPassword(user1, "Passw0rd!");
@@ -81,7 +80,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			FirstName = "Maria",
 			LastName = "Nowak",
 			Email = "maria.kowalska@email.com",
-			Avatar = "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?w=100&h=100&fit=crop",
 			RegistrationDate = new DateTime(2024, 2, 20),
 		};
 		user2.PasswordHash = _hasher.HashPassword(user2, "VerySafe");
@@ -92,7 +90,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			FirstName = "Piotr",
 			LastName = "Wiśniewski",
 			Email = "piotr.nowak@email.com",
-			Avatar = "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100&h=100&fit=crop",
 			RegistrationDate = new DateTime(2024, 3, 10),
 		};
 		user3.PasswordHash = _hasher.HashPassword(user3, "HelloWorld");
@@ -103,7 +100,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			FirstName = "Anna",
 			LastName = "Zielińska",
 			Email = "anna.wisniowska@email.com",
-			Avatar = "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100&h=100&fit=crop",
 			RegistrationDate = new DateTime(2024, 1, 5),
 		};
 		user4.PasswordHash = _hasher.HashPassword(user4, "123456789");
@@ -114,7 +110,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			FirstName = "Test",
 			LastName = "User",
 			Email = "user@example.com",
-			Avatar = "https://images.pexels.com/users/avatars/268385455/photo-dog-681.png?fit=crop&h=100&w=100",
 			RegistrationDate = DateTime.UtcNow,
 		};
 		user5.PasswordHash = _hasher.HashPassword(user5, "string");
@@ -125,7 +120,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 			FirstName = "Mod",
 			LastName = "Erator",
 			Email = "mod@example.com",
-			Avatar = "https://images.pexels.com/users/avatars/2942047/natureday-com-m-434.jpeg?fit=crop&h=100&w=100",
 			RegistrationDate = DateTime.UtcNow,
 			Role = UserRole.Moderator
 		};
