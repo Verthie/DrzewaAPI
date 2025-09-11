@@ -14,6 +14,7 @@ namespace DrzewaAPI.Controllers;
 [Authorize]
 public class UsersController(IUserService _userService, ILogger<UsersController> _logger) : ControllerBase
 {
+    [Authorize(Roles = "Moderator")]
     [HttpGet]
     public async Task<IActionResult> GetUsers()
     {
@@ -30,6 +31,7 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
         }
     }
 
+    [Authorize(Roles = "Moderator")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(string id)
     {
@@ -52,6 +54,29 @@ public class UsersController(IUserService _userService, ILogger<UsersController>
         catch (Exception ex)
         {
             _logger.LogError(ex, "Błąd podczas pobierania użytkownika: {UserId}", id);
+            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
+        }
+    }
+
+    [HttpGet("current")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        try
+        {
+            Guid userId = User.GetCurrentUserId();
+
+            UserDto? user = await _userService.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound(new ErrorResponseDto { Error = "Użytkownik nie został znaleziony" });
+            }
+
+            return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Błąd podczas pobierania obecnego użytkownika");
             return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
         }
     }
