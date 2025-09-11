@@ -101,6 +101,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			await _context.SaveChangesAsync();
 
 			// Load navigation properties
+			await _context.Entry(submission).Reference(s => s.User).LoadAsync();
 			await _context.Entry(submission).Reference(s => s.Species).LoadAsync();
 			await _context.Entry(submission).Collection(s => s.TreeVotes).LoadAsync();
 
