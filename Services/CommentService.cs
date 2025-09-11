@@ -102,6 +102,29 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 		}
 	}
 
+	public async Task<bool> DeleteCommentAsync(Guid commentId, Guid userId, bool isModerator)
+	{
+		try
+		{
+			Comment? comment = isModerator
+					? await _context.Comments.FirstOrDefaultAsync(a => a.Id == commentId)
+					: await _context.Comments.FirstOrDefaultAsync(a => a.Id == commentId && a.UserId == userId);
+
+			if (comment == null)
+				return false;
+
+			_context.Comments.Remove(comment);
+			await _context.SaveChangesAsync();
+
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas usuwania komentarza");
+			throw;
+		}
+	}
+
 	public async Task<VotesCount?> SetVoteAsync(Guid commentId, Guid userId, VoteType? type)
 	{
 		try

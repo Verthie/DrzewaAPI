@@ -11,5 +11,6 @@ public interface ICommentService
 	Task<CommentDto?> GetCommentByIdAsync(Guid commentId);
 	Task<List<CommentDto>> GetTreeCommentsAsync(Guid treeId);
 	Task<CommentDto?> CreateCommentAsync(CreateCommentDto request, Guid userId, Guid treeId);
-	Task<VotesCount?> SetVoteAsync(Guid treeId, Guid userId, VoteType? type);
+	Task<bool> DeleteCommentAsync(Guid commentId, Guid userId, bool isModerator);
+	Task<VotesCount?> SetVoteAsync(Guid commentId, Guid userId, VoteType? type);
 }
