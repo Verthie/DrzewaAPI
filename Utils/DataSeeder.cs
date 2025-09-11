@@ -313,7 +313,7 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 				EstimatedAge = data.EstimatedAge,
 				Description = data.Description,
 				Images = data.Images,
-				Status = data.IsMonument ? SubmissionStatus.Monument : SubmissionStatus.Pending,
+				Status = data.IsMonument ? SubmissionStatus.Approved : SubmissionStatus.Pending,
 				SubmissionDate = DateTime.Now.AddDays(-random.Next(1, 365)), // Random date within last year
 				ApprovalDate = DateTime.Now.AddDays(-random.Next(1, 30)) // Random approval date within last month
 			}).ToArray();

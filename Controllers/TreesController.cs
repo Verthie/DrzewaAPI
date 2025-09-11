@@ -33,6 +33,7 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
         }
     }
 
+    [Authorize]
     [HttpGet("user")]
     public async Task<IActionResult> GetCurrentUserTreeSubmissions()
     {
@@ -139,7 +140,32 @@ public class TreesController(ITreeService _treeService, ILogger<TreesController>
         }
     }
 
-    // :TODO Approve Tree Functionality for Moderator
+    [Authorize(Roles = "Moderator")]
+    [HttpPut("{id}/approve")]
+    public async Task<IActionResult> ApproveTree(string id)
+    {
+        try
+        {
+            if (!Guid.TryParse(id, out var treeId))
+            {
+                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
+            }
+
+            var result = await _treeService.ApproveTreeAsync(treeId);
+
+            if (!result)
+            {
+                return NotFound(new ErrorResponseDto { Error = "Nie udało się uznać drzewa za pomnik przyrody" });
+            }
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Błąd podczas uznawania za pomnik drzewa: {TreeId}", id);
+            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
+        }
+    }
 
     [Authorize]
     [HttpPut("{id}/vote")]

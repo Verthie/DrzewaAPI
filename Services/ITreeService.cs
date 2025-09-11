@@ -12,5 +12,6 @@ public interface ITreeService
 	Task<TreeSubmissionDto?> GetTreeSubmissionByIdAsync(Guid treeId);
 	Task<TreeSubmissionDto?> CreateTreeSubmissionAsync(CreateTreeSubmissionDto request, Guid userId);
 	Task<bool> DeleteTreeSubmissionAsync(Guid treeId, Guid userId, bool isModerator);
+	Task<bool> ApproveTreeAsync(Guid treeId);
 	Task<VotesCount?> SetVoteAsync(Guid treeId, Guid userId, VoteType? type);
 }

@@ -141,6 +141,27 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		}
 	}
 
+	public async Task<bool> ApproveTreeAsync(Guid treeId)
+	{
+		try
+		{
+			TreeSubmission? submission = await _context.TreeSubmissions.FirstOrDefaultAsync(s => s.Id == treeId);
+
+			if (submission == null) return false;
+
+			submission.ApprovalDate = DateTime.UtcNow;
+
+			await _context.SaveChangesAsync();
+
+			return true;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas uznawania drzewa za pomnik");
+			throw;
+		}
+	}
+
 	public async Task<VotesCount?> SetVoteAsync(Guid treeId, Guid userId, VoteType? type)
 	{
 		try

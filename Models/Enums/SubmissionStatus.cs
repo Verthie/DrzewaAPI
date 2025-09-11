@@ -6,6 +6,5 @@ public enum SubmissionStatus
 {
 	Pending = 0,
 	Approved = 1,
-	Rejected = 2,
-	Monument = 3
+	Rejected = 2
 }
