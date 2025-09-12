@@ -225,6 +225,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			Id = s.Id,
 			UserData = new UserData
 			{
+				UserId = s.User.Id,
 				UserName = s.User.FullName,
 				Avatar = s.User.Avatar
 			},
