@@ -7,6 +7,7 @@ using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
 using DrzewaAPI.Services;
+using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,218 +16,95 @@ namespace DrzewaAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TreesController(ITreeService _treeService, ILogger<TreesController> _logger) : ControllerBase
+public class TreesController(ITreeService _treeService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetTreeSubmissions()
     {
-        try
-        {
-            List<TreeSubmissionDto> trees = await _treeService.GetTreeSubmissionsAsync();
+        List<TreeSubmissionDto> trees = await _treeService.GetTreeSubmissionsAsync();
 
-            return Ok(trees);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas pobierania listy drzew");
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return Ok(trees);
     }
 
     [Authorize]
     [HttpGet("user")]
     public async Task<IActionResult> GetCurrentUserTreeSubmissions()
     {
-        try
-        {
-            Guid userId = User.GetCurrentUserId();
+        Guid userId = User.GetCurrentUserId();
 
-            List<TreeSubmissionDto> trees = await _treeService.GetCurrentUserTreeSubmissionsAsync(userId);
+        List<TreeSubmissionDto> trees = await _treeService.GetCurrentUserTreeSubmissionsAsync(userId);
 
-            return Ok(trees);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas pobierania listy drzew");
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return Ok(trees);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTreeSubmissionById(string id)
     {
-        try
-        {
-            if (!Guid.TryParse(id, out var treeId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
+        Guid treeId = ValidationHelpers.ValidateAndParseId(id);
 
-            TreeSubmissionDto? tree = await _treeService.GetTreeSubmissionByIdAsync(treeId);
+        TreeSubmissionDto tree = await _treeService.GetTreeSubmissionByIdAsync(treeId);
 
-            if (tree == null)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Drzewo nie zostało znalezione" });
-            }
-
-            return Ok(tree);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas pobierania drzewa: {TreeId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return Ok(tree);
     }
 
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateTreeSubmission([FromBody] CreateTreeSubmissionDto request)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+        ValidationHelpers.ValidateModelState(ModelState);
 
-            Guid userId = User.GetCurrentUserId();
+        Guid userId = User.GetCurrentUserId();
+        TreeSubmissionDto result = await _treeService.CreateTreeSubmissionAsync(request, userId);
 
-            var result = await _treeService.CreateTreeSubmissionAsync(request, userId);
-
-            if (result == null)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Nie udało się utworzyć drzewa" });
-            }
-
-            return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas tworzenia drzewa");
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTreeSubmission(string id)
     {
-        try
-        {
-            if (!Guid.TryParse(id, out var treeId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
+        Guid treeId = ValidationHelpers.ValidateAndParseId(id);
+        Guid userId = User.GetCurrentUserId();
 
-            var userId = User.GetCurrentUserId();
-            string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+        string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+        bool isModerator = currentUserRole == UserRole.Moderator.ToString();
 
-            bool isModerator = currentUserRole == UserRole.Moderator.ToString();
-
-            var result = await _treeService.DeleteTreeSubmissionAsync(treeId, userId, isModerator);
-
-            if (!result)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Drzwo nie zostało znalezione" });
-            }
-
-            return NoContent();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new ErrorResponseDto { Error = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas usuwania drzewa: {TreeId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        await _treeService.DeleteTreeSubmissionAsync(treeId, userId, isModerator);
+        return NoContent();
     }
 
     [Authorize(Roles = "Moderator")]
     [HttpPut("{id}/approve")]
     public async Task<IActionResult> ApproveTree(string id)
     {
-        try
-        {
-            if (!Guid.TryParse(id, out var treeId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
-
-            var result = await _treeService.ApproveTreeAsync(treeId);
-
-            if (!result)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Nie udało się uznać drzewa za pomnik przyrody" });
-            }
-
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas uznawania za pomnik drzewa: {TreeId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        Guid treeId = ValidationHelpers.ValidateAndParseId(id);
+        await _treeService.ApproveTreeAsync(treeId);
+        return NoContent();
     }
 
     [Authorize]
     [HttpPut("{id}/vote")]
     public async Task<ActionResult<VotesCount>> UpdateVote(string id, [FromBody] VoteRequestDto request)
     {
-        try
-        {
-            if (!Guid.TryParse(id, out var treeId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
+        Guid treeId = ValidationHelpers.ValidateAndParseId(id);
+        Guid userId = User.GetCurrentUserId();
 
-            Guid userId = User.GetCurrentUserId();
+        if (request?.Type == null) throw new TreeVoteFailedException(treeId, "Typ głosu musi zostać podany");
 
-            if (request?.Type == null)
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Typ musi zostać podany" });
-            }
+        VotesCount result = await _treeService.SetVoteAsync(treeId, userId, request.Type);
 
-            var result = await _treeService.SetVoteAsync(treeId, userId, request.Type);
-
-            if (result == null)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Nie udało się oddać głosu" });
-            }
-
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas oddawania głosu na drzewo: {TreeId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return Ok(result);
     }
 
     [Authorize]
     [HttpDelete("{id}/vote")]
     public async Task<ActionResult<VotesCount>> DeleteVote(string id)
     {
-        try
-        {
-            if (!Guid.TryParse(id, out var treeId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
+        Guid treeId = ValidationHelpers.ValidateAndParseId(id);
+        Guid userId = User.GetCurrentUserId();
 
-            Guid userId = User.GetCurrentUserId();
+        VotesCount result = await _treeService.SetVoteAsync(treeId, userId, type: null);
 
-            var result = await _treeService.SetVoteAsync(treeId, userId, type: null);
-
-            if (result == null)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Nie udało się usunąć głosu" });
-            }
-
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas usuwania głosu z drzewa: {TreeId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return Ok(result);
     }
 }

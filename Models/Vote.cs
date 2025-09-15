@@ -1,8 +1,7 @@
 using System;
-using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 
-namespace DrzewaAPI.Utils;
+namespace DrzewaAPI.Models;
 
 public class Vote
 {

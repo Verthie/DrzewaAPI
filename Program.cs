@@ -1,3 +1,4 @@
+global using DrzewaAPI.Middleware.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,7 @@ using DrzewaAPI.Configuration;
 using DrzewaAPI.Services;
 using DrzewaAPI.Models;
 using DrzewaAPI.Utils;
+using DrzewaAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -144,6 +146,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {

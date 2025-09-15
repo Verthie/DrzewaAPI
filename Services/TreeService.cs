@@ -3,7 +3,7 @@ using DrzewaAPI.Dtos.TreeSubmissions;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
-using DrzewaAPI.Utils;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
@@ -27,7 +27,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas pobierania listy drzew");
-			throw;
+			throw new TreeServiceException($"Nie można pobrać listy drzew", "TREE_FETCH_ERROR");
 		}
 	}
 
@@ -36,24 +36,34 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		try
 		{
 			List<TreeSubmissionDto> submissions = await _context.TreeSubmissions
-				.Where(s => s.UserId == userId)
-				.Include(s => s.Species)
-				.Include(s => s.TreeVotes)
-				.Include(s => s.User)
-				.Include(s => s.Comments)
-				.Select(s => MapToTreeSubmissionDto(s))
-				.ToListAsync();
+					.Where(s => s.UserId == userId)
+					.Include(s => s.Species)
+					.Include(s => s.TreeVotes)
+					.Include(s => s.User)
+					.Include(s => s.Comments)
+					.Select(s => MapToTreeSubmissionDto(s))
+					.ToListAsync();
 
 			return submissions;
 		}
+		catch (SqlException ex) when (ex.Number == -2)
+		{
+			_logger.LogError(ex, "Timeout podczas pobierania drzew dla użytkownika {UserId}", userId);
+			throw;
+		}
+		catch (SqlException ex) when (ex.Number == 2)
+		{
+			_logger.LogError(ex, "Błąd połączenia z bazą danych podczas pobierania drzew");
+			throw new DatabaseConnectionException();
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas pobierania listy drzew");
-			throw;
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas pobierania drzew dla użytkownika {UserId}", userId);
+			throw new TreeServiceException($"Nie można pobrać listy drzew dla użytkownika {userId}", "TREE_FETCH_ERROR");
 		}
 	}
 
-	public async Task<TreeSubmissionDto?> GetTreeSubmissionByIdAsync(Guid treeId)
+	public async Task<TreeSubmissionDto> GetTreeSubmissionByIdAsync(Guid treeId)
 	{
 		try
 		{
@@ -64,21 +74,30 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 				.Include(s => s.Comments)
 				.FirstOrDefaultAsync(s => s.Id == treeId);
 
-			if (submission == null) return null;
+			if (submission == null) throw new TreeNotFoundException(treeId);
 
 			return MapToTreeSubmissionDto(submission);
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas pobierania drzewa o ID: {TreeId}", treeId);
-			throw;
+			_logger.LogError(ex, "Błąd podczas pobierania drzewa {TreeId}", treeId);
+			throw new TreeServiceException($"Nie można pobrać drzewa {treeId}", "TREE_FETCH_ERROR");
 		}
 	}
 
-	public async Task<TreeSubmissionDto?> CreateTreeSubmissionAsync(CreateTreeSubmissionDto req, Guid userId)
+	public async Task<TreeSubmissionDto> CreateTreeSubmissionAsync(CreateTreeSubmissionDto req, Guid userId)
 	{
 		try
 		{
+			bool speciesExists = await _context.TreeSpecies.AnyAsync(s => s.Id == req.SpeciesId);
+			if (!speciesExists) throw new SpeciesNotFoundException(req.SpeciesId);
+
+			await ValidateTreeSubmissionData(req);
+
 			TreeSubmission submission = new TreeSubmission
 			{
 				Id = Guid.NewGuid(),
@@ -111,64 +130,77 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			return MapToTreeSubmissionDto(submission);
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd bazy danych podczas tworzenia drzewa");
+			throw new TreeCreationFailedException("Błąd podczas zapisu do bazy danych");
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas tworzenia drzewa");
-			throw;
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas tworzenia drzewa");
+			throw new TreeCreationFailedException("Nieoczekiwany błąd systemu");
 		}
 	}
 
-	public async Task<bool> DeleteTreeSubmissionAsync(Guid treeId, Guid userId, bool isModerator)
+	public async Task DeleteTreeSubmissionAsync(Guid treeId, Guid userId, bool isModerator)
 	{
 		try
 		{
-			TreeSubmission? submission = isModerator
-					? await _context.TreeSubmissions.FirstOrDefaultAsync(a => a.Id == treeId)
-					: await _context.TreeSubmissions.FirstOrDefaultAsync(a => a.Id == treeId && a.UserId == userId);
+			TreeSubmission submission = await _context.TreeSubmissions
+				.FirstOrDefaultAsync(s => s.Id == treeId) ?? throw new TreeNotFoundException(treeId);
 
-			if (submission == null)
-				return false;
+			// Check privileges
+			if (!isModerator && submission.UserId != userId) throw new TreeAccessDeniedException(treeId, userId);
 
 			_context.TreeSubmissions.Remove(submission);
 			await _context.SaveChangesAsync();
-
-			return true;
+		}
+		catch (BusinessException)
+		{
+			throw;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas usuwania drzewa");
-			throw;
+			_logger.LogError(ex, "Błąd podczas usuwania drzewa {TreeId}", treeId);
+			throw new TreeServiceException($"Nie można usunąć drzewa {treeId}", "TREE_DELETE_ERROR");
 		}
 	}
 
-	public async Task<bool> ApproveTreeAsync(Guid treeId)
+	public async Task ApproveTreeAsync(Guid treeId)
 	{
 		try
 		{
-			TreeSubmission? submission = await _context.TreeSubmissions.FirstOrDefaultAsync(s => s.Id == treeId);
+			TreeSubmission submission = await _context.TreeSubmissions
+				.FirstOrDefaultAsync(s => s.Id == treeId) ?? throw new TreeNotFoundException(treeId);
 
-			if (submission == null) return false;
+			if (submission.ApprovalDate != null) throw new TreeAlreadyApprovedException(treeId);
 
 			submission.ApprovalDate = DateTime.UtcNow;
 
 			await _context.SaveChangesAsync();
-
-			return true;
+		}
+		catch (BusinessException)
+		{
+			throw;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas uznawania drzewa za pomnik");
-			throw;
+			_logger.LogError(ex, "Błąd podczas zatwierdzania drzewa {TreeId}", treeId);
+			throw new TreeApprovalFailedException(treeId, "Nieoczekiwany błąd systemu");
 		}
 	}
 
-	public async Task<VotesCount?> SetVoteAsync(Guid treeId, Guid userId, VoteType? type)
+	public async Task<VotesCount> SetVoteAsync(Guid treeId, Guid userId, VoteType? type)
 	{
 		try
 		{
-			TreeSubmission? submission = await _context.TreeSubmissions.FirstOrDefaultAsync(s => s.Id == treeId);
-
-			if (submission == null) return null;
+			TreeSubmission submission = await _context.TreeSubmissions
+				.FirstOrDefaultAsync(s => s.Id == treeId)
+				?? throw new TreeNotFoundException(treeId);
 
 			TreeVote? existing = await _context.TreeVotes
 				.SingleOrDefaultAsync(v => v.TreeSubmissionId == treeId && v.UserId == userId);
@@ -176,7 +208,9 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			if (type == null)
 			{
 				// remove existing vote
-				if (existing != null) _context.TreeVotes.Remove(existing);
+				if (existing == null) throw new TreeServiceException("Nie znaleziono istniejącego głosu na drzewo", "VOTE_NOT_FOUND");
+
+				_context.TreeVotes.Remove(existing);
 			}
 			else
 			{
@@ -211,10 +245,19 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			return counts;
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas wprowadzania głosu do bazy danych");
+			throw new TreeCreationFailedException("Błąd podczas zapisu do bazy danych");
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas nadawania głosu");
-			throw;
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas oddawania głosu");
+			throw new TreeCreationFailedException("Nieoczekiwany błąd systemu");
 		}
 	}
 
@@ -252,4 +295,35 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		};
 	}
 
+	private async Task ValidateTreeSubmissionData(CreateTreeSubmissionDto request)
+	{
+		var errors = new Dictionary<string, List<string>>();
+
+		// Coordinates validation
+		if (request.Location.Lat < -90 || request.Location.Lat > 90)
+		{
+			errors.GetValueOrDefault("Latitude", new List<string>()).Add("Szerokość geograficzna musi być między -90 a 90");
+		}
+
+		if (request.Location.Lng < -180 || request.Location.Lng > 180)
+		{
+			errors.GetValueOrDefault("Longitude", new List<string>()).Add("Długość geograficzna musi być między -180 a 180");
+		}
+
+		// Check if there are any existing tree submissions in 10m radius
+		var nearbyTree = await _context.TreeSubmissions
+				.AnyAsync(t => Math.Abs(t.Location.Lat - request.Location.Lat) < 0.0001
+										&& Math.Abs(t.Location.Lng - request.Location.Lng) < 0.0001);
+
+		if (nearbyTree)
+		{
+			errors.GetValueOrDefault("Location", new List<string>()).Add("W tym miejscu już istnieje zgłoszenie drzewa");
+		}
+
+		if (errors.Any())
+		{
+			var errorDict = errors.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
+			throw new ValidationException(errorDict);
+		}
+	}
 }
