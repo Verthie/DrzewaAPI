@@ -27,7 +27,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas pobierania listy drzew");
-			throw new TreeServiceException($"Nie można pobrać listy drzew", "TREE_FETCH_ERROR");
+			throw new ServiceException($"Nie można pobrać listy drzew", "TREE_FETCH_ERROR");
 		}
 	}
 
@@ -59,7 +59,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas pobierania drzew dla użytkownika {UserId}", userId);
-			throw new TreeServiceException($"Nie można pobrać listy drzew dla użytkownika {userId}", "TREE_FETCH_ERROR");
+			throw new ServiceException($"Nie można pobrać listy drzew dla użytkownika {userId}", "TREE_FETCH_ERROR");
 		}
 	}
 
@@ -85,7 +85,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas pobierania drzewa {TreeId}", treeId);
-			throw new TreeServiceException($"Nie można pobrać drzewa {treeId}", "TREE_FETCH_ERROR");
+			throw new ServiceException($"Nie można pobrać drzewa {treeId}", "TREE_FETCH_ERROR");
 		}
 	}
 
@@ -166,7 +166,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas usuwania drzewa {TreeId}", treeId);
-			throw new TreeServiceException($"Nie można usunąć drzewa {treeId}", "TREE_DELETE_ERROR");
+			throw new ServiceException($"Nie można usunąć drzewa {treeId}", "TREE_DELETE_ERROR");
 		}
 	}
 
@@ -207,9 +207,9 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			if (type == null)
 			{
-				// remove existing vote
-				if (existing == null) throw new TreeServiceException("Nie znaleziono istniejącego głosu na drzewo", "VOTE_NOT_FOUND");
+				if (existing == null) throw new ServiceException("Nie znaleziono istniejącego głosu na drzewo", "VOTE_NOT_FOUND");
 
+				// remove existing vote
 				_context.TreeVotes.Remove(existing);
 			}
 			else

@@ -8,8 +8,8 @@ namespace DrzewaAPI.Services;
 public interface IUserService
 {
 	Task<List<UserDto>> GetAllUsersAsync();
-	Task<UserDto?> GetUserByIdAsync(Guid userId);
-	Task<UserDto?> UpdateUserAsync(Guid userId, UpdateUserDto updateDto);
+	Task<UserDto> GetUserByIdAsync(Guid userId);
+	Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, bool isModerator);
 	// Task<bool> DeactivateUserAsync(Guid userId);
 	// Task<bool> ActivateUserAsync(Guid userId);
 }

@@ -22,40 +22,42 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas pobierania listy użytkowników");
-			throw;
+			throw new ServiceException($"Nie można pobrać listy użytkowników", "TREE_FETCH_ERROR");
 		}
 	}
 
-	public async Task<UserDto?> GetUserByIdAsync(Guid userId)
+	public async Task<UserDto> GetUserByIdAsync(Guid userId)
 	{
 		try
 		{
-			User? user = await _context.Users
+			User user = await _context.Users
 				.Include(u => u.TreeSubmissions)
-				.FirstOrDefaultAsync(u => u.Id == userId);
-
-			ArgumentNullException.ThrowIfNull(user);
+				.FirstOrDefaultAsync(u => u.Id == userId)
+				?? throw new UserNotFoundException(userId);
 
 			return MapToUserDto(user);
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas pobierania użytkownika o ID: {UserId}", userId);
-			throw;
+			_logger.LogError(ex, "Błąd podczas pobierania użytkownika {UserId}", userId);
+			throw new ServiceException($"Nie można pobrać użytkownika {userId}", "USER_FETCH_ERROR");
 		}
 	}
 
-	public async Task<UserDto?> UpdateUserAsync(Guid userId, UpdateUserDto updateDto)
+	public async Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, bool isModerator)
 	{
 		try
 		{
-			var user = await _context.Users
-					.FirstOrDefaultAsync(u => u.Id == userId);
+			User user = await _context.Users
+					.FirstOrDefaultAsync(u => u.Id == userId)
+					?? throw new UserNotFoundException(userId);
 
-			if (user == null)
-			{
-				return null;
-			}
+			// Check privileges
+			if (!isModerator && user.Id != currentUserId) throw new UserAccessDeniedException(userId);
 
 			// Field update
 			user.Phone = updateDto.Phone?.Trim();
@@ -70,10 +72,19 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 
 			return await GetUserByIdAsync(userId);
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas wprowadzania danych do bazy");
+			throw new UserUpdateFailedException(userId, "Błąd podczas zapisu do bazy danych");
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas aktualizacji użytkownika: {UserId}", userId);
-			throw;
+			_logger.LogError(ex, "Błąd podczas aktualizacji danych użytkownika: {UserId}", userId);
+			throw new ServiceException($"Nie udało się zaktualizować danych użytkownika {userId}", "USER_UPDATE_ERROR");
 		}
 	}
 

@@ -89,8 +89,6 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         Guid treeId = ValidationHelpers.ValidateAndParseId(id);
         Guid userId = User.GetCurrentUserId();
 
-        if (request?.Type == null) throw new TreeVoteFailedException(treeId, "Typ głosu musi zostać podany");
-
         VotesCount result = await _treeService.SetVoteAsync(treeId, userId, request.Type);
 
         return Ok(result);
