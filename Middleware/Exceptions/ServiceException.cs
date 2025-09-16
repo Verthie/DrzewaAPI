@@ -2,10 +2,6 @@ using System;
 
 namespace DrzewaAPI.Middleware.Exceptions;
 
-public class ServiceException : BusinessException
+public class ServiceException(string message, string errorCode) : BusinessException(message, errorCode, 500)
 {
-	public ServiceException(string message, string errorCode)
-			: base(message, errorCode, 500)
-	{
-	}
 }

@@ -74,7 +74,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 				.Include(s => s.Comments)
 				.FirstOrDefaultAsync(s => s.Id == treeId);
 
-			if (submission == null) throw new TreeNotFoundException(treeId);
+			if (submission == null) throw EntityNotFoundException.ForTree(treeId);
 
 			return MapToTreeSubmissionDto(submission);
 		}
@@ -94,7 +94,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		try
 		{
 			bool speciesExists = await _context.TreeSpecies.AnyAsync(s => s.Id == req.SpeciesId);
-			if (!speciesExists) throw new SpeciesNotFoundException(req.SpeciesId);
+			if (!speciesExists) throw EntityNotFoundException.ForSpecies(req.SpeciesId);
 
 			await ValidateTreeSubmissionData(req);
 
@@ -137,12 +137,12 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (DbUpdateException ex)
 		{
 			_logger.LogError(ex, "Błąd bazy danych podczas tworzenia drzewa");
-			throw new TreeCreationFailedException("Błąd podczas zapisu do bazy danych");
+			throw EntityCreationFailedException.ForTree("Błąd podczas zapisu do bazy danych");
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas tworzenia drzewa");
-			throw new TreeCreationFailedException("Nieoczekiwany błąd systemu");
+			throw EntityCreationFailedException.ForTree("Nieoczekiwany błąd systemu");
 		}
 	}
 
@@ -151,10 +151,10 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		try
 		{
 			TreeSubmission submission = await _context.TreeSubmissions
-				.FirstOrDefaultAsync(s => s.Id == treeId) ?? throw new TreeNotFoundException(treeId);
+				.FirstOrDefaultAsync(s => s.Id == treeId) ?? throw EntityNotFoundException.ForTree(treeId);
 
 			// Check privileges
-			if (!isModerator && submission.UserId != userId) throw new TreeAccessDeniedException(treeId, userId);
+			if (!isModerator && submission.UserId != userId) throw EntityAccessDeniedException.ForTree(treeId, userId);
 
 			_context.TreeSubmissions.Remove(submission);
 			await _context.SaveChangesAsync();
@@ -175,9 +175,9 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		try
 		{
 			TreeSubmission submission = await _context.TreeSubmissions
-				.FirstOrDefaultAsync(s => s.Id == treeId) ?? throw new TreeNotFoundException(treeId);
+				.FirstOrDefaultAsync(s => s.Id == treeId) ?? throw EntityNotFoundException.ForTree(treeId);
 
-			if (submission.ApprovalDate != null) throw new TreeAlreadyApprovedException(treeId);
+			if (submission.ApprovalDate != null) throw TreeException.ForExistingApproval(treeId);
 
 			submission.ApprovalDate = DateTime.UtcNow;
 
@@ -190,7 +190,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas zatwierdzania drzewa {TreeId}", treeId);
-			throw new TreeApprovalFailedException(treeId, "Nieoczekiwany błąd systemu");
+			throw TreeException.ForApprovalFailure(treeId, "Nieoczekiwany błąd systemu");
 		}
 	}
 
@@ -200,7 +200,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		{
 			TreeSubmission submission = await _context.TreeSubmissions
 				.FirstOrDefaultAsync(s => s.Id == treeId)
-				?? throw new TreeNotFoundException(treeId);
+				?? throw EntityNotFoundException.ForTree(treeId);
 
 			TreeVote? existing = await _context.TreeVotes
 				.SingleOrDefaultAsync(v => v.TreeSubmissionId == treeId && v.UserId == userId);
@@ -252,12 +252,12 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (DbUpdateException ex)
 		{
 			_logger.LogError(ex, "Błąd podczas wprowadzania głosu do bazy danych");
-			throw new TreeCreationFailedException("Błąd podczas zapisu do bazy danych");
+			throw EntityCreationFailedException.ForTree("Błąd podczas zapisu do bazy danych");
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas oddawania głosu");
-			throw new TreeCreationFailedException("Nieoczekiwany błąd systemu");
+			throw EntityCreationFailedException.ForTree("Nieoczekiwany błąd systemu");
 		}
 	}
 

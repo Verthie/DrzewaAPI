@@ -20,24 +20,29 @@ public class SpeciesService(ApplicationDbContext _context, ILogger<SpeciesServic
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas pobierania listy gatunków");
-			throw;
+			throw new ServiceException($"Nie można pobrać listy gatunków", "SPECIES_FETCH_ERROR");
 		}
 	}
 
-	public async Task<TreeSpeciesDto?> GetSpeciesByIdAsync(Guid speciesId)
+	public async Task<TreeSpeciesDto> GetSpeciesByIdAsync(Guid speciesId)
 	{
 		try
 		{
-			TreeSpecies? species = await _context.TreeSpecies.Include(s => s.Images).FirstOrDefaultAsync(s => s.Id == speciesId);
-
-			if (species == null) return null;
+			TreeSpecies species = await _context.TreeSpecies
+				.Include(s => s.Images)
+				.FirstOrDefaultAsync(s => s.Id == speciesId)
+				?? throw new SpeciesNotFoundException(speciesId);
 
 			return MapToTreeSpeciesDto(species);
+		}
+		catch (BusinessException)
+		{
+			throw;
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas pobierania gatunku o ID: {SpeciesId}", speciesId);
-			throw;
+			throw new ServiceException($"Nie można pobrać użytkownika {speciesId}", "SPECIES_FETCH_ERROR");
 		}
 	}
 

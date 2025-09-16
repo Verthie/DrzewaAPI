@@ -22,7 +22,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas pobierania listy użytkowników");
-			throw new ServiceException($"Nie można pobrać listy użytkowników", "TREE_FETCH_ERROR");
+			throw new ServiceException($"Nie można pobrać listy użytkowników", "USER_FETCH_ERROR");
 		}
 	}
 
@@ -33,7 +33,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 			User user = await _context.Users
 				.Include(u => u.TreeSubmissions)
 				.FirstOrDefaultAsync(u => u.Id == userId)
-				?? throw new UserNotFoundException(userId);
+				?? throw EntityNotFoundException.ForUser(userId);
 
 			return MapToUserDto(user);
 		}
@@ -54,10 +54,10 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		{
 			User user = await _context.Users
 					.FirstOrDefaultAsync(u => u.Id == userId)
-					?? throw new UserNotFoundException(userId);
+					?? throw EntityNotFoundException.ForUser(userId);
 
 			// Check privileges
-			if (!isModerator && user.Id != currentUserId) throw new UserAccessDeniedException(userId);
+			if (!isModerator && user.Id != currentUserId) throw EntityAccessDeniedException.ForUser(userId);
 
 			// Field update
 			user.Phone = updateDto.Phone?.Trim();
@@ -79,7 +79,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		catch (DbUpdateException ex)
 		{
 			_logger.LogError(ex, "Błąd podczas wprowadzania danych do bazy");
-			throw new UserUpdateFailedException(userId, "Błąd podczas zapisu do bazy danych");
+			throw EntityUpdateFailedException.ForUser(userId, "Błąd podczas zapisu do bazy danych");
 		}
 		catch (Exception ex)
 		{
