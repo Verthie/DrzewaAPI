@@ -83,8 +83,8 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas aktualizacji danych użytkownika: {UserId}", userId);
-			throw new ServiceException($"Nie udało się zaktualizować danych użytkownika {userId}", "USER_UPDATE_ERROR");
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas aktualizacji danych użytkownika");
+			throw EntityUpdateFailedException.ForUser(userId, "Nieoczekiwany błąd systemu");
 		}
 	}
 

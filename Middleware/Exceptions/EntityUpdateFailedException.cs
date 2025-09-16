@@ -9,4 +9,7 @@ public class EntityUpdateFailedException(string message, string errorCode) : Bus
 
 	public static EntityUpdateFailedException ForMunicipality(Guid municipalityId, string reason) =>
 		new EntityUpdateFailedException($"Nie udało się zaktualizować danych gminy {municipalityId}: {reason}", "MUNICIPALITY_UPDATE_FAILED");
+
+	public static EntityUpdateFailedException ForTemplate(Guid templateId, string reason) =>
+		new EntityUpdateFailedException($"Nie udało się zaktualizować danych szablonu {templateId}: {reason}", "TEMPLATE_UPDATE_FAILED");
 }

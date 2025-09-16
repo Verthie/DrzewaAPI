@@ -27,4 +27,7 @@ public class EntityNotFoundException(string message, string errorCode) : Busines
 
 	public static EntityNotFoundException ForCommentVote(Guid commentId, Guid userId) =>
 		new EntityNotFoundException($"Nie znaleziono istniejącego głosu dla użytkownika o ID {userId} na komentarz o ID {commentId}", "VOTE_NOT_FOUND");
+
+	public static EntityNotFoundException ForTemplate(Guid templateId) =>
+			new EntityNotFoundException($"Szablon o ID {templateId} nie został znaleziony", "TEMPLATE_NOT_FOUND");
 }
