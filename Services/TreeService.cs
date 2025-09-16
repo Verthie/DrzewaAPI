@@ -67,14 +67,13 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 	{
 		try
 		{
-			TreeSubmission? submission = await _context.TreeSubmissions
+			TreeSubmission submission = await _context.TreeSubmissions
 				.Include(s => s.Species)
 				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
 				.Include(s => s.Comments)
-				.FirstOrDefaultAsync(s => s.Id == treeId);
-
-			if (submission == null) throw EntityNotFoundException.ForTree(treeId);
+				.FirstOrDefaultAsync(s => s.Id == treeId)
+				?? throw EntityNotFoundException.ForTree(treeId);
 
 			return MapToTreeSubmissionDto(submission);
 		}
@@ -151,7 +150,8 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		try
 		{
 			TreeSubmission submission = await _context.TreeSubmissions
-				.FirstOrDefaultAsync(s => s.Id == treeId) ?? throw EntityNotFoundException.ForTree(treeId);
+				.FirstOrDefaultAsync(s => s.Id == treeId)
+				?? throw EntityNotFoundException.ForTree(treeId);
 
 			// Check privileges
 			if (!isModerator && submission.UserId != userId) throw EntityAccessDeniedException.ForTree(treeId, userId);
@@ -175,7 +175,8 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		try
 		{
 			TreeSubmission submission = await _context.TreeSubmissions
-				.FirstOrDefaultAsync(s => s.Id == treeId) ?? throw EntityNotFoundException.ForTree(treeId);
+				.FirstOrDefaultAsync(s => s.Id == treeId)
+				?? throw EntityNotFoundException.ForTree(treeId);
 
 			if (submission.ApprovalDate != null) throw TreeException.ForExistingApproval(treeId);
 
@@ -207,7 +208,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			if (type == null)
 			{
-				if (existing == null) throw new ServiceException("Nie znaleziono istniejącego głosu na drzewo", "VOTE_NOT_FOUND");
+				if (existing == null) throw EntityNotFoundException.ForTreeVote(treeId, userId);
 
 				// remove existing vote
 				_context.TreeVotes.Remove(existing);

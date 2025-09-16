@@ -2,7 +2,7 @@ using System;
 
 namespace DrzewaAPI.Middleware.Exceptions;
 
-public class TreeException(string message, string code, int errorCode = 400) : BusinessException(message, code, errorCode)
+public class TreeException(string message, string errorCode, int statusCode = 400) : BusinessException(message, errorCode, statusCode)
 {
 	public static TreeException ForApprovalFailure(Guid treeId, string reason) =>
 		new TreeException($"Nie udało się zatwierdzić drzewa {treeId}: {reason}", "TREE_APPROVAL_FAILED");
