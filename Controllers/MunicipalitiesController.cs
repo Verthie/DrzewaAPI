@@ -1,6 +1,7 @@
 using DrzewaAPI.Dtos.Auth;
 using DrzewaAPI.Dtos.Municipality;
 using DrzewaAPI.Services;
+using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,132 +15,54 @@ public class MunicipalitiesController(IMunicipalityService _municipalityService,
     [HttpGet]
     public async Task<IActionResult> GetAllMunicipalities()
     {
-        try
-        {
-            var municipalities = await _municipalityService.GetAllMunicipalitiesAsync();
-            return Ok(municipalities);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas pobierania wszystkich gmin");
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        List<MunicipalityDto> municipalities = await _municipalityService.GetAllMunicipalitiesAsync();
+
+        return Ok(municipalities);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMunicipalityById(string id)
     {
-        try
-        {
-            if (!Guid.TryParse(id, out var municipalityId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
+        Guid municipalityId = ValidationHelpers.ValidateAndParseId(id);
 
-            var municipality = await _municipalityService.GetMunicipalityByIdAsync(municipalityId);
+        MunicipalityDto municipality = await _municipalityService.GetMunicipalityByIdAsync(municipalityId);
 
-            if (municipality == null)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Gmina nie została znaleziona" });
-            }
-
-            return Ok(municipality);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas pobierania gminy: {MunicipalityId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return Ok(municipality);
     }
 
     [HttpPost]
     [Authorize(Roles = "Moderator")]
     public async Task<IActionResult> CreateMunicipality([FromBody] CreateMunicipalityDto createDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        ValidationHelpers.ValidateModelState(ModelState);
 
-            var municipality = await _municipalityService.CreateMunicipalityAsync(createDto);
+        MunicipalityDto municipality = await _municipalityService.CreateMunicipalityAsync(createDto);
 
-            return CreatedAtAction(nameof(GetMunicipalityById),
-                new { id = municipality.Id }, municipality);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ErrorResponseDto { Error = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas tworzenia gminy");
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return CreatedAtAction(nameof(GetMunicipalityById), new { id = municipality.Id }, municipality);
     }
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Moderator")]
     public async Task<IActionResult> UpdateMunicipality(string id, [FromBody] UpdateMunicipalityDto updateDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        ValidationHelpers.ValidateModelState(ModelState);
 
-            if (!Guid.TryParse(id, out var municipalityId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
+        Guid municipalityId = ValidationHelpers.ValidateAndParseId(id);
 
-            var municipality = await _municipalityService.UpdateMunicipalityAsync(municipalityId, updateDto);
+        MunicipalityDto municipality = await _municipalityService.UpdateMunicipalityAsync(municipalityId, updateDto);
 
-            if (municipality == null)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Gmina nie została znaleziona" });
-            }
-
-            return Ok(municipality);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new ErrorResponseDto { Error = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas aktualizacji gminy: {MunicipalityId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return Ok(municipality);
     }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Moderator")]
     public async Task<IActionResult> DeleteMunicipality(string id)
     {
-        try
-        {
-            if (!Guid.TryParse(id, out var municipalityId))
-            {
-                return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-            }
+        Guid municipalityId = ValidationHelpers.ValidateAndParseId(id);
 
-            var result = await _municipalityService.DeleteMunicipalityAsync(municipalityId);
+        await _municipalityService.DeleteMunicipalityAsync(municipalityId);
 
-            if (!result)
-            {
-                return NotFound(new ErrorResponseDto { Error = "Gmina nie została znaleziona" });
-            }
-
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Błąd podczas usuwania gminy: {MunicipalityId}", id);
-            return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-        }
+        return NoContent();
     }
 }
 
