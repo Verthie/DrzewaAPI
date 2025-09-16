@@ -27,28 +27,31 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas pobierania listy drzew");
-			throw;
+			_logger.LogError(ex, "Błąd podczas pobierania listy komentarzy");
+			throw new ServiceException($"Nie można pobrać listy komentarzy", "COMMENT_FETCH_ERROR");
 		}
 	}
 
-	public async Task<CommentDto?> GetCommentByIdAsync(Guid commentId)
+	public async Task<CommentDto> GetCommentByIdAsync(Guid commentId)
 	{
 		try
 		{
-			Comment? comment = await _context.Comments
+			Comment comment = await _context.Comments
 				.Include(c => c.User)
 				.Include(c => c.CommentVotes)
-				.FirstOrDefaultAsync(c => c.Id == commentId);
-
-			if (comment == null) return null;
+				.FirstOrDefaultAsync(c => c.Id == commentId)
+				?? throw EntityNotFoundException.ForComment(commentId);
 
 			return MapToCommentDto(comment);
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas komentarza o Id: {CommentId}", commentId);
-			throw;
+			_logger.LogError(ex, "Błąd podczas pobierania drzewa {CommentId}", commentId);
+			throw new ServiceException($"Nie można pobrać drzewa {commentId}", "COMMENT_FETCH_ERROR");
 		}
 	}
 
@@ -67,16 +70,19 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas pobierania listy komentarzy dla drzewa o Id: {TreeId}", treeId);
-			throw;
+			_logger.LogError(ex, "Błąd podczas pobierania listy komentarzy");
+			throw new ServiceException($"Nie można pobrać listy komentarzy", "COMMENT_FETCH_ERROR");
 		}
 	}
 
 
-	public async Task<CommentDto?> CreateCommentAsync(CreateCommentDto request, Guid userId, Guid treeId)
+	public async Task<CommentDto> CreateCommentAsync(CreateCommentDto request, Guid userId, Guid treeId)
 	{
 		try
 		{
+			bool submissionExists = await _context.TreeSubmissions.AnyAsync(s => s.Id == treeId);
+			if (!submissionExists) throw EntityNotFoundException.ForTree(treeId);
+
 			Comment comment = new Comment
 			{
 				Id = Guid.NewGuid(),
@@ -95,51 +101,64 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 
 			return MapToCommentDto(comment);
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd bazy danych podczas tworzenia drzewa");
+			throw EntityCreationFailedException.ForComment("Błąd podczas zapisu do bazy danych");
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas tworzenia komentarza do drzewa o Id: {TreeId}", treeId);
-			throw;
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas tworzenia komentarza");
+			throw EntityCreationFailedException.ForComment("Nieoczekiwany błąd systemu");
 		}
 	}
 
-	public async Task<bool> DeleteCommentAsync(Guid commentId, Guid userId, bool isModerator)
+	public async Task DeleteCommentAsync(Guid commentId, Guid userId, bool isModerator)
 	{
 		try
 		{
-			Comment? comment = isModerator
-					? await _context.Comments.FirstOrDefaultAsync(a => a.Id == commentId)
-					: await _context.Comments.FirstOrDefaultAsync(a => a.Id == commentId && a.UserId == userId);
+			Comment comment = await _context.Comments
+				.FirstOrDefaultAsync(c => c.Id == commentId)
+				?? throw EntityNotFoundException.ForComment(commentId);
 
-			if (comment == null)
-				return false;
+			// Check privileges
+			if (!isModerator && comment.UserId != userId) throw EntityAccessDeniedException.ForComment(commentId, userId);
 
 			_context.Comments.Remove(comment);
 			await _context.SaveChangesAsync();
-
-			return true;
+		}
+		catch (BusinessException)
+		{
+			throw;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas usuwania komentarza");
-			throw;
+			_logger.LogError(ex, "Błąd podczas usuwania komentarza {CommentId}", commentId);
+			throw new ServiceException($"Nie można usunąć komentarza {commentId}", "COMMENT_DELETE_ERROR");
 		}
 	}
 
-	public async Task<VotesCount?> SetVoteAsync(Guid commentId, Guid userId, VoteType? type)
+	public async Task<VotesCount> SetVoteAsync(Guid commentId, Guid userId, VoteType? type)
 	{
 		try
 		{
-			Comment? comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == commentId);
-
-			if (comment == null) return null;
+			Comment comment = await _context.Comments
+				.FirstOrDefaultAsync(c => c.Id == commentId)
+				?? throw EntityNotFoundException.ForComment(commentId);
 
 			CommentVote? existing = await _context.CommentVotes
 				.SingleOrDefaultAsync(v => v.CommentId == commentId && v.UserId == userId);
 
 			if (type == null)
 			{
+				if (existing == null) throw new ServiceException("Nie znaleziono istniejącego głosu na komentarz", "VOTE_NOT_FOUND");
+
 				// remove existing vote
-				if (existing != null) _context.CommentVotes.Remove(existing);
+				_context.CommentVotes.Remove(existing);
 			}
 			else
 			{
@@ -174,10 +193,19 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 
 			return counts;
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas wprowadzania głosu do bazy danych");
+			throw EntityVoteException.ForComment(commentId, "Błąd podczas zapisu do bazy danych");
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas nadawania głosu");
-			throw;
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas oddawania głosu");
+			throw EntityVoteException.ForComment(commentId, "Nieoczekiwany błąd systemu");
 		}
 	}
 

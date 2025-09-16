@@ -6,6 +6,7 @@ using DrzewaAPI.Extensions;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
 using DrzewaAPI.Services;
+using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,194 +15,86 @@ namespace DrzewaAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommentsController(ICommentService _commentService, ILogger<CommentsController> _logger) : ControllerBase
+public class CommentsController(ICommentService _commentService) : ControllerBase
 {
 	[HttpGet]
 	public async Task<IActionResult> GetComments()
 	{
-		try
-		{
-			List<CommentDto> comments = await _commentService.GetCommentsAsync();
+		List<CommentDto> comments = await _commentService.GetCommentsAsync();
 
-			return Ok(comments);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Błąd podczas pobierania listy komentarzy");
-			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-		}
+		return Ok(comments);
 	}
 
 	[HttpGet("{id}")]
 	public async Task<IActionResult> GetCommentById(string id)
 	{
-		try
-		{
-			if (!Guid.TryParse(id, out var commentId))
-			{
-				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-			}
+		Guid commentId = ValidationHelpers.ValidateAndParseId(id);
 
-			CommentDto? comment = await _commentService.GetCommentByIdAsync(commentId);
+		CommentDto comment = await _commentService.GetCommentByIdAsync(commentId);
 
-			return Ok(comment);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Błąd podczas pobierania komentarza o Id: {CommentId}", id);
-			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-		}
+		return Ok(comment);
 	}
 
 	[HttpGet("tree/{treeId}")]
 	public async Task<IActionResult> GetTreeComments(string treeId)
 	{
-		try
-		{
-			if (!Guid.TryParse(treeId, out var guid))
-			{
-				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-			}
+		Guid treeGuid = ValidationHelpers.ValidateAndParseId(treeId);
 
-			List<CommentDto> comments = await _commentService.GetTreeCommentsAsync(guid);
+		List<CommentDto> comments = await _commentService.GetTreeCommentsAsync(treeGuid);
 
-			return Ok(comments);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Błąd podczas pobierania listy komentarzy dla drzewa o Id: {TreeId}", treeId);
-			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-		}
+		return Ok(comments);
 	}
 
 	[Authorize]
 	[HttpPost("tree/{treeId}")]
 	public async Task<IActionResult> CreateComment([FromBody] CreateCommentDto request, string treeId)
 	{
-		try
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
+		ValidationHelpers.ValidateModelState(ModelState);
 
-			if (!Guid.TryParse(treeId, out var guid))
-			{
-				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-			}
+		Guid treeGuid = ValidationHelpers.ValidateAndParseId(treeId);
+		Guid userId = User.GetCurrentUserId();
 
-			Guid userId = User.GetCurrentUserId();
+		CommentDto result = await _commentService.CreateCommentAsync(request, userId, treeGuid);
 
-			var result = await _commentService.CreateCommentAsync(request, userId, guid);
-
-			if (result == null)
-			{
-				return NotFound(new ErrorResponseDto { Error = "Nie udało się utworzyć komentarza" });
-			}
-
-			return CreatedAtAction(nameof(GetCommentById), new { id = result.Id }, result);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Błąd podczas tworzenia komentarza dla drzewa o Id: {TreeId}", treeId);
-			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-		}
+		return CreatedAtAction(nameof(GetCommentById), new { id = result.Id }, result);
 	}
 
 	[Authorize]
 	[HttpPut("{id}/vote")]
 	public async Task<ActionResult<VotesCount>> UpdateVote(string id, [FromBody] VoteRequestDto request)
 	{
-		try
-		{
-			if (!Guid.TryParse(id, out var commentId))
-			{
-				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-			}
+		Guid commentId = ValidationHelpers.ValidateAndParseId(id);
+		Guid userId = User.GetCurrentUserId();
 
-			Guid userId = User.GetCurrentUserId();
+		VotesCount result = await _commentService.SetVoteAsync(commentId, userId, request.Type);
 
-			if (request?.Type == null)
-			{
-				return BadRequest(new ErrorResponseDto { Error = "Typ musi zostać podany" });
-			}
-
-			var result = await _commentService.SetVoteAsync(commentId, userId, request.Type);
-
-			if (result == null)
-			{
-				return NotFound(new ErrorResponseDto { Error = "Nie udało się oddać głosu" });
-			}
-
-			return Ok(result);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Błąd podczas oddawania głosu na komentarz: {CommentId}", id);
-			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-		}
+		return Ok(result);
 	}
 
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> DeleteTreeSubmission(string id)
 	{
-		try
-		{
-			if (!Guid.TryParse(id, out var commentId))
-			{
-				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-			}
+		Guid commentId = ValidationHelpers.ValidateAndParseId(id);
+		Guid userId = User.GetCurrentUserId();
 
-			var userId = User.GetCurrentUserId();
-			string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+		string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+		bool isModerator = currentUserRole == UserRole.Moderator.ToString();
 
-			bool isModerator = currentUserRole == UserRole.Moderator.ToString();
+		await _commentService.DeleteCommentAsync(commentId, userId, isModerator);
 
-			var result = await _commentService.DeleteCommentAsync(commentId, userId, isModerator);
-
-			if (!result)
-			{
-				return NotFound(new ErrorResponseDto { Error = "Komentarz nie został znaleziony" });
-			}
-
-			return NoContent();
-		}
-		catch (InvalidOperationException ex)
-		{
-			return BadRequest(new ErrorResponseDto { Error = ex.Message });
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Błąd podczas usuwania komentarza: {CommentId}", id);
-			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-		}
+		return NoContent();
 	}
 
 	[Authorize]
 	[HttpDelete("{id}/vote")]
 	public async Task<ActionResult<VotesCount>> DeleteVote(string id)
 	{
-		try
-		{
-			if (!Guid.TryParse(id, out var commentId))
-			{
-				return BadRequest(new ErrorResponseDto { Error = "Nieprawidłowy format ID" });
-			}
+		Guid commentId = ValidationHelpers.ValidateAndParseId(id);
+		Guid userId = User.GetCurrentUserId();
 
-			Guid userId = User.GetCurrentUserId();
+		VotesCount result = await _commentService.SetVoteAsync(commentId, userId, type: null);
 
-			var result = await _commentService.SetVoteAsync(commentId, userId, type: null);
-
-			if (result == null)
-			{
-				return NotFound(new ErrorResponseDto { Error = "Nie udało się usunąć głosu" });
-			}
-
-			return Ok(result);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Błąd podczas usuwania głosu z komentarza: {CommentId}", id);
-			return StatusCode(500, new ErrorResponseDto { Error = "Wystąpił błąd serwera" });
-		}
+		return Ok(result);
 	}
 }
 

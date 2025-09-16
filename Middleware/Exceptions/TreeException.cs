@@ -9,7 +9,4 @@ public class TreeException(string message, string errorCode, int statusCode = 40
 
 	public static TreeException ForExistingApproval(Guid treeId) =>
 		new TreeException($"Drzewo o ID {treeId} zostało już zatwierdzone", "TREE_ALREADY_APPROVED", 409);
-
-	public static TreeException ForVoteFailure(Guid treeId, string reason) =>
-		new TreeException($"Nie udało się zagłosować na drzewo {treeId}: {reason}", "TREE_VOTE_FAILED", 400);
 }

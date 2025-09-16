@@ -8,7 +8,7 @@ public static class ValidationHelpers
 {
 
 	/// <summary>
-	/// Validates and parses string to Guid. Throws InvalidTreeIdException if incorrect.
+	/// Validates and parses string to Guid. Throws InvalidIdException if incorrect.
 	/// </summary>
 	public static Guid ValidateAndParseId(string id)
 	{

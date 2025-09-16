@@ -253,12 +253,12 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		catch (DbUpdateException ex)
 		{
 			_logger.LogError(ex, "Błąd podczas wprowadzania głosu do bazy danych");
-			throw EntityCreationFailedException.ForTree("Błąd podczas zapisu do bazy danych");
+			throw EntityVoteException.ForTree(treeId, "Błąd podczas zapisu do bazy danych");
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas oddawania głosu");
-			throw EntityCreationFailedException.ForTree("Nieoczekiwany błąd systemu");
+			throw EntityVoteException.ForTree(treeId, "Nieoczekiwany błąd systemu");
 		}
 	}
 
