@@ -8,8 +8,6 @@ public record ApplicationTemplateDto
 	public Guid MunicipalityId { get; init; }
 	public string Name { get; init; } = string.Empty;
 	public string? Description { get; init; }
-	public string HtmlTemplate { get; init; } = string.Empty;
-	public List<ApplicationField> Fields { get; init; } = new List<ApplicationField>();
 	public bool IsActive { get; init; }
 	public DateTime CreatedDate { get; init; }
 	public DateTime? LastModifiedDate { get; init; }

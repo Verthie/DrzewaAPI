@@ -61,6 +61,7 @@ public class GlobalExceptionMiddleware
 					response.Error = $"Nieprawidłowe dane: {ex.ParamName}";
 					response.Code = "INVALID_ARGUMENT";
 					context.Response.StatusCode = 400;
+					response.Details = ex.Message;
 					break;
 
 				case InvalidOperationException:
@@ -98,7 +99,6 @@ public class GlobalExceptionMiddleware
 		// In development environment add error details
 		if (_environment.IsDevelopment())
 		{
-			response.Details = exception.Message;
 			response.InnerException = exception.InnerException;
 		}
 

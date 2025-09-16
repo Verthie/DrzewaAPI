@@ -7,9 +7,6 @@ public class EntityNotFoundException(string message, string errorCode) : Busines
 	public static EntityNotFoundException ForTree(Guid treeId) =>
 			new EntityNotFoundException($"Drzewo o ID {treeId} nie zostało znalezione", "TREE_NOT_FOUND");
 
-	public static EntityNotFoundException ForTreeVote(Guid treeId, Guid userId) =>
-		new EntityNotFoundException($"Nie znaleziono istniejącego głosu dla użytkownika o ID {userId} na drzewo o ID {treeId}", "VOTE_NOT_FOUND");
-
 	public static EntityNotFoundException ForUser(Guid userId) =>
 			new EntityNotFoundException($"Użytkownik o ID {userId} nie został znaleziony", "USER_NOT_FOUND");
 
@@ -24,9 +21,6 @@ public class EntityNotFoundException(string message, string errorCode) : Busines
 
 	public static EntityNotFoundException ForComment(Guid commentId) =>
 			new EntityNotFoundException($"Komentarz o ID {commentId} nie został znaleziony", "COMMENT_NOT_FOUND");
-
-	public static EntityNotFoundException ForCommentVote(Guid commentId, Guid userId) =>
-		new EntityNotFoundException($"Nie znaleziono istniejącego głosu dla użytkownika o ID {userId} na komentarz o ID {commentId}", "VOTE_NOT_FOUND");
 
 	public static EntityNotFoundException ForTemplate(Guid templateId) =>
 			new EntityNotFoundException($"Szablon o ID {templateId} nie został znaleziony", "TEMPLATE_NOT_FOUND");

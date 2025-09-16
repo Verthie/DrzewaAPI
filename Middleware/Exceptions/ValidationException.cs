@@ -4,11 +4,11 @@ namespace DrzewaAPI.Middleware.Exceptions;
 
 public class ValidationException : BusinessException
 {
-	public Dictionary<string, string[]> ValidationErrors { get; }
+	public Dictionary<string, string[]> AdditionalData { get; }
 
 	public ValidationException(Dictionary<string, string[]> validationErrors)
 			: base("Dane nie przeszły walidacji", "VALIDATION_ERROR", 400)
 	{
-		ValidationErrors = validationErrors;
+		AdditionalData = validationErrors;
 	}
 }

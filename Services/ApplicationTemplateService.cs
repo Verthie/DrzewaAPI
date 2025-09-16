@@ -77,18 +77,18 @@ public class ApplicationTemplateService(ApplicationDbContext _context, ILogger<A
 		}
 	}
 
-	public async Task<List<ShortApplicationTemplateDto>> GetTemplatesByMunicipalityIdAsync(Guid municipalityId)
+	public async Task<List<ApplicationTemplateDto>> GetTemplatesByMunicipalityIdAsync(Guid municipalityId)
 	{
 		try
 		{
 			bool municipalityExists = await _context.Municipalities.AnyAsync(m => m.Id == municipalityId);
 			if (!municipalityExists) throw EntityNotFoundException.ForMunicipality(municipalityId);
 
-			List<ShortApplicationTemplateDto> templates = await _context.ApplicationTemplates
+			List<ApplicationTemplateDto> templates = await _context.ApplicationTemplates
 					.Include(t => t.Municipality)
 					.Where(t => t.MunicipalityId == municipalityId && t.IsActive)
 					.OrderBy(t => t.Name)
-					.Select(t => t.MapToShortDto())
+					.Select(t => t.MapToDto())
 					.ToListAsync();
 
 			return templates;

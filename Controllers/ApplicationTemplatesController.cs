@@ -44,7 +44,7 @@ public class ApplicationTemplatesController(IApplicationTemplateService _templat
 	{
 		Guid municipalityGuid = ValidationHelpers.ValidateAndParseId(municipalityId);
 
-		List<ShortApplicationTemplateDto> templates = await _templateService.GetTemplatesByMunicipalityIdAsync(municipalityGuid);
+		List<ApplicationTemplateDto> templates = await _templateService.GetTemplatesByMunicipalityIdAsync(municipalityGuid);
 
 		return Ok(templates);
 	}

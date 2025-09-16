@@ -31,7 +31,7 @@ public class SpeciesService(ApplicationDbContext _context, ILogger<SpeciesServic
 			TreeSpecies species = await _context.TreeSpecies
 				.Include(s => s.Images)
 				.FirstOrDefaultAsync(s => s.Id == speciesId)
-				?? throw new SpeciesNotFoundException(speciesId);
+				?? throw EntityNotFoundException.ForSpecies(speciesId);
 
 			return MapToTreeSpeciesDto(species);
 		}

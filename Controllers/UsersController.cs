@@ -30,7 +30,7 @@ public class UsersController(IUserService _userService) : ControllerBase
     {
         Guid userId = ValidationHelpers.ValidateAndParseId(id);
 
-        CurrentUserDto user = await _userService.GetUserByIdAsync<CurrentUserDto>(userId);
+        UserDto user = await _userService.GetUserByIdAsync<UserDto>(userId);
 
         return Ok(user);
     }
@@ -40,7 +40,7 @@ public class UsersController(IUserService _userService) : ControllerBase
     {
         Guid userId = User.GetCurrentUserId();
 
-        UserDto user = await _userService.GetUserByIdAsync<UserDto>(userId);
+        CurrentUserDto user = await _userService.GetUserByIdAsync<CurrentUserDto>(userId);
 
         return Ok(user);
     }
@@ -51,11 +51,9 @@ public class UsersController(IUserService _userService) : ControllerBase
         ValidationHelpers.ValidateModelState(ModelState);
 
         Guid userId = ValidationHelpers.ValidateAndParseId(id);
-
-        // Check if user can edit this profile
         Guid currentUserId = User.GetCurrentUserId();
-        string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
+        string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
         bool isModerator = currentUserRole == UserRole.Moderator.ToString();
 
         UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userId, updateDto, isModerator);

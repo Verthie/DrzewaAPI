@@ -67,15 +67,15 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		try
 		{
 			// Verify that tree submission exists and belongs to user
-			TreeSubmission treeSubmission = await _context.TreeSubmissions
+			TreeSubmission? treeSubmission = await _context.TreeSubmissions
 					.Include(ts => ts.Species)
 					.FirstOrDefaultAsync(ts => ts.Id == createDto.TreeSubmissionId && ts.UserId == userId)
-					?? throw new ArgumentException($"Zgłoszenie drzewa nie zostało znalezione lub nie należy do użytkownika o ID {userId}", "TreeSubmissionId || UserId");
+					?? throw new EntityNotFoundException($"Nie znaleziono drzewa o ID {createDto.TreeSubmissionId} przypisanego do użytkownika o ID {userId}", "TREE_NOT_FOUND");
 
 			// Verify that application template exists and is active
 			ApplicationTemplate template = await _context.ApplicationTemplates
 				 .FirstOrDefaultAsync(at => at.Id == createDto.ApplicationTemplateId && at.IsActive)
-				 ?? throw new ArgumentException("Szablon wniosku nie został znaleziony lub jest nieaktywny", "ApplicationTemplateId || IsActive");
+				 ?? throw new EntityNotFoundException($"Szablon wniosku o ID {createDto.ApplicationTemplateId} nie został znaleziony lub jest nieaktywny", "TEMPLATE_NOT_FOUND");
 
 			Application application = new Application
 			{
@@ -125,7 +125,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 
 			// Can only update draft applications
 			if (application.Status != ApplicationStatus.Draft)
-				throw new InvalidOperationException("Można edytować tylko wnioski w stanie roboczym");
+				throw new EntityAccessDeniedException("Można edytować tylko wnioski w stanie roboczym", "ACCESS_DENIED");
 
 			if (updateDto.FormData != null)
 				application.FormData = updateDto.FormData;
@@ -264,12 +264,15 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 					?? throw EntityNotFoundException.ForApplication(id);
 
 			if (application.Status != ApplicationStatus.Draft)
-				throw new InvalidOperationException("Można przesłać tylko wnioski w stanie roboczym");
+				throw new ServiceException("Można przesłać tylko wnioski w stanie roboczym", "APPLICATION_SUBMIT_ERROR");
 
 			// Validate required fields
-			List<string> validationErrors = ValidateFormData(application.ApplicationTemplate.Fields, submitDto.FormData);
+			Dictionary<string, List<string>> validationErrors = ValidateFormData(application.ApplicationTemplate.Fields, submitDto.FormData);
 			if (validationErrors.Count > 0)
-				throw new ArgumentException($"Błędy walidacji: {string.Join(", ", validationErrors)}");
+			{
+				Dictionary<string, string[]> errorDict = validationErrors.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
+				throw new Middleware.Exceptions.ValidationException(errorDict);
+			}
 
 			// Update form data
 			application.FormData = submitDto.FormData;
@@ -316,10 +319,10 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			?? throw EntityNotFoundException.ForApplication(applicationId);
 
 			if (application.Status == ApplicationStatus.Draft)
-				throw new InvalidOperationException("Nie można wygenerować PDF dla wniosku w stanie roboczym");
+				throw new EntityAccessDeniedException("Nie można wygenerować PDF dla wniosku w stanie roboczym", "ACCESS_DENIED");
 
 			if (string.IsNullOrEmpty(application.GeneratedHtmlContent))
-				throw new InvalidOperationException("Brak wygenerowanej treści HTML");
+				throw new ServiceException("Brak wygenerowanej treści HTML", "HTML_CONTENT_MISSING");
 
 			// Generate PDF
 			string pdfPath = await _fileGenerationService.GeneratePdfAsync(application.GeneratedHtmlContent, $"wniosek_{application.Id}.pdf");
@@ -386,23 +389,22 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		};
 	}
 
-	private List<string> ValidateFormData(List<ApplicationField> fields, Dictionary<string, object> allFormData)
+	private Dictionary<string, List<string>> ValidateFormData(List<ApplicationField> fields, Dictionary<string, object> allFormData)
 	{
-		var errors = new List<string>();
+		var errors = new Dictionary<string, List<string>>();
 
 		foreach (var field in fields.Where(f => f.IsRequired))
 		{
-			if (!allFormData.ContainsKey(field.Name) ||
-					allFormData[field.Name] == null ||
-					string.IsNullOrWhiteSpace(allFormData[field.Name].ToString()))
+			if (!allFormData.ContainsKey(field.Name) || allFormData[field.Name] == null || string.IsNullOrWhiteSpace(allFormData[field.Name].ToString()))
 			{
-				errors.Add($"Pole '{field.Label}' jest wymagane");
+				if (!errors.ContainsKey(field.Name))
+					errors[field.Name] = new List<string>();
+				errors[field.Name].Add($"Pole '{field.Label}' jest wymagane");
 				continue;
 			}
 
 			// Additional field-specific validations
 			var value = allFormData[field.Name].ToString();
-
 			if (value == null) continue;
 
 			if (field.Validation != null)
@@ -410,12 +412,16 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 				// Length validation
 				if (field.Validation.MinLength.HasValue && value.Length < field.Validation.MinLength.Value)
 				{
-					errors.Add($"Pole '{field.Label}' musi mieć co najmniej {field.Validation.MinLength.Value} znaków");
+					if (!errors.ContainsKey(field.Name))
+						errors[field.Name] = new List<string>();
+					errors[field.Name].Add($"Pole '{field.Label}' musi mieć co najmniej {field.Validation.MinLength.Value} znaków");
 				}
 
 				if (field.Validation.MaxLength.HasValue && value.Length > field.Validation.MaxLength.Value)
 				{
-					errors.Add($"Pole '{field.Label}' może mieć maksymalnie {field.Validation.MaxLength.Value} znaków");
+					if (!errors.ContainsKey(field.Name))
+						errors[field.Name] = new List<string>();
+					errors[field.Name].Add($"Pole '{field.Label}' może mieć maksymalnie {field.Validation.MaxLength.Value} znaków");
 				}
 
 				// Pattern validation
@@ -424,10 +430,12 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 					var regex = new System.Text.RegularExpressions.Regex(field.Validation.Pattern);
 					if (!regex.IsMatch(value))
 					{
+						if (!errors.ContainsKey(field.Name))
+							errors[field.Name] = new List<string>();
 						var message = !string.IsNullOrEmpty(field.Validation.ValidationMessage)
 								? field.Validation.ValidationMessage
 								: $"Pole '{field.Label}' ma nieprawidłowy format";
-						errors.Add(message);
+						errors[field.Name].Add(message);
 					}
 				}
 
@@ -436,17 +444,23 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 				{
 					if (field.Validation.Min.HasValue && numValue < field.Validation.Min.Value)
 					{
-						errors.Add($"Pole '{field.Label}' musi być większe lub równe {field.Validation.Min.Value}");
+						if (!errors.ContainsKey(field.Name))
+							errors[field.Name] = new List<string>();
+						errors[field.Name].Add($"Pole '{field.Label}' musi być większe lub równe {field.Validation.Min.Value}");
 					}
 
 					if (field.Validation.Max.HasValue && numValue > field.Validation.Max.Value)
 					{
-						errors.Add($"Pole '{field.Label}' musi być mniejsze lub równe {field.Validation.Max.Value}");
+						if (!errors.ContainsKey(field.Name))
+							errors[field.Name] = new List<string>();
+						errors[field.Name].Add($"Pole '{field.Label}' musi być mniejsze lub równe {field.Validation.Max.Value}");
 					}
 				}
 				else if (field.Type == ApplicationFieldType.Number && !double.TryParse(value, out _))
 				{
-					errors.Add($"Pole '{field.Label}' musi być liczbą");
+					if (!errors.ContainsKey(field.Name))
+						errors[field.Name] = new List<string>();
+					errors[field.Name].Add($"Pole '{field.Label}' musi być liczbą");
 				}
 			}
 
@@ -456,28 +470,36 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 				case ApplicationFieldType.Email:
 					if (!IsValidEmail(value))
 					{
-						errors.Add($"Pole '{field.Label}' musi zawierać prawidłowy adres email");
+						if (!errors.ContainsKey(field.Name))
+							errors[field.Name] = new List<string>();
+						errors[field.Name].Add($"Pole '{field.Label}' musi zawierać prawidłowy adres email");
 					}
 					break;
 
 				case ApplicationFieldType.Phone:
 					if (!IsValidPhone(value))
 					{
-						errors.Add($"Pole '{field.Label}' musi zawierać prawidłowy numer telefonu");
+						if (!errors.ContainsKey(field.Name))
+							errors[field.Name] = new List<string>();
+						errors[field.Name].Add($"Pole '{field.Label}' musi zawierać prawidłowy numer telefonu");
 					}
 					break;
 
 				case ApplicationFieldType.Date:
 					if (!DateTime.TryParse(value, out _))
 					{
-						errors.Add($"Pole '{field.Label}' musi zawierać prawidłową datę");
+						if (!errors.ContainsKey(field.Name))
+							errors[field.Name] = new List<string>();
+						errors[field.Name].Add($"Pole '{field.Label}' musi zawierać prawidłową datę");
 					}
 					break;
 
 				case ApplicationFieldType.DateTime:
 					if (!DateTime.TryParse(value, out _))
 					{
-						errors.Add($"Pole '{field.Label}' musi zawierać prawidłową datę i czas");
+						if (!errors.ContainsKey(field.Name))
+							errors[field.Name] = new List<string>();
+						errors[field.Name].Add($"Pole '{field.Label}' musi zawierać prawidłową datę i czas");
 					}
 					break;
 			}

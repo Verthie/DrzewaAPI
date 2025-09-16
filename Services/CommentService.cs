@@ -155,7 +155,7 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 
 			if (type == null)
 			{
-				if (existing == null) throw new ServiceException("Nie znaleziono istniejącego głosu na komentarz", "VOTE_NOT_FOUND");
+				if (existing == null) throw new ServiceException($"Nie znaleziono istniejącego głosu dla użytkownika o ID {userId} na komentarz o ID {commentId}", "VOTE_NOT_FOUND");
 
 				// remove existing vote
 				_context.CommentVotes.Remove(existing);

@@ -208,7 +208,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			if (type == null)
 			{
-				if (existing == null) throw EntityNotFoundException.ForTreeVote(treeId, userId);
+				if (existing == null) throw new ServiceException($"Nie znaleziono istniejącego głosu dla użytkownika o ID {userId} na drzewo o ID {treeId}", "VOTE_NOT_FOUND");
 
 				// remove existing vote
 				_context.TreeVotes.Remove(existing);

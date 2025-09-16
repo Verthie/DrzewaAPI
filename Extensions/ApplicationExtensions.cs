@@ -28,21 +28,6 @@ public static class ApplicationExtensions
 			MunicipalityId = template.MunicipalityId,
 			Name = template.Name,
 			Description = template.Description,
-			HtmlTemplate = template.HtmlTemplate,
-			Fields = template.Fields.ToList(),
-			IsActive = template.IsActive,
-			CreatedDate = template.CreatedDate,
-			LastModifiedDate = template.LastModifiedDate,
-		};
-	}
-
-	public static ShortApplicationTemplateDto MapToShortDto(this ApplicationTemplate template)
-	{
-		return new ShortApplicationTemplateDto
-		{
-			Id = template.Id,
-			Name = template.Name,
-			Description = template.Description,
 			IsActive = template.IsActive,
 			CreatedDate = template.CreatedDate,
 			LastModifiedDate = template.LastModifiedDate,

@@ -10,7 +10,7 @@ namespace DrzewaAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class MunicipalitiesController(IMunicipalityService _municipalityService, ILogger<MunicipalitiesController> _logger) : ControllerBase
+public class MunicipalitiesController(IMunicipalityService _municipalityService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAllMunicipalities()
