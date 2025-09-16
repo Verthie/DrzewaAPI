@@ -20,34 +20,30 @@ public class AuthService : IAuthService
 	private readonly IPasswordHasher<User> _passwordHasher;
 	private readonly JwtSettings _jwtSettings;
 	private readonly ILogger<AuthService> _logger;
-	private readonly IUserService _userService;
 
 	public AuthService(
 			ApplicationDbContext context,
 			IPasswordHasher<User> passwordHasher,
 			IOptions<JwtSettings> jwtSettings,
-			ILogger<AuthService> logger,
-			IUserService userService)
+			ILogger<AuthService> logger)
 	{
 		_context = context;
 		_passwordHasher = passwordHasher;
 		_jwtSettings = jwtSettings.Value;
 		_logger = logger;
-		_userService = userService;
 	}
 
-	public async Task<AuthResponseDto?> RegisterAsync(RegisterDto registerDto)
+	public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
 	{
 		try
 		{
 			// Check if the user exists
-			var existingUser = await _context.Users
-					.FirstOrDefaultAsync(u => u.Email.ToLower() == registerDto.Email.ToLower());
-
-			if (existingUser != null) return null;
+			User? existingUser = await _context.Users
+					.FirstOrDefaultAsync(u => u.Email.ToLower() == registerDto.Email.ToLower())
+					?? throw EntityNotFoundException.ForAccount(registerDto.Email);
 
 			// Create user
-			var user = new User
+			User user = new User
 			{
 				Id = Guid.NewGuid(),
 				FirstName = registerDto.FirstName.Trim(),
@@ -75,32 +71,36 @@ public class AuthService : IAuthService
 				Token = token
 			};
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd bazy danych podczas rejestracji użytkownika");
+			throw EntityCreationFailedException.ForUser("Błąd podczas zapisu do bazy danych");
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas rejestracji użytkownika: {Email}", registerDto.Email);
-			throw;
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas rejestracji użytkownika");
+			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
 		}
 	}
 
-	public async Task<AuthResponseDto?> LoginAsync(LoginDto loginDto)
+	public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
 	{
 		try
 		{
 			// Find user
-			var user = await _context.Users
-					.FirstOrDefaultAsync(u => u.Email.ToLower() == loginDto.Email.ToLower());
-
-			ArgumentNullException.ThrowIfNull(user);
+			User user = await _context.Users
+					.FirstOrDefaultAsync(u => u.Email.ToLower() == loginDto.Email.ToLower())
+					?? throw EntityNotFoundException.ForAccount(loginDto.Email);
 
 			// Verify password
 			var passwordResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginDto.Password);
+			if (passwordResult == PasswordVerificationResult.Failed) throw AccountException.ForIncorrectPassword();
 
-			if (passwordResult == PasswordVerificationResult.Failed)
-			{
-				return null;
-			}
-
-			// Updating last login time 
+			// Updating last login time
 			// user.LastLoginAt = DateTime.UtcNow;
 
 			// await _context.SaveChangesAsync();
@@ -116,10 +116,14 @@ public class AuthService : IAuthService
 				Token = token
 			};
 		}
+		catch (BusinessException)
+		{
+			throw;
+		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas logowania użytkownika: {Email}", loginDto.Email);
-			throw;
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas logowania użytkownika: {Email}", loginDto.Email);
+			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
 		}
 	}
 

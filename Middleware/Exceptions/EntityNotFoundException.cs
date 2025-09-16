@@ -13,6 +13,9 @@ public class EntityNotFoundException(string message, string errorCode) : Busines
 	public static EntityNotFoundException ForUser(Guid userId) =>
 			new EntityNotFoundException($"Użytkownik o ID {userId} nie został znaleziony", "USER_NOT_FOUND");
 
+	public static EntityNotFoundException ForAccount(string accountEmail) =>
+			new EntityNotFoundException($"Konto o podanym mail'u \"{accountEmail}\" nie zostało znalezione", "ACCOUNT_DOES_NOT_EXISTS");
+
 	public static EntityNotFoundException ForSpecies(Guid speciesId) =>
 			new EntityNotFoundException($"Gatunek o ID {speciesId} nie został znaleziony", "SPECIES_NOT_FOUND");
 
