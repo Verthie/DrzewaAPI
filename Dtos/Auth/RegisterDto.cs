@@ -25,5 +25,6 @@ public record RegisterDto
 	public required string ConfirmPassword { get; init; }
 
 	[Phone(ErrorMessage = "Nieprawidłowy numer telefonu")]
+	[StringLength(20, MinimumLength = 9, ErrorMessage = "Numer telefonu musi zawierać co najmniej 9 cyfr")]
 	public string? Phone { get; init; }
 }

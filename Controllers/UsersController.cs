@@ -30,7 +30,7 @@ public class UsersController(IUserService _userService) : ControllerBase
     {
         Guid userId = ValidationHelpers.ValidateAndParseId(id);
 
-        UserDto user = await _userService.GetUserByIdAsync(userId);
+        CurrentUserDto user = await _userService.GetUserByIdAsync<CurrentUserDto>(userId);
 
         return Ok(user);
     }
@@ -40,7 +40,7 @@ public class UsersController(IUserService _userService) : ControllerBase
     {
         Guid userId = User.GetCurrentUserId();
 
-        UserDto user = await _userService.GetUserByIdAsync(userId);
+        UserDto user = await _userService.GetUserByIdAsync<UserDto>(userId);
 
         return Ok(user);
     }

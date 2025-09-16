@@ -14,6 +14,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		try
 		{
 			List<UserDto> users = await _context.Users
+				.Where(u => u.Role == UserRole.User)
 				.Select(u => MapToUserDto(u))
 				.ToListAsync();
 
@@ -26,7 +27,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		}
 	}
 
-	public async Task<UserDto> GetUserByIdAsync(Guid userId)
+	public async Task<T> GetUserByIdAsync<T>(Guid userId)
 	{
 		try
 		{
@@ -35,7 +36,21 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 				.FirstOrDefaultAsync(u => u.Id == userId)
 				?? throw EntityNotFoundException.ForUser(userId);
 
-			return MapToUserDto(user);
+			return typeof(T) == typeof(UserDto)
+				? (T)(object)MapToUserDto(user)
+				: (T)(object)new CurrentUserDto
+				{
+					Id = user.Id,
+					Email = user.Email,
+					Name = user.FullName,
+					Phone = user.Phone,
+					Address = user.Address,
+					City = user.City,
+					PostalCode = user.PostalCode,
+					Avatar = user.Avatar,
+					RegistrationDate = user.RegistrationDate,
+					Role = user.Role,
+				};
 		}
 		catch (BusinessException)
 		{
@@ -70,7 +85,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 
 			_logger.LogInformation("Zaktualizowano dane użytkownika: {UserId}", userId);
 
-			return await GetUserByIdAsync(userId);
+			return await GetUserByIdAsync<UserDto>(userId);
 		}
 		catch (BusinessException)
 		{

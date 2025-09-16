@@ -1,6 +1,8 @@
+using DrzewaAPI.Models.Enums;
+
 namespace DrzewaAPI.Dtos.User;
 
-public record UserDto
+public record CurrentUserDto
 {
 	public Guid Id { get; init; }
 	public required string Email { get; init; }
@@ -11,4 +13,5 @@ public record UserDto
 	public string? PostalCode { get; set; }
 	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; init; }
+	public UserRole Role { get; init; }
 }
