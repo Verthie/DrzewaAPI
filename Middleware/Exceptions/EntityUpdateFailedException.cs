@@ -12,4 +12,7 @@ public class EntityUpdateFailedException(string message, string errorCode) : Bus
 
 	public static EntityUpdateFailedException ForTemplate(Guid templateId, string reason) =>
 		new EntityUpdateFailedException($"Nie udało się zaktualizować danych szablonu {templateId}: {reason}", "TEMPLATE_UPDATE_FAILED");
+
+	public static EntityUpdateFailedException ForApplication(Guid applicationId, string reason) =>
+		new EntityUpdateFailedException($"Nie udało się zaktualizować danych wniosku {applicationId}: {reason}", "APPLICATION_UPDATE_FAILED");
 }

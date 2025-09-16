@@ -30,4 +30,10 @@ public class EntityNotFoundException(string message, string errorCode) : Busines
 
 	public static EntityNotFoundException ForTemplate(Guid templateId) =>
 			new EntityNotFoundException($"Szablon o ID {templateId} nie został znaleziony", "TEMPLATE_NOT_FOUND");
+
+	public static EntityNotFoundException ForApplication(Guid applicationId) =>
+			new EntityNotFoundException($"Aplikacja o ID {applicationId} nie została znaleziona", "APPLICATION_NOT_FOUND");
+
+	public static EntityNotFoundException ForUserApplication(Guid applicationId, Guid userId) =>
+		new EntityNotFoundException($"Nie znaleziono wniosku o ID {applicationId} przypisanego do użytkownika o ID {userId}", "APPLICATION_NOT_FOUND");
 }

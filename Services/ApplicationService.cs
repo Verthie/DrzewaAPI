@@ -9,174 +9,341 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class ApplicationService(ApplicationDbContext _context, IFileGenerationService _fileGenerationService) : IApplicationService
+public class ApplicationService(ApplicationDbContext _context, IFileGenerationService _fileGenerationService, ILogger<ApplicationService> _logger) : IApplicationService
 {
 	public async Task<List<ApplicationDto>> GetUserApplicationsAsync(Guid userId)
 	{
-		var applications = await _context.Applications
-				.Include(a => a.ApplicationTemplate)
-				.Include(a => a.TreeSubmission)
-						.ThenInclude(ts => ts.Species)
-				.Where(a => a.UserId == userId)
-				.OrderByDescending(a => a.CreatedDate)
-				.Select(a => a.MapToDto())
-				.ToListAsync();
+		try
+		{
+			List<ApplicationDto> applications = await _context.Applications
+					.Include(a => a.ApplicationTemplate)
+					.Include(a => a.TreeSubmission)
+							.ThenInclude(ts => ts.Species)
+					.Where(a => a.UserId == userId)
+					.OrderByDescending(a => a.CreatedDate)
+					.Select(a => a.MapToDto())
+					.ToListAsync();
 
-		return applications;
+			return applications;
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas pobierania listy wniosków");
+			throw new ServiceException($"Nie można pobrać listy wniosków", "APPLICATION_FETCH_ERROR");
+		}
 	}
 
-	public async Task<ApplicationDto?> GetApplicationByIdAsync(Guid id, Guid userId)
+	public async Task<ApplicationDto> GetApplicationByIdAsync(Guid id, Guid userId)
 	{
-		var application = await _context.Applications
-				.Include(a => a.ApplicationTemplate)
-				.Include(a => a.TreeSubmission)
-						.ThenInclude(ts => ts.Species)
-				.Include(a => a.User)
-				.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
+		try
+		{
+			Application application = await _context.Applications
+					.Include(a => a.ApplicationTemplate)
+					.Include(a => a.TreeSubmission)
+							.ThenInclude(ts => ts.Species)
+					.Include(a => a.User)
+					.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId)
+					?? throw EntityNotFoundException.ForApplication(id);
 
-		return application != null ? application.MapToDto() : null;
+			return application.MapToDto();
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas pobierania wniosku {ApplicationId}", id);
+			throw new ServiceException($"Nie można pobrać wniosku {id}", "APPLICATION_FETCH_ERROR");
+		}
 	}
 
 	public async Task<ApplicationDto> CreateApplicationAsync(Guid userId, CreateApplicationDto createDto)
 	{
-		// Verify that tree submission belongs to user
-		var treeSubmission = await _context.TreeSubmissions
-				.Include(ts => ts.Species)
-				.FirstOrDefaultAsync(ts => ts.Id == createDto.TreeSubmissionId && ts.UserId == userId);
-
-		if (treeSubmission == null)
-			throw new ArgumentException("Zgłoszenie drzewa nie zostało znalezione lub nie należy do użytkownika");
-
-		// Verify that application template exists
-		var template = await _context.ApplicationTemplates
-				.FirstOrDefaultAsync(at => at.Id == createDto.ApplicationTemplateId);
-
-		if (template == null)
-			throw new ArgumentException("Szablon wniosku nie został znaleziony lub jest nieaktywny");
-
-		var application = new Application
+		try
 		{
-			Id = Guid.NewGuid(),
-			UserId = userId,
-			TreeSubmissionId = createDto.TreeSubmissionId,
-			ApplicationTemplateId = createDto.ApplicationTemplateId,
-			FormData = new Dictionary<string, object>(),
-			Status = ApplicationStatus.Draft,
-			CreatedDate = DateTime.UtcNow
-		};
+			// Verify that tree submission exists and belongs to user
+			TreeSubmission treeSubmission = await _context.TreeSubmissions
+					.Include(ts => ts.Species)
+					.FirstOrDefaultAsync(ts => ts.Id == createDto.TreeSubmissionId && ts.UserId == userId)
+					?? throw new ArgumentException($"Zgłoszenie drzewa nie zostało znalezione lub nie należy do użytkownika o ID {userId}", "TreeSubmissionId || UserId");
 
-		_context.Applications.Add(application);
-		await _context.SaveChangesAsync();
+			// Verify that application template exists and is active
+			ApplicationTemplate template = await _context.ApplicationTemplates
+				 .FirstOrDefaultAsync(at => at.Id == createDto.ApplicationTemplateId && at.IsActive)
+				 ?? throw new ArgumentException("Szablon wniosku nie został znaleziony lub jest nieaktywny", "ApplicationTemplateId || IsActive");
 
-		application.TreeSubmission = treeSubmission;
-		application.ApplicationTemplate = template;
-
-		return application.MapToDto();
-	}
-
-	public async Task<ApplicationDto?> UpdateApplicationAsync(Guid id, Guid userId, UpdateApplicationDto updateDto)
-	{
-		var application = await _context.Applications
-				.Include(a => a.ApplicationTemplate)
-				.Include(a => a.TreeSubmission)
-						.ThenInclude(ts => ts.Species)
-				.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
-
-		if (application == null)
-			return null;
-
-		// Can only update draft applications
-		if (application.Status != ApplicationStatus.Draft)
-			throw new InvalidOperationException("Można edytować tylko wnioski w stanie roboczym");
-
-		if (updateDto.FormData != null)
-			application.FormData = updateDto.FormData;
-
-		await _context.SaveChangesAsync();
-
-		return application.MapToDto();
-	}
-
-	public async Task<bool> DeleteApplicationAsync(Guid id, Guid userId)
-	{
-		var application = await _context.Applications
-				.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
-
-		if (application == null)
-			return false;
-
-		_context.Applications.Remove(application);
-		await _context.SaveChangesAsync();
-
-		return true;
-	}
-
-	public async Task<ApplicationFormSchemaDto?> GetApplicationFormSchemaAsync(Guid applicationId, Guid userId)
-	{
-		var application = await _context.Applications
-				.Include(a => a.ApplicationTemplate)
-					.ThenInclude(at => at.Municipality)
-				.Include(a => a.TreeSubmission)
-						.ThenInclude(ts => ts.Species)
-				.Include(a => a.User)
-				.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId);
-
-		if (application == null)
-			return null;
-
-		// Get prefilled data from user, tree submission and municipality
-		var prefilledData = GetPrefilledData(application);
-
-		// Merge with existing form data
-		foreach (var item in application.FormData)
-		{
-			prefilledData[item.Key] = item.Value;
-		}
-
-		// Find missing required fields
-		List<ApplicationField> requiredFields = new List<ApplicationField>();
-
-		foreach (var item in prefilledData)
-		{
-			if (item.Value.ToString() == "")
+			Application application = new Application
 			{
-				requiredFields.Add(
-					new ApplicationField
-					{
-						Name = item.Key,
-						Label = (char.ToUpper(item.Key[0]) + item.Key.Substring(1).ToLower()).Replace("_", " "),
-						Type = item.Key switch
-						{
-							"user_phone" => ApplicationFieldType.Phone,
-							"tree_description" => ApplicationFieldType.TextArea,
-							_ => ApplicationFieldType.Text
-						},
-						IsRequired = true,
-						Order = requiredFields.Count + 1
-					}
-				);
+				Id = Guid.NewGuid(),
+				UserId = userId,
+				TreeSubmissionId = createDto.TreeSubmissionId,
+				ApplicationTemplateId = createDto.ApplicationTemplateId,
+				FormData = new Dictionary<string, object>(),
+				Status = ApplicationStatus.Draft,
+				CreatedDate = DateTime.UtcNow
+			};
+
+			_context.Applications.Add(application);
+			await _context.SaveChangesAsync();
+
+			application.TreeSubmission = treeSubmission;
+			application.ApplicationTemplate = template;
+
+			return application.MapToDto();
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd bazy danych podczas tworzenia drzewa");
+			throw EntityCreationFailedException.ForApplication("Błąd podczas zapisu do bazy danych");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas tworzenia drzewa");
+			throw EntityCreationFailedException.ForApplication("Nieoczekiwany błąd systemu");
+		}
+	}
+
+	public async Task<ApplicationDto> UpdateApplicationAsync(Guid applicationId, Guid userId, UpdateApplicationDto updateDto)
+	{
+		try
+		{
+			Application application = await _context.Applications
+					.Include(a => a.ApplicationTemplate)
+					.Include(a => a.TreeSubmission)
+							.ThenInclude(ts => ts.Species)
+					.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
+					?? throw EntityNotFoundException.ForUserApplication(applicationId, userId);
+
+			// Can only update draft applications
+			if (application.Status != ApplicationStatus.Draft)
+				throw new InvalidOperationException("Można edytować tylko wnioski w stanie roboczym");
+
+			if (updateDto.FormData != null)
+				application.FormData = updateDto.FormData;
+
+			await _context.SaveChangesAsync();
+
+			return application.MapToDto();
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas wprowadzania danych do bazy");
+			throw EntityUpdateFailedException.ForApplication(userId, "Błąd podczas zapisu do bazy danych");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas aktualizacji danych wniosku");
+			throw EntityUpdateFailedException.ForApplication(userId, "Nieoczekiwany błąd systemu");
+		}
+	}
+
+	public async Task DeleteApplicationAsync(Guid applicationId, Guid userId)
+	{
+		try
+		{
+			Application application = await _context.Applications
+					.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
+					?? throw EntityNotFoundException.ForUserApplication(applicationId, userId);
+
+			_context.Applications.Remove(application);
+			await _context.SaveChangesAsync();
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas usuwania wniosku {ApplicationId}", applicationId);
+			throw new ServiceException($"Nie można usunąć wniosku {applicationId}", "APPLICATION_DELETE_ERROR");
+		}
+	}
+
+	public async Task<ApplicationFormSchemaDto> GetApplicationFormSchemaAsync(Guid applicationId, Guid userId)
+	{
+		try
+		{
+			Application application = await _context.Applications
+					.Include(a => a.ApplicationTemplate)
+						.ThenInclude(at => at.Municipality)
+					.Include(a => a.TreeSubmission)
+							.ThenInclude(ts => ts.Species)
+					.Include(a => a.User)
+					.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
+					?? throw EntityNotFoundException.ForUserApplication(applicationId, userId);
+
+			// Get prefilled data from user, tree submission and municipality
+			Dictionary<string, object> prefilledData = GetPrefilledData(application);
+
+			// Merge with existing form data
+			foreach (var kvp in application.FormData)
+			{
+				prefilledData[kvp.Key] = kvp.Value;
 			}
+
+			// Find missing required fields
+			List<ApplicationField> requiredFields = new List<ApplicationField>();
+
+			foreach (var kvp in prefilledData)
+			{
+				if (kvp.Value.ToString() == "")
+				{
+					requiredFields.Add(
+						new ApplicationField
+						{
+							Name = kvp.Key,
+							Label = (char.ToUpper(kvp.Key[0]) + kvp.Key.Substring(1).ToLower()).Replace("_", " "),
+							Type = kvp.Key switch
+							{
+								"user_phone" => ApplicationFieldType.Phone,
+								"tree_description" => ApplicationFieldType.TextArea,
+								_ => ApplicationFieldType.Text
+							},
+							IsRequired = true,
+							Order = requiredFields.Count + 1
+						}
+					);
+				}
+			}
+
+			List<ApplicationField> additionalTemplateFields = application.ApplicationTemplate.Fields
+					.Where(f => !prefilledData.ContainsKey(f.Name))
+					.OrderBy(f => f.Order)
+					.ToList();
+
+			foreach (ApplicationField field in additionalTemplateFields)
+			{
+				field.Order = requiredFields.Count + 1;
+				requiredFields.Add(field);
+			}
+
+			return new ApplicationFormSchemaDto
+			{
+				ApplicationId = application.Id,
+				ApplicationTemplateId = application.ApplicationTemplateId,
+				TemplateName = application.ApplicationTemplate.Name,
+				RequiredFields = requiredFields,
+				PrefilledData = prefilledData
+			};
 		}
-
-		var additionalTemplateFields = application.ApplicationTemplate.Fields
-				.Where(f => !prefilledData.ContainsKey(f.Name))
-				.OrderBy(f => f.Order)
-				.ToList();
-
-		foreach (var field in additionalTemplateFields)
+		catch (BusinessException)
 		{
-			field.Order = requiredFields.Count + 1;
-			requiredFields.Add(field);
+			throw;
 		}
-
-		return new ApplicationFormSchemaDto
+		catch (Exception ex)
 		{
-			ApplicationId = application.Id,
-			ApplicationTemplateId = application.ApplicationTemplateId,
-			TemplateName = application.ApplicationTemplate.Name,
-			RequiredFields = requiredFields,
-			PrefilledData = prefilledData
-		};
+			_logger.LogError(ex, "Błąd podczas pobierania schematu wniosku");
+			throw new ServiceException($"Nie można pobrać schematu wniosku", "SCHEMA_FETCH_ERROR");
+		}
+	}
+
+	public async Task<ApplicationDto> SubmitApplicationAsync(Guid id, Guid userId, SubmitApplicationDto submitDto)
+	{
+		try
+		{
+			Application application = await _context.Applications
+					.Include(a => a.ApplicationTemplate)
+						.ThenInclude(at => at.Municipality)
+					.Include(a => a.TreeSubmission)
+							.ThenInclude(ts => ts.Species)
+					.Include(a => a.User)
+					.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId)
+					?? throw EntityNotFoundException.ForApplication(id);
+
+			if (application.Status != ApplicationStatus.Draft)
+				throw new InvalidOperationException("Można przesłać tylko wnioski w stanie roboczym");
+
+			// Validate required fields
+			List<string> validationErrors = ValidateFormData(application.ApplicationTemplate.Fields, submitDto.FormData);
+			if (validationErrors.Count > 0)
+				throw new ArgumentException($"Błędy walidacji: {string.Join(", ", validationErrors)}");
+
+			// Update form data
+			application.FormData = submitDto.FormData;
+			application.Status = ApplicationStatus.Submitted;
+			application.SubmittedDate = DateTime.UtcNow;
+
+			// Generate HTML content
+			var prefilledData = GetPrefilledData(application);
+			var allData = new Dictionary<string, object>(prefilledData);
+			foreach (var kvp in submitDto.FormData)
+			{
+				allData[kvp.Key] = kvp.Value;
+			}
+
+			application.GeneratedHtmlContent = await _fileGenerationService.GenerateHtmlFromTemplateAsync(
+					application.ApplicationTemplate.HtmlTemplate, allData);
+
+			await _context.SaveChangesAsync();
+
+			return application.MapToDto();
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas wprowadzania danych do bazy");
+			throw EntityUpdateFailedException.ForApplication(userId, "Błąd podczas zapisu do bazy danych");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas składania wniosku");
+			throw new ServiceException($"Nie można złożyć wniosku", "APPLICATION_SUBMIT_ERROR");
+		}
+	}
+
+	public async Task<string> GeneratePdfFromAplicationAsync(Guid applicationId, Guid userId)
+	{
+		try
+		{
+			Application application = await _context.Applications
+			.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
+			?? throw EntityNotFoundException.ForApplication(applicationId);
+
+			if (application.Status == ApplicationStatus.Draft)
+				throw new InvalidOperationException("Nie można wygenerować PDF dla wniosku w stanie roboczym");
+
+			if (string.IsNullOrEmpty(application.GeneratedHtmlContent))
+				throw new InvalidOperationException("Brak wygenerowanej treści HTML");
+
+			// Generate PDF
+			string pdfPath = await _fileGenerationService.GeneratePdfAsync(application.GeneratedHtmlContent, $"wniosek_{application.Id}.pdf");
+
+			// Update application with PDF path
+			application.GeneratedPdfPath = pdfPath;
+			await _context.SaveChangesAsync();
+
+			return pdfPath;
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas wprowadzania danych do bazy");
+			throw EntityUpdateFailedException.ForApplication(userId, "Błąd podczas zapisu do bazy danych");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas składania wniosku");
+			throw new ServiceException($"Nie można złożyć wniosku", "APPLICATION_SUBMIT_ERROR");
+		}
 	}
 
 	private Dictionary<string, object> GetPrefilledData(Application application)
@@ -217,48 +384,6 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			["municipality_phone"] = municipality.Phone,
 			["municipality_email"] = municipality.Email,
 		};
-	}
-
-	public async Task<ApplicationDto?> SubmitApplicationAsync(Guid id, Guid userId, SubmitApplicationDto submitDto)
-	{
-		var application = await _context.Applications
-				.Include(a => a.ApplicationTemplate)
-					.ThenInclude(at => at.Municipality)
-				.Include(a => a.TreeSubmission)
-						.ThenInclude(ts => ts.Species)
-				.Include(a => a.User)
-				.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
-
-		if (application == null)
-			return null;
-
-		if (application.Status != ApplicationStatus.Draft)
-			throw new InvalidOperationException("Można przesłać tylko wnioski w stanie roboczym");
-
-		// Validate required fields
-		var validationErrors = ValidateFormData(application.ApplicationTemplate.Fields, submitDto.FormData);
-		if (validationErrors.Any())
-			throw new ArgumentException($"Błędy walidacji: {string.Join(", ", validationErrors)}");
-
-		// Update form data
-		application.FormData = submitDto.FormData;
-		application.Status = ApplicationStatus.Submitted;
-		application.SubmittedDate = DateTime.UtcNow;
-
-		// Generate HTML content
-		var prefilledData = GetPrefilledData(application);
-		var allData = new Dictionary<string, object>(prefilledData);
-		foreach (var item in submitDto.FormData)
-		{
-			allData[item.Key] = item.Value;
-		}
-
-		application.GeneratedHtmlContent = await _fileGenerationService.GenerateHtmlFromTemplateAsync(
-				application.ApplicationTemplate.HtmlTemplate, allData);
-
-		await _context.SaveChangesAsync();
-
-		return application.MapToDto();
 	}
 
 	private List<string> ValidateFormData(List<ApplicationField> fields, Dictionary<string, object> allFormData)
@@ -376,32 +501,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 
 	private bool IsValidPhone(string phone)
 	{
-		// Simple phone validation - can be enhanced based on requirements
 		var cleanPhone = phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "");
 		return System.Text.RegularExpressions.Regex.IsMatch(cleanPhone, @"^\+?[0-9]{9,15}$");
-	}
-
-	public async Task<string> GeneratePdfFromAplicationAsync(Guid applicationId, Guid userId)
-	{
-		var application = await _context.Applications
-		.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId);
-
-		if (application == null)
-			throw new ArgumentException("Wniosek nie został znaleziony");
-
-		if (application.Status == ApplicationStatus.Draft)
-			throw new InvalidOperationException("Nie można wygenerować PDF dla wniosku w stanie roboczym");
-
-		if (string.IsNullOrEmpty(application.GeneratedHtmlContent))
-			throw new InvalidOperationException("Brak wygenerowanej treści HTML");
-
-		// Generate PDF
-		var pdfPath = await _fileGenerationService.GeneratePdfAsync(application.GeneratedHtmlContent, $"wniosek_{application.Id}.pdf");
-
-		// Update application with PDF path
-		application.GeneratedPdfPath = pdfPath;
-		await _context.SaveChangesAsync();
-
-		return pdfPath;
 	}
 }

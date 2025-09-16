@@ -57,8 +57,8 @@ public class GlobalExceptionMiddleware
 					context.Response.StatusCode = 401;
 					break;
 
-				case ArgumentException argEx:
-					response.Error = $"Nieprawidłowe dane: {argEx.ParamName}";
+				case ArgumentException ex:
+					response.Error = $"Nieprawidłowe dane: {ex.ParamName}";
 					response.Code = "INVALID_ARGUMENT";
 					context.Response.StatusCode = 400;
 					break;
@@ -75,13 +75,13 @@ public class GlobalExceptionMiddleware
 					context.Response.StatusCode = 408;
 					break;
 
-				case SqlException sqlEx when sqlEx.Number == -2: // Timeout
+				case SqlException ex when ex.Number == -2: // Timeout
 					response.Error = "Zapytanie do bazy danych przekroczyło limit czasu";
 					response.Code = "DATABASE_TIMEOUT";
 					context.Response.StatusCode = 408;
 					break;
 
-				case SqlException sqlEx when sqlEx.Number == 2: // Connection timeout
+				case SqlException ex when ex.Number == 2: // Connection timeout
 					response.Error = "Nie można połączyć się z bazą danych";
 					response.Code = "DATABASE_CONNECTION_ERROR";
 					context.Response.StatusCode = 503;
@@ -98,7 +98,8 @@ public class GlobalExceptionMiddleware
 		// In development environment add error details
 		if (_environment.IsDevelopment())
 		{
-			response.InnerException = exception.InnerException?.Message;
+			response.Details = exception.Message;
+			response.InnerException = exception.InnerException;
 		}
 
 		context.Response.ContentType = "application/json";
