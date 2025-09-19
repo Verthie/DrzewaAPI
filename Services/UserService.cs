@@ -3,6 +3,7 @@ using DrzewaAPI.Data;
 using DrzewaAPI.Dtos.User;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
+using DrzewaAPI.Models.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
@@ -14,6 +15,8 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		try
 		{
 			List<UserDto> users = await _context.Users
+				.Include(u => u.TreeSubmissions)
+				.Include(u => u.Applications)
 				.Where(u => u.Role == UserRole.User)
 				.Select(u => MapToUserDto(u))
 				.ToListAsync();
@@ -33,6 +36,7 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		{
 			User user = await _context.Users
 				.Include(u => u.TreeSubmissions)
+				.Include(u => u.Applications)
 				.FirstOrDefaultAsync(u => u.Id == userId)
 				?? throw EntityNotFoundException.ForUser(userId);
 
@@ -116,6 +120,11 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 			PostalCode = u.PostalCode,
 			Avatar = u.Avatar,
 			RegistrationDate = u.RegistrationDate,
+			Statistics = new UserStatistics()
+			{
+				ApplicationCount = u.Applications.Count,
+				SubmissionCount = u.TreeSubmissions.Count
+			}
 		};
 	}
 }

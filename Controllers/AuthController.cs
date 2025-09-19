@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using DrzewaAPI.Dtos;
 using DrzewaAPI.Dtos.Auth;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DrzewaAPI.Controllers;
 
@@ -28,6 +29,19 @@ public class AuthController(IAuthService _authService) : ControllerBase
 		ValidationHelpers.ValidateModelState(ModelState);
 
 		AuthResponseDto result = await _authService.LoginAsync(loginDto);
+
+		return Ok(result);
+	}
+
+	[HttpPost("refresh-token")]
+	public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+	{
+		ValidationHelpers.ValidateModelState(ModelState);
+
+		if (string.IsNullOrEmpty(request.RefreshToken))
+			return BadRequest("Refresh token is required.");
+
+		AuthResponseDto result = await _authService.RefreshTokenAsync(request.RefreshToken);
 
 		return Ok(result);
 	}

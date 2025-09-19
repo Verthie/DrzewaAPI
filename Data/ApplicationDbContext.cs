@@ -9,6 +9,7 @@ namespace DrzewaAPI.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
+	public DbSet<RefreshToken> RefreshTokens { get; set; }
 	public DbSet<User> Users { get; set; }
 	public DbSet<TreeSubmission> TreeSubmissions { get; set; }
 	public DbSet<TreeSpecies> TreeSpecies { get; set; }

@@ -1,3 +1,5 @@
+using DrzewaAPI.Models.ValueObjects;
+
 namespace DrzewaAPI.Dtos.User;
 
 public record UserDto
@@ -11,4 +13,5 @@ public record UserDto
 	public string? PostalCode { get; set; }
 	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; init; }
+	public UserStatistics Statistics { get; init; } = new UserStatistics();
 }
