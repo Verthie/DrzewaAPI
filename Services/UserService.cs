@@ -4,11 +4,12 @@ using DrzewaAPI.Dtos.User;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class UserService(ApplicationDbContext _context, ILogger<UserService> _logger) : IUserService
+public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _passwordHasher, ILogger<UserService> _logger) : IUserService
 {
 	public async Task<List<UserDto>> GetAllUsersAsync()
 	{
@@ -108,6 +109,46 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas aktualizacji danych użytkownika");
+			throw EntityUpdateFailedException.ForUser(userId, "Nieoczekiwany błąd systemu");
+		}
+	}
+
+	public async Task UpdatePasswordAsync(Guid currentUserId, Guid userId, UpdatePasswordDto updatePasswordDto, bool isModerator)
+	{
+		try
+		{
+			User user = await _context.Users
+					.FirstOrDefaultAsync(u => u.Id == userId)
+					?? throw EntityNotFoundException.ForUser(userId);
+
+			// Check privileges
+			if (!isModerator && user.Id != currentUserId) throw EntityAccessDeniedException.ForUser(userId);
+
+			if (!isModerator)
+			{
+				PasswordVerificationResult passwordResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, updatePasswordDto.OldPassword);
+				if (passwordResult == PasswordVerificationResult.Failed) throw AccountException.ForIncorrectPassword();
+			}
+
+			// Field update
+			user.PasswordHash = _passwordHasher.HashPassword(user, updatePasswordDto.NewPassword);
+
+			await _context.SaveChangesAsync();
+
+			_logger.LogInformation("Zaktualizowano hasło użytkownika: {UserId}", userId);
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas wprowadzania danych do bazy");
+			throw EntityUpdateFailedException.ForUser(userId, "Błąd podczas zapisu do bazy danych");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas aktualizacji hasła użytkownika");
 			throw EntityUpdateFailedException.ForUser(userId, "Nieoczekiwany błąd systemu");
 		}
 	}

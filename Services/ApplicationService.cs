@@ -67,7 +67,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		try
 		{
 			// Verify that tree submission exists and belongs to user
-			TreeSubmission? treeSubmission = await _context.TreeSubmissions
+			TreeSubmission treeSubmission = await _context.TreeSubmissions
 					.Include(ts => ts.Species)
 					.FirstOrDefaultAsync(ts => ts.Id == createDto.TreeSubmissionId && ts.UserId == userId)
 					?? throw new EntityNotFoundException($"Nie znaleziono drzewa o ID {createDto.TreeSubmissionId} przypisanego do użytkownika o ID {userId}", "TREE_NOT_FOUND");

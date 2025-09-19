@@ -113,9 +113,9 @@ public class AuthService : IAuthService
 	public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
 	{
 		RefreshToken token = await _context.RefreshTokens
-				.FirstOrDefaultAsync(rt => rt.Token == refreshToken && !rt.IsRevoked) ?? throw new ServiceException("Refresh token doesn't exist or is invalid", "TOKEN_FETCH_ERROR");
+				.FirstOrDefaultAsync(rt => rt.Token == refreshToken && !rt.IsRevoked) ?? throw new ServiceException("Token odświeżania nie istnieje lub jest nieprawidłowy", "TOKEN_FETCH_ERROR");
 
-		if (token.ExpiresAt < DateTime.UtcNow) throw new ServiceException("Refresh token is expired", "EXPIRED_TOKEN");
+		if (token.ExpiresAt < DateTime.UtcNow) throw new ServiceException("Token odświeżania wygasł", "EXPIRED_TOKEN");
 
 		User user = await _context.Users.FirstOrDefaultAsync(u => u.Id == token.UserId) ?? throw EntityNotFoundException.ForUser(token.UserId);
 

@@ -45,12 +45,14 @@ public class UsersController(IUserService _userService) : ControllerBase
         return Ok(user);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto updateDto)
+    [HttpPut("data")]
+    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto updateDto)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
-        Guid userId = ValidationHelpers.ValidateAndParseId(id);
+        updateDto.UserId ??= User.GetCurrentUserId().ToString();
+
+        Guid userId = ValidationHelpers.ValidateAndParseId(updateDto.UserId);
         Guid currentUserId = User.GetCurrentUserId();
 
         string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
@@ -61,6 +63,23 @@ public class UsersController(IUserService _userService) : ControllerBase
         return Ok(updatedUser);
     }
 
+    [HttpPut("password")]
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto updatePasswordDto)
+    {
+        ValidationHelpers.ValidateModelState(ModelState);
+
+        updatePasswordDto.UserId ??= User.GetCurrentUserId().ToString();
+
+        Guid userId = ValidationHelpers.ValidateAndParseId(updatePasswordDto.UserId);
+        Guid currentUserId = User.GetCurrentUserId();
+
+        string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+        bool isModerator = currentUserRole == UserRole.Moderator.ToString();
+
+        await _userService.UpdatePasswordAsync(currentUserId, userId, updatePasswordDto, isModerator);
+
+        return NoContent();
+    }
+
     // TODO Add User Deletion
-    // TODO Password Change
 }
