@@ -1,4 +1,5 @@
 using DrzewaAPI.Models.Enums;
+using DrzewaAPI.Models.ValueObjects;
 
 namespace DrzewaAPI.Dtos.User;
 
@@ -14,4 +15,5 @@ public record CurrentUserDto
 	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; init; }
 	public UserRole Role { get; init; }
+	public UserStatistics Statistics { get; init; } = new UserStatistics();
 }

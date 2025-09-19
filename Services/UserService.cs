@@ -54,6 +54,11 @@ public class UserService(ApplicationDbContext _context, ILogger<UserService> _lo
 					Avatar = user.Avatar,
 					RegistrationDate = user.RegistrationDate,
 					Role = user.Role,
+					Statistics = new UserStatistics
+					{
+						ApplicationCount = user.Applications.Count,
+						SubmissionCount = user.TreeSubmissions.Count
+					}
 				};
 		}
 		catch (BusinessException)
