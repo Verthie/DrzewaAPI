@@ -152,7 +152,6 @@ public class AuthService : IAuthService
 		{
 			AccessToken = token,
 			RefreshToken = refreshToken,
-			User = MapToUserDto(user),
 		};
 	}
 
@@ -192,17 +191,5 @@ public class AuthService : IAuthService
 		using RandomNumberGenerator rng = RandomNumberGenerator.Create();
 		rng.GetBytes(randomBytes);
 		return Convert.ToBase64String(randomBytes);
-	}
-
-	private static UserDto MapToUserDto(User user)
-	{
-		return new UserDto
-		{
-			Id = user.Id,
-			Email = user.Email,
-			Name = user.FullName,
-			Avatar = user.Avatar,
-			RegistrationDate = user.RegistrationDate,
-		};
 	}
 }
