@@ -201,20 +201,9 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			{
 				if (kvp.Value.ToString() == "")
 				{
+					requiredFieldData[kvp.Key].Order = requiredFields.Count + 1;
 					requiredFields.Add(
-						new ApplicationField
-						{
-							Name = kvp.Key,
-							Label = (char.ToUpper(kvp.Key[0]) + kvp.Key.Substring(1).ToLower()).Replace("_", " "),
-							Type = kvp.Key switch
-							{
-								"user_phone" => ApplicationFieldType.Phone,
-								"tree_description" => ApplicationFieldType.TextArea,
-								_ => ApplicationFieldType.Text
-							},
-							IsRequired = true,
-							Order = requiredFields.Count + 1
-						}
+						requiredFieldData[kvp.Key]
 					);
 				}
 			}
@@ -526,4 +515,82 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		var cleanPhone = phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "");
 		return System.Text.RegularExpressions.Regex.IsMatch(cleanPhone, @"^\+?[0-9]{9,15}$");
 	}
+
+	private readonly Dictionary<string, ApplicationField> requiredFieldData = new Dictionary<string, ApplicationField>
+	{
+		{
+		"user_phone", new ApplicationField {
+				Name = "user_phone",
+				Label = "Numer telefonu",
+				Type = ApplicationFieldType.Phone,
+				IsRequired = true,
+				Placeholder = "+48 123 456 789",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 9,
+						MaxLength = 15,
+						Pattern = @"^\+?[0-9\s\-\(\)]{9,15}$",
+						ValidationMessage = "Numer telefonu musi zawierać 9-15 cyfr"
+				},
+				HelpText = "Podaj numer telefonu kontaktowego",
+				Order = 1
+		}},
+		{
+		"user_address", new ApplicationField {
+				Name = "user_address",
+				Label = "Adres zamieszkania",
+				Type = ApplicationFieldType.Text,
+				IsRequired = true,
+				Placeholder = "ul. Wiśniewska 34/1",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 5,
+						MaxLength = 150,
+						ValidationMessage = "Adres musi mieć od 5 do 200 znaków"
+				},
+				HelpText = "Podaj pełny adres zamieszkania",
+				Order = 2
+		}},
+		{
+		"user_city", new ApplicationField {
+				Name = "user_city",
+				Label = "Miasto",
+				Type = ApplicationFieldType.Text,
+				IsRequired = true,
+				Placeholder = "Warszawa",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 2,
+						MaxLength = 50,
+						ValidationMessage = "Nazwa miasta musi mieć od 2 do 50 znaków"
+				},
+				HelpText = "Podaj nazwę miasta",
+				Order = 3
+		}},
+		{
+		"user_postal_code", new ApplicationField {
+				Name = "user_postal_code",
+				Label = "Kod pocztowy",
+				Type = ApplicationFieldType.Text,
+				IsRequired = true,
+				Placeholder = "12-345",
+				Validation = new ApplicationFieldValidation
+				{
+						Pattern = @"^\d{2}-\d{3}$",
+						ValidationMessage = "Kod pocztowy musi być w formacie XX-XXX"
+				},
+				HelpText = "Podaj kod pocztowy w formacie XX-XXX",
+				Order = 4
+		}},
+		{
+		"tree_description", new ApplicationField {
+				Name = "tree_description",
+				Label = "Opis drzewa",
+				Type = ApplicationFieldType.TextArea,
+				IsRequired = true,
+				Placeholder = "Opisz gatunek drzewa, jego wygląd, wymiary...",
+				HelpText = "Podaj szczegółowy opis drzewa (gatunek, wymiary, stan)",
+				Order = 5
+		}}
+	};
 }

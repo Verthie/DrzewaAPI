@@ -24,9 +24,9 @@ public class User
 	[Phone]
 	[Range(9, 20)]
 	public string? Phone { get; set; }
-	[MaxLength(150)]
+	[Length(5, 150)]
 	public string? Address { get; set; }
-	[MaxLength(50)]
+	[Length(2, 50)]
 	public string? City { get; set; }
 	[MaxLength(50)]
 	public string? PostalCode { get; set; }
