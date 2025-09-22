@@ -5,12 +5,30 @@ using DrzewaAPI.Dtos.Application;
 using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
+using DrzewaAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class ApplicationService(ApplicationDbContext _context, IFileGenerationService _fileGenerationService, ILogger<ApplicationService> _logger) : IApplicationService
+public class ApplicationService : IApplicationService
 {
+	private readonly ApplicationDbContext _context;
+	private readonly IFileGenerationService _fileGenerationService;
+	private readonly ILogger<ApplicationService> _logger;
+	private readonly IHttpContextAccessor _httpContextAccessor;
+
+	public ApplicationService(
+			ApplicationDbContext context,
+			IFileGenerationService fileGenerationService,
+			ILogger<ApplicationService> logger,
+			IHttpContextAccessor httpContextAccessor)
+	{
+		_context = context;
+		_fileGenerationService = fileGenerationService;
+		_logger = logger;
+		_httpContextAccessor = httpContextAccessor;
+	}
+
 	public async Task<List<ApplicationDto>> GetUserApplicationsAsync(Guid userId)
 	{
 		try
@@ -188,36 +206,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			// Get prefilled data from user, tree submission and municipality
 			Dictionary<string, object> prefilledData = GetPrefilledData(application);
 
-			// Merge with existing form data
-			foreach (var kvp in application.FormData)
-			{
-				prefilledData[kvp.Key] = kvp.Value;
-			}
-
-			// Find missing required fields
-			List<ApplicationField> requiredFields = new List<ApplicationField>();
-
-			foreach (var kvp in prefilledData)
-			{
-				if (kvp.Value.ToString() == "")
-				{
-					requiredFieldData[kvp.Key].Order = requiredFields.Count + 1;
-					requiredFields.Add(
-						requiredFieldData[kvp.Key]
-					);
-				}
-			}
-
-			List<ApplicationField> additionalTemplateFields = application.ApplicationTemplate.Fields
-					.Where(f => !prefilledData.ContainsKey(f.Name))
-					.OrderBy(f => f.Order)
-					.ToList();
-
-			foreach (ApplicationField field in additionalTemplateFields)
-			{
-				field.Order = requiredFields.Count + 1;
-				requiredFields.Add(field);
-			}
+			List<ApplicationField> requiredFields = GetRequiredFields(application, prefilledData);
 
 			return new ApplicationFormSchemaDto
 			{
@@ -252,11 +241,13 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 					.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId)
 					?? throw EntityNotFoundException.ForApplication(id);
 
+			List<ApplicationField> requiredFields = GetRequiredFields(application);
+
 			if (application.Status != ApplicationStatus.Draft)
 				throw new ServiceException("Można przesłać tylko wnioski w stanie roboczym", "APPLICATION_SUBMIT_ERROR");
 
 			// Validate required fields
-			Dictionary<string, List<string>> validationErrors = ValidateFormData(application.ApplicationTemplate.Fields, submitDto.FormData);
+			Dictionary<string, List<string>> validationErrors = ValidateFormData(requiredFields, submitDto.FormData);
 			if (validationErrors.Count > 0)
 			{
 				Dictionary<string, string[]> errorDict = validationErrors.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
@@ -304,6 +295,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 		try
 		{
 			Application application = await _context.Applications
+			.Include(a => a.TreeSubmission)
 			.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
 			?? throw EntityNotFoundException.ForApplication(applicationId);
 
@@ -314,13 +306,16 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 				throw new ServiceException("Brak wygenerowanej treści HTML", "HTML_CONTENT_MISSING");
 
 			// Generate PDF
-			string pdfPath = await _fileGenerationService.GeneratePdfAsync(application.GeneratedHtmlContent, $"wniosek_{application.Id}.pdf");
+			string folderPath = $"pdfs/tree-submissions/{application.TreeSubmissionId}";
+			string pdfPath = await _fileGenerationService.GeneratePdfAsync(application.GeneratedHtmlContent, folderPath);
 
 			// Update application with PDF path
 			application.GeneratedPdfPath = pdfPath;
 			await _context.SaveChangesAsync();
 
-			return pdfPath;
+			string fileUrl = FileHelper.GetFileUrl(pdfPath, _httpContextAccessor);
+
+			return fileUrl;
 		}
 		catch (BusinessException)
 		{
@@ -336,6 +331,44 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 			_logger.LogError(ex, "Błąd podczas składania wniosku");
 			throw new ServiceException($"Nie można złożyć wniosku", "APPLICATION_SUBMIT_ERROR");
 		}
+	}
+
+	private List<ApplicationField> GetRequiredFields(Application application, Dictionary<string, object>? prefilledData = null)
+	{
+		prefilledData ??= GetPrefilledData(application);
+
+		// Merge with existing form data
+		foreach (var kvp in application.FormData)
+		{
+			prefilledData[kvp.Key] = kvp.Value;
+		}
+
+		// Find missing required fields
+		List<ApplicationField> requiredFields = new List<ApplicationField>();
+
+		foreach (var kvp in prefilledData)
+		{
+			if (kvp.Value.ToString() == "")
+			{
+				requiredFieldData[kvp.Key].Order = requiredFields.Count + 1;
+				requiredFields.Add(
+					requiredFieldData[kvp.Key]
+				);
+			}
+		}
+
+		List<ApplicationField> additionalTemplateFields = application.ApplicationTemplate.Fields
+				.Where(f => !prefilledData.ContainsKey(f.Name))
+				.OrderBy(f => f.Order)
+				.ToList();
+
+		foreach (ApplicationField field in additionalTemplateFields)
+		{
+			field.Order = requiredFields.Count + 1;
+			requiredFields.Add(field);
+		}
+
+		return requiredFields;
 	}
 
 	private Dictionary<string, object> GetPrefilledData(Application application)
@@ -546,7 +579,7 @@ public class ApplicationService(ApplicationDbContext _context, IFileGenerationSe
 				{
 						MinLength = 5,
 						MaxLength = 150,
-						ValidationMessage = "Adres musi mieć od 5 do 200 znaków"
+						ValidationMessage = "Adres musi mieć od 5 do 150 znaków"
 				},
 				HelpText = "Podaj pełny adres zamieszkania",
 				Order = 2

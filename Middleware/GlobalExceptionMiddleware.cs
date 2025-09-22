@@ -43,6 +43,20 @@ public class GlobalExceptionMiddleware
 			response.Error = businessException.Message;
 			response.Code = businessException.ErrorCode;
 			context.Response.StatusCode = businessException.StatusCode;
+
+			response.Data = businessException switch
+			{
+				ValidationException v => v.AdditionalData,
+				_ => []
+			};
+
+			switch (businessException)
+			{
+				case ValidationException:
+
+					break;
+				default: break;
+			}
 		}
 		// Handling standard .NET exceptions
 		else
