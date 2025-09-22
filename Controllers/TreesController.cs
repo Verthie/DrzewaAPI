@@ -49,12 +49,23 @@ public class TreesController(ITreeService _treeService) : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> CreateTreeSubmission([FromBody] CreateTreeSubmissionDto request)
+    public async Task<IActionResult> CreateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
+        if (images == null || images.Count == 0)
+        {
+            return BadRequest("At least one image needs to be provided");
+        }
+
+        // Validate images
+        if (images.Count > 5) // Limit to 5 images
+        {
+            return BadRequest("Maximum 5 images allowed");
+        }
+
         Guid userId = User.GetCurrentUserId();
-        TreeSubmissionDto result = await _treeService.CreateTreeSubmissionAsync(request, userId);
+        TreeSubmissionDto result = await _treeService.CreateTreeSubmissionAsync(request, images, userId);
 
         return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
     }

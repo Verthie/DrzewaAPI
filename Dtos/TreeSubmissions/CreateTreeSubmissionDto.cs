@@ -6,7 +6,6 @@ namespace DrzewaAPI.Dtos.TreeSubmissions;
 
 public record CreateTreeSubmissionDto
 {
-	public Guid Id { get; init; }
 	[Required(ErrorMessage = "Gatunek jest wymagany")]
 	public required Guid SpeciesId { get; init; }
 	[Required(ErrorMessage = "Lokalizacja jest wymagana")]
@@ -25,6 +24,5 @@ public record CreateTreeSubmissionDto
 	public required int EstimatedAge { get; set; }
 	public string? Description { get; set; }
 	[Required(ErrorMessage = "Przynajmniej jeden załącznik jest wymagany")]
-	public required List<string> Images { get; set; }
 	public bool IsMonument { get; init; } = false;
 }

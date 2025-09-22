@@ -24,7 +24,7 @@ public class TreeSubmission
 	[Required]
 	public required int EstimatedAge { get; set; }
 	public string? Description { get; set; }
-	public required List<string> Images { get; set; }
+	public List<string>? Images { get; set; }
 	public bool IsMonument { get; set; } = false;
 	public SubmissionStatus Status { get; set; } = SubmissionStatus.Pending;
 	public DateTime SubmissionDate { get; set; } = DateTime.UtcNow;

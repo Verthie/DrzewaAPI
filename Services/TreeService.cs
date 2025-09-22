@@ -3,26 +3,47 @@ using DrzewaAPI.Dtos.TreeSubmissions;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Models.ValueObjects;
+using DrzewaAPI.Utils;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _logger) : ITreeService
+public class TreeService : ITreeService
 {
+	private readonly ApplicationDbContext _context;
+	private readonly ILogger<TreeService> _logger;
+	private readonly IImageService _imageService;
+	private readonly IHttpContextAccessor _httpContextAccessor;
+
+	public TreeService(
+			ApplicationDbContext context,
+			ILogger<TreeService> logger,
+			IImageService imageService,
+			IHttpContextAccessor httpContextAccessor)
+	{
+		_context = context;
+		_logger = logger;
+		_imageService = imageService;
+		_httpContextAccessor = httpContextAccessor;
+	}
+
 	public async Task<List<TreeSubmissionDto>> GetTreeSubmissionsAsync()
 	{
 		try
 		{
-			List<TreeSubmissionDto> submissions = await _context.TreeSubmissions
+			List<TreeSubmission> submissions = await _context.TreeSubmissions
 				.Include(s => s.Species)
 				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
 				.Include(s => s.Comments)
-				.Select(s => MapToTreeSubmissionDto(s))
 				.ToListAsync();
 
-			return submissions;
+			List<TreeSubmissionDto> result = submissions
+				.Select(s => MapToTreeSubmissionDto(s))
+				.ToList();
+
+			return result;
 		}
 		catch (Exception ex)
 		{
@@ -35,16 +56,19 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 	{
 		try
 		{
-			List<TreeSubmissionDto> submissions = await _context.TreeSubmissions
+			List<TreeSubmission> submissions = await _context.TreeSubmissions
 					.Where(s => s.UserId == userId)
 					.Include(s => s.Species)
 					.Include(s => s.TreeVotes)
 					.Include(s => s.User)
 					.Include(s => s.Comments)
-					.Select(s => MapToTreeSubmissionDto(s))
 					.ToListAsync();
 
-			return submissions;
+			List<TreeSubmissionDto> result = submissions
+				.Select(s => MapToTreeSubmissionDto(s))
+				.ToList();
+
+			return result;
 		}
 		catch (SqlException ex) when (ex.Number == -2)
 		{
@@ -88,7 +112,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		}
 	}
 
-	public async Task<TreeSubmissionDto> CreateTreeSubmissionAsync(CreateTreeSubmissionDto req, Guid userId)
+	public async Task<TreeSubmissionDto> CreateTreeSubmissionAsync(CreateTreeSubmissionDto req, IFormFileCollection images, Guid userId)
 	{
 		try
 		{
@@ -114,12 +138,29 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 				IsAlive = req.IsAlive,
 				EstimatedAge = req.EstimatedAge,
 				Description = req.Description,
-				Images = req.Images,
+				Images = new List<string>(),
 				IsMonument = req.IsMonument,
 			};
 
 			_context.TreeSubmissions.Add(submission);
 			await _context.SaveChangesAsync();
+
+			// Handle image uploads
+			if (images != null && images.Count > 0)
+			{
+				try
+				{
+					string folderPath = $"uploads/tree-submissions/{submission.Id}";
+					List<string> imagePaths = await _imageService.SaveImagesAsync(images, folderPath);
+					submission.Images = imagePaths;
+					await _context.SaveChangesAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error saving images for tree submission {Id}", submission.Id);
+					// TODO Notify the user that images couldn't be saved
+				}
+			}
 
 			// Load navigation properties
 			await _context.Entry(submission).Reference(s => s.User).LoadAsync();
@@ -155,6 +196,12 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 
 			// Check privileges
 			if (!isModerator && submission.UserId != userId) throw EntityAccessDeniedException.ForTree(treeId, userId);
+
+			// Delete associated images
+			if (submission.Images?.Any() == true)
+			{
+				_imageService.DeleteImages(submission.Images);
+			}
 
 			_context.TreeSubmissions.Remove(submission);
 			await _context.SaveChangesAsync();
@@ -262,7 +309,7 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 		}
 	}
 
-	private static TreeSubmissionDto MapToTreeSubmissionDto(TreeSubmission s)
+	private TreeSubmissionDto MapToTreeSubmissionDto(TreeSubmission s)
 	{
 		return new TreeSubmissionDto
 		{
@@ -282,7 +329,8 @@ public class TreeService(ApplicationDbContext _context, ILogger<TreeService> _lo
 			IsAlive = s.IsAlive,
 			EstimatedAge = s.EstimatedAge,
 			Description = s.Description,
-			Images = s.Images,
+			ImageUrls = s.Images?.Select(path =>
+						ImageHelper.GetImageUrl(path, _httpContextAccessor)).ToList() ?? new List<string>(),
 			IsMonument = s.IsMonument,
 			Status = s.Status,
 			SubmissionDate = s.SubmissionDate,

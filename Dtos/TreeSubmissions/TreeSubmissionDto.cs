@@ -16,7 +16,7 @@ public record TreeSubmissionDto
 	public bool IsAlive { get; init; } = true;
 	public int EstimatedAge { get; set; }
 	public string? Description { get; set; }
-	public required List<string> Images { get; set; }
+	public List<string> ImageUrls { get; set; } = new();
 	public bool IsMonument { get; init; } = false;
 	public SubmissionStatus Status { get; init; }
 	public DateTime SubmissionDate { get; init; }
