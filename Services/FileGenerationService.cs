@@ -34,18 +34,20 @@ public class FileGenerationService(IWebHostEnvironment _environment, ILogger<Fil
 		}
 	}
 
-	public async Task<string> GeneratePdfAsync(string htmlContent, string fileName)
+	public async Task<string> GeneratePdfAsync(string htmlContent, string folderPath)
 	{
 		try
 		{
 			// Ensure the pdfs directory exists
-			var pdfsDirectory = Path.Combine(_environment.WebRootPath, "pdfs");
+			string pdfsDirectory = Path.Combine(_environment.WebRootPath, folderPath);
+
 			if (!Directory.Exists(pdfsDirectory))
 			{
 				Directory.CreateDirectory(pdfsDirectory);
 			}
 
-			var filePath = Path.Combine(pdfsDirectory, fileName);
+			string uniqueFileName = $"wniosek_{Guid.NewGuid()}.pdf";
+			string filePath = Path.Combine(pdfsDirectory, uniqueFileName);
 
 			// PDF generation with PuppeteerSharp
 			BrowserFetcher browserFetcher = new BrowserFetcher();
@@ -73,7 +75,10 @@ public class FileGenerationService(IWebHostEnvironment _environment, ILogger<Fil
 			});
 
 			_logger.LogInformation($"PDF wygenerowany: {filePath}");
-			return $"/pdfs/{fileName}";
+
+			string relativePath = Path.Combine(folderPath, uniqueFileName).Replace("\\", "/");
+
+			return relativePath;
 		}
 		catch (Exception ex)
 		{

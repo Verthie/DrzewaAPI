@@ -330,7 +330,7 @@ public class TreeService : ITreeService
 			EstimatedAge = s.EstimatedAge,
 			Description = s.Description,
 			ImageUrls = s.Images?.Select(path =>
-						ImageHelper.GetImageUrl(path, _httpContextAccessor)).ToList() ?? new List<string>(),
+						FileHelper.GetFileUrl(path, _httpContextAccessor)).ToList() ?? new List<string>(),
 			IsMonument = s.IsMonument,
 			Status = s.Status,
 			SubmissionDate = s.SubmissionDate,

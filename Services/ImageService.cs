@@ -16,7 +16,11 @@ public class ImageService(IWebHostEnvironment _environment, ILogger<ImageService
 
 		// Create directory if it doesn't exist
 		string uploadsPath = Path.Combine(_environment.WebRootPath, folderPath);
-		Directory.CreateDirectory(uploadsPath);
+
+		if (!Directory.Exists(uploadsPath))
+		{
+			Directory.CreateDirectory(uploadsPath);
+		}
 
 		foreach (IFormFile image in images)
 		{

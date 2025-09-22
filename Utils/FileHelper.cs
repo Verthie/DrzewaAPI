@@ -2,18 +2,18 @@ using System;
 
 namespace DrzewaAPI.Utils;
 
-public static class ImageHelper
+public static class FileHelper
 {
-	public static string GetImageUrl(string imagePath, IHttpContextAccessor httpContextAccessor)
+	public static string GetFileUrl(string filePath, IHttpContextAccessor httpContextAccessor)
 	{
-		if (string.IsNullOrEmpty(imagePath))
+		if (string.IsNullOrEmpty(filePath))
 			return string.Empty;
 
 		HttpRequest? request = httpContextAccessor.HttpContext?.Request;
 		string baseUrl = $"{request?.Scheme}://{request?.Host}";
 
 		// Ensure path starts with /
-		string normalizedPath = imagePath.StartsWith("/") ? imagePath : "/" + imagePath;
+		string normalizedPath = filePath.StartsWith("/") ? filePath : "/" + filePath;
 
 		return $"{baseUrl}{normalizedPath}";
 	}
