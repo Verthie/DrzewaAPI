@@ -1,6 +1,7 @@
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DrzewaAPI.Controllers;
 
@@ -9,6 +10,7 @@ namespace DrzewaAPI.Controllers;
 public class AuthController(IAuthService _authService) : ControllerBase
 {
 
+	[EnableRateLimiting("UserPolicy")]
 	[HttpPost("register")]
 	public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
 	{

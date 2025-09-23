@@ -1,4 +1,3 @@
-using System;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -6,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DrzewaAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class ApplicationTemplatesController(IApplicationTemplateService _templateService) : ControllerBase
 {
 	[HttpGet]

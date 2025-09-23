@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DrzewaAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class UsersController(IUserService _userService) : ControllerBase
 {
     [Authorize(Roles = "Moderator")]

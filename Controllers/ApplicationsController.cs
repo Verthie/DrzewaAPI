@@ -1,15 +1,15 @@
+using System.ComponentModel.DataAnnotations;
 using DrzewaAPI.Extensions;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DrzewaAPI.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
 public class ApplicationsController(IApplicationService _applicationService) : ControllerBase
 {
 	[HttpGet]
@@ -34,7 +34,8 @@ public class ApplicationsController(IApplicationService _applicationService) : C
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> CreateApplication([FromBody] CreateApplicationDto createDto)
+	[IdempotentAction(10)] // Cache for 10 minutes
+	public async Task<IActionResult> CreateApplication([FromBody] CreateApplicationDto createDto, [FromHeader(Name = "X-Idempotency-Key")][Required] string idempotencyKey)
 	{
 		ValidationHelpers.ValidateModelState(ModelState);
 		Guid userId = User.GetCurrentUserId();

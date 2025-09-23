@@ -1,13 +1,10 @@
 using System.Security.Claims;
-using DrzewaAPI.Data;
 using DrzewaAPI.Extensions;
-using DrzewaAPI.Models;
-using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DrzewaAPI.Controllers;
 
@@ -46,6 +43,7 @@ public class TreesController(ITreeService _treeService) : ControllerBase
 
     [Authorize]
     [HttpPost]
+    [EnableRateLimiting("UserPolicy")]
     public async Task<IActionResult> CreateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images)
     {
         ValidationHelpers.ValidateModelState(ModelState);
