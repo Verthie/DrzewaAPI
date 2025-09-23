@@ -25,9 +25,6 @@ public class DataSeeder(ApplicationDbContext _db, IPasswordHasher<User> _hasher,
 		if (!await _db.TreeSpecies.AnyAsync(ct)) _db.TreeSpecies.AddRange(species);
 		else species = await _db.TreeSpecies.ToArrayAsync(ct);
 
-		TreeSpeciesImage[] images = GetMockImages(species);
-		if (!await _db.TreeSpeciesImages.AnyAsync(ct)) _db.TreeSpeciesImages.AddRange(images);
-		// else images = await _db.TreeSpeciesImages.ToArrayAsync(ct);
 
 		TreeSubmission[] submissions = GetMockSubmissionsFromJson(users, "Utils\\Mocks\\pomniki_przyrody_to_post.json");
 		if (!await _db.TreeSubmissions.AnyAsync(ct)) _db.TreeSubmissions.AddRange(submissions);

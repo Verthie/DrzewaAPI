@@ -7,7 +7,7 @@ using PuppeteerSharp.Media;
 
 namespace DrzewaAPI.Services;
 
-public class FileGenerationService(IWebHostEnvironment _environment, ILogger<FileGenerationService> _logger) : IFileGenerationService
+public class FileGenerationService(IAzureStorageService _azureStorageService, ILogger<FileGenerationService> _logger) : IFileGenerationService
 {
 	public async Task<string> GenerateHtmlFromTemplateAsync(string template, Dictionary<string, object> data)
 	{
@@ -38,16 +38,7 @@ public class FileGenerationService(IWebHostEnvironment _environment, ILogger<Fil
 	{
 		try
 		{
-			// Ensure the pdfs directory exists
-			string pdfsDirectory = Path.Combine(_environment.WebRootPath, folderPath);
-
-			if (!Directory.Exists(pdfsDirectory))
-			{
-				Directory.CreateDirectory(pdfsDirectory);
-			}
-
 			string uniqueFileName = $"wniosek_{Guid.NewGuid()}.pdf";
-			string filePath = Path.Combine(pdfsDirectory, uniqueFileName);
 
 			// PDF generation with PuppeteerSharp
 			BrowserFetcher browserFetcher = new BrowserFetcher();
@@ -61,7 +52,8 @@ public class FileGenerationService(IWebHostEnvironment _environment, ILogger<Fil
 			using var page = await browser.NewPageAsync();
 			await page.SetContentAsync(htmlContent);
 
-			await page.PdfAsync(filePath, new PdfOptions
+			// Generate PDF to memory stream
+			byte[] pdfBytes = await page.PdfDataAsync(new PdfOptions
 			{
 				Format = PaperFormat.A4,
 				PrintBackground = true,
@@ -74,9 +66,10 @@ public class FileGenerationService(IWebHostEnvironment _environment, ILogger<Fil
 				}
 			});
 
-			_logger.LogInformation($"PDF wygenerowany: {filePath}");
+			// Save PDF to Azure Storage
+			string relativePath = await _azureStorageService.SavePdfAsync(pdfBytes, uniqueFileName, folderPath);
 
-			string relativePath = Path.Combine(folderPath, uniqueFileName).Replace("\\", "/");
+			_logger.LogInformation($"PDF wygenerowany i zapisany w Azure Storage: {relativePath}");
 
 			return relativePath;
 		}

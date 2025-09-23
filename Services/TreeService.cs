@@ -15,17 +15,20 @@ public class TreeService : ITreeService
 	private readonly ILogger<TreeService> _logger;
 	private readonly IImageService _imageService;
 	private readonly IHttpContextAccessor _httpContextAccessor;
+	private readonly IAzureStorageService _azureStorageService;
 
 	public TreeService(
 			ApplicationDbContext context,
 			ILogger<TreeService> logger,
 			IImageService imageService,
-			IHttpContextAccessor httpContextAccessor)
+			IHttpContextAccessor httpContextAccessor,
+			IAzureStorageService azureStorageService)
 	{
 		_context = context;
 		_logger = logger;
 		_imageService = imageService;
 		_httpContextAccessor = httpContextAccessor;
+		_azureStorageService = azureStorageService;
 	}
 
 	public async Task<List<TreeSubmissionDto>> GetTreeSubmissionsAsync()
@@ -330,7 +333,7 @@ public class TreeService : ITreeService
 			EstimatedAge = s.EstimatedAge,
 			Description = s.Description,
 			ImageUrls = s.Images?.Select(path =>
-						FileHelper.GetFileUrl(path, _httpContextAccessor)).ToList() ?? new List<string>(),
+						FileHelper.GetFileUrl(path, _azureStorageService)).ToList() ?? new List<string>(),
 			IsMonument = s.IsMonument,
 			Status = s.Status,
 			SubmissionDate = s.SubmissionDate,
