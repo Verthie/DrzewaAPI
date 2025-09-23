@@ -1,7 +1,39 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace DrzewaAPI.Dtos.Auth;
+namespace DrzewaAPI.Dtos;
+
+public record AuthResponseDto
+{
+	public required string AccessToken { get; init; }
+	public required string RefreshToken { get; init; }
+}
+
+public record ErrorResponseDto
+{
+	public string Error { get; set; } = string.Empty;
+	public string Code { get; set; } = string.Empty;
+	public Exception? InnerException { get; set; }
+	public string Details { get; set; } = string.Empty;
+	public Dictionary<string, string[]> Data { get; set; } = new Dictionary<string, string[]>();
+	public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+}
+
+public record LoginDto
+{
+	[Required(ErrorMessage = "Email jest wymagany")]
+
+	[EmailAddress(ErrorMessage = "Nieprawidłowy format email")]
+	public required string Email { get; init; }
+
+	[Required(ErrorMessage = "Hasło jest wymagane")]
+	public required string Password { get; init; }
+}
+
+public record RefreshTokenRequestDto
+{
+	public string RefreshToken { get; init; } = string.Empty;
+}
 
 public record RegisterDto
 {

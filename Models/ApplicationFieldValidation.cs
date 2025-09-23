@@ -1,5 +1,3 @@
-using System;
-
 namespace DrzewaAPI.Models;
 
 public class ApplicationFieldValidation

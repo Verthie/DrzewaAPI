@@ -1,9 +1,4 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Models.ValueObjects;
-using DrzewaAPI.Utils;
 
 namespace DrzewaAPI.Models;
 
@@ -13,7 +8,7 @@ public class TreeSubmission
 	public Guid UserId { get; set; }
 	public Guid SpeciesId { get; set; }
 	[Required]
-	public required Location Location { get; set; }
+	public required LocationDto Location { get; set; }
 	[Required]
 	public required int Circumference { get; set; } // Pierśnica
 	[Required]

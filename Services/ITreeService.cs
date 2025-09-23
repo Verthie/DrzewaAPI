@@ -1,8 +1,3 @@
-using System;
-using DrzewaAPI.Dtos.TreeSubmissions;
-using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Models.ValueObjects;
-
 namespace DrzewaAPI.Services;
 
 public interface ITreeService
@@ -13,5 +8,5 @@ public interface ITreeService
 	Task<TreeSubmissionDto> CreateTreeSubmissionAsync(CreateTreeSubmissionDto request, IFormFileCollection images, Guid userId);
 	Task DeleteTreeSubmissionAsync(Guid treeId, Guid userId, bool isModerator);
 	Task ApproveTreeAsync(Guid treeId);
-	Task<VotesCount> SetVoteAsync(Guid treeId, Guid userId, VoteType? type);
+	Task<VotesDto> SetVoteAsync(Guid treeId, Guid userId, VoteType? type);
 }

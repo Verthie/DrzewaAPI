@@ -1,4 +1,6 @@
+global using DrzewaAPI.Dtos;
 global using DrzewaAPI.Middleware.Exceptions;
+global using DrzewaAPI.Models.Enums;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -24,8 +26,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Azure Storage Configuration
 builder.Services.AddSingleton(provider =>
 {
-	var connectionString = builder.Configuration.GetConnectionString("AzureStorage");
-	return new BlobServiceClient(connectionString);
+    var connectionString = builder.Configuration.GetConnectionString("AzureStorage");
+    return new BlobServiceClient(connectionString);
 });
 
 // Service Registration
@@ -33,7 +35,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
-builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ITreeService, TreeService>();
 builder.Services.AddScoped<ISpeciesService, SpeciesService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
@@ -41,7 +42,6 @@ builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IApplicationTemplateService, ApplicationTemplateService>();
 builder.Services.AddScoped<IMunicipalityService, MunicipalityService>();
 builder.Services.AddScoped<IFileGenerationService, FileGenerationService>();
-builder.Services.AddScoped<IDataSeeder, DataSeeder>();
 
 // JWT Configuration
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
@@ -161,11 +161,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
-
-using (var scope = app.Services.CreateScope())
-{
-    var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
-    await seeder.SeedAsync();
-}
 
 app.Run();

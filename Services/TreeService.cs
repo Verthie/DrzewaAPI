@@ -1,8 +1,5 @@
 using DrzewaAPI.Data;
-using DrzewaAPI.Dtos.TreeSubmissions;
 using DrzewaAPI.Models;
-using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Models.ValueObjects;
 using DrzewaAPI.Utils;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -13,20 +10,17 @@ public class TreeService : ITreeService
 {
 	private readonly ApplicationDbContext _context;
 	private readonly ILogger<TreeService> _logger;
-	private readonly IImageService _imageService;
 	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly IAzureStorageService _azureStorageService;
 
 	public TreeService(
 			ApplicationDbContext context,
 			ILogger<TreeService> logger,
-			IImageService imageService,
 			IHttpContextAccessor httpContextAccessor,
 			IAzureStorageService azureStorageService)
 	{
 		_context = context;
 		_logger = logger;
-		_imageService = imageService;
 		_httpContextAccessor = httpContextAccessor;
 		_azureStorageService = azureStorageService;
 	}
@@ -129,7 +123,7 @@ public class TreeService : ITreeService
 				Id = Guid.NewGuid(),
 				UserId = userId,
 				SpeciesId = req.SpeciesId,
-				Location = new Location
+				Location = new LocationDto
 				{
 					Lat = req.Location.Lat,
 					Lng = req.Location.Lng,
@@ -154,7 +148,7 @@ public class TreeService : ITreeService
 				try
 				{
 					string folderPath = $"uploads/tree-submissions/{submission.Id}";
-					List<string> imagePaths = await _imageService.SaveImagesAsync(images, folderPath);
+					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(images, folderPath);
 					submission.Images = imagePaths;
 					await _context.SaveChangesAsync();
 				}
@@ -203,7 +197,7 @@ public class TreeService : ITreeService
 			// Delete associated images
 			if (submission.Images?.Any() == true)
 			{
-				_imageService.DeleteImages(submission.Images);
+				_azureStorageService.DeleteImages(submission.Images);
 			}
 
 			_context.TreeSubmissions.Remove(submission);
@@ -245,7 +239,7 @@ public class TreeService : ITreeService
 		}
 	}
 
-	public async Task<VotesCount> SetVoteAsync(Guid treeId, Guid userId, VoteType? type)
+	public async Task<VotesDto> SetVoteAsync(Guid treeId, Guid userId, VoteType? type)
 	{
 		try
 		{
@@ -287,12 +281,12 @@ public class TreeService : ITreeService
 			var counts = await _context.TreeVotes
 				.Where(v => v.TreeSubmissionId == treeId)
 				.GroupBy(_ => 1)
-				.Select(g => new VotesCount
+				.Select(g => new VotesDto
 				{
 					Like = g.Count(v => v.Type == VoteType.Like),
 					Dislike = g.Count(v => v.Type == VoteType.Dislike)
 				})
-				.FirstOrDefaultAsync() ?? new VotesCount();
+				.FirstOrDefaultAsync() ?? new VotesDto();
 
 			return counts;
 		}
@@ -317,7 +311,7 @@ public class TreeService : ITreeService
 		return new TreeSubmissionDto
 		{
 			Id = s.Id,
-			UserData = new UserData
+			UserData = new UserDataDto
 			{
 				UserId = s.User.Id,
 				UserName = s.User.FullName,
@@ -338,7 +332,7 @@ public class TreeService : ITreeService
 			Status = s.Status,
 			SubmissionDate = s.SubmissionDate,
 			ApprovalDate = s.ApprovalDate,
-			Votes = new VotesCount
+			Votes = new VotesDto
 			{
 				Like = s.TreeVotes.Count(v => v.Type == VoteType.Like),
 				Dislike = s.TreeVotes.Count(v => v.Type == VoteType.Dislike)

@@ -1,8 +1,3 @@
-using System;
-using DrzewaAPI.Dtos.Comment;
-using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Models.ValueObjects;
-
 namespace DrzewaAPI.Services;
 
 public interface ICommentService
@@ -12,5 +7,5 @@ public interface ICommentService
 	Task<List<CommentDto>> GetTreeCommentsAsync(Guid treeId);
 	Task<CommentDto> CreateCommentAsync(CreateCommentDto request, Guid userId, Guid treeId);
 	Task DeleteCommentAsync(Guid commentId, Guid userId, bool isModerator);
-	Task<VotesCount> SetVoteAsync(Guid commentId, Guid userId, VoteType? type);
+	Task<VotesDto> SetVoteAsync(Guid commentId, Guid userId, VoteType? type);
 }

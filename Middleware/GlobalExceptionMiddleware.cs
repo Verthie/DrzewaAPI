@@ -1,7 +1,4 @@
-using System;
 using System.Text.Json;
-using DrzewaAPI.Dtos.Auth;
-using DrzewaAPI.Middleware.Exceptions;
 using Microsoft.Data.SqlClient;
 
 namespace DrzewaAPI.Middleware;

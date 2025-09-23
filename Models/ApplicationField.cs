@@ -1,6 +1,3 @@
-using System;
-using DrzewaAPI.Models.Enums;
-
 namespace DrzewaAPI.Models;
 
 public class ApplicationField

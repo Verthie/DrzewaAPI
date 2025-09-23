@@ -1,8 +1,3 @@
-using System;
-using DrzewaAPI.Dtos.User;
-using DrzewaAPI.Models;
-using DrzewaAPI.Models.Enums;
-
 namespace DrzewaAPI.Services;
 
 public interface IUserService

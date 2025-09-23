@@ -1,6 +1,3 @@
-using System;
-using DrzewaAPI.Dtos.Application;
-
 namespace DrzewaAPI.Services;
 
 public interface IApplicationTemplateService

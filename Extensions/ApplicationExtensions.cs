@@ -1,5 +1,3 @@
-using System;
-using DrzewaAPI.Dtos.Application;
 using DrzewaAPI.Models;
 
 namespace DrzewaAPI.Extensions;

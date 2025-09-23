@@ -1,8 +1,5 @@
 using System;
 using DrzewaAPI.Data;
-using DrzewaAPI.Dtos.Application;
-using DrzewaAPI.Dtos.Municipality;
-using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
 using Microsoft.EntityFrameworkCore;
 

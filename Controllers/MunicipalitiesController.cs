@@ -1,9 +1,6 @@
-using DrzewaAPI.Dtos.Auth;
-using DrzewaAPI.Dtos.Municipality;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DrzewaAPI.Controllers;

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using DrzewaAPI.Utils;
 
 namespace DrzewaAPI.Models;
 

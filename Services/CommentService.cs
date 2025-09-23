@@ -1,9 +1,5 @@
-using System;
 using DrzewaAPI.Data;
-using DrzewaAPI.Dtos.Comment;
 using DrzewaAPI.Models;
-using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Models.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
@@ -142,7 +138,7 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 		}
 	}
 
-	public async Task<VotesCount> SetVoteAsync(Guid commentId, Guid userId, VoteType? type)
+	public async Task<VotesDto> SetVoteAsync(Guid commentId, Guid userId, VoteType? type)
 	{
 		try
 		{
@@ -184,12 +180,12 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 			var counts = await _context.CommentVotes
 				.Where(v => v.CommentId == commentId)
 				.GroupBy(_ => 1)
-				.Select(g => new VotesCount
+				.Select(g => new VotesDto
 				{
 					Like = g.Count(v => v.Type == VoteType.Like),
 					Dislike = g.Count(v => v.Type == VoteType.Dislike)
 				})
-				.FirstOrDefaultAsync() ?? new VotesCount();
+				.FirstOrDefaultAsync() ?? new VotesDto();
 
 			return counts;
 		}
@@ -215,7 +211,7 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 		{
 			Id = c.Id,
 			TreePolishName = c.TreeSubmission?.Species.PolishName,
-			UserData = new UserData
+			UserData = new UserDataDto
 			{
 				UserName = c.User.FullName,
 				Avatar = c.User.Avatar
@@ -223,7 +219,7 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 			Content = c.Content,
 			DatePosted = c.DatePosted,
 			IsLegend = c.IsLegend,
-			Votes = new VotesCount
+			Votes = new VotesDto
 			{
 				Like = c.CommentVotes.Count(v => v.Type == VoteType.Like),
 				Dislike = c.CommentVotes.Count(v => v.Type == VoteType.Dislike)

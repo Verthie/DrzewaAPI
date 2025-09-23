@@ -1,6 +1,4 @@
 using System;
-using DrzewaAPI.Dtos.Application;
-using DrzewaAPI.Dtos.Auth;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;

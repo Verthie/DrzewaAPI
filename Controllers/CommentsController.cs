@@ -1,14 +1,8 @@
 using System.Security.Claims;
-using DrzewaAPI.Dtos.Auth;
-using DrzewaAPI.Dtos.Comment;
-using DrzewaAPI.Dtos.TreeSubmissions;
 using DrzewaAPI.Extensions;
-using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Models.ValueObjects;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DrzewaAPI.Controllers;
@@ -61,12 +55,12 @@ public class CommentsController(ICommentService _commentService) : ControllerBas
 
 	[Authorize]
 	[HttpPut("{id}/vote")]
-	public async Task<ActionResult<VotesCount>> UpdateVote(string id, [FromBody] VoteRequestDto request)
+	public async Task<ActionResult<VotesDto>> UpdateVote(string id, [FromBody] VoteRequestDto request)
 	{
 		Guid commentId = ValidationHelpers.ValidateAndParseId(id);
 		Guid userId = User.GetCurrentUserId();
 
-		VotesCount result = await _commentService.SetVoteAsync(commentId, userId, request.Type);
+		VotesDto result = await _commentService.SetVoteAsync(commentId, userId, request.Type);
 
 		return Ok(result);
 	}
@@ -87,12 +81,12 @@ public class CommentsController(ICommentService _commentService) : ControllerBas
 
 	[Authorize]
 	[HttpDelete("{id}/vote")]
-	public async Task<ActionResult<VotesCount>> DeleteVote(string id)
+	public async Task<ActionResult<VotesDto>> DeleteVote(string id)
 	{
 		Guid commentId = ValidationHelpers.ValidateAndParseId(id);
 		Guid userId = User.GetCurrentUserId();
 
-		VotesCount result = await _commentService.SetVoteAsync(commentId, userId, type: null);
+		VotesDto result = await _commentService.SetVoteAsync(commentId, userId, type: null);
 
 		return Ok(result);
 	}

@@ -1,11 +1,8 @@
 using System.Security.Claims;
 using DrzewaAPI.Data;
-using DrzewaAPI.Dtos.Auth;
-using DrzewaAPI.Dtos.TreeSubmissions;
 using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Models.ValueObjects;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -95,24 +92,24 @@ public class TreesController(ITreeService _treeService) : ControllerBase
 
     [Authorize]
     [HttpPut("{id}/vote")]
-    public async Task<ActionResult<VotesCount>> UpdateVote(string id, [FromBody] VoteRequestDto request)
+    public async Task<ActionResult<VotesDto>> UpdateVote(string id, [FromBody] VoteRequestDto request)
     {
         Guid treeId = ValidationHelpers.ValidateAndParseId(id);
         Guid userId = User.GetCurrentUserId();
 
-        VotesCount result = await _treeService.SetVoteAsync(treeId, userId, request.Type);
+        VotesDto result = await _treeService.SetVoteAsync(treeId, userId, request.Type);
 
         return Ok(result);
     }
 
     [Authorize]
     [HttpDelete("{id}/vote")]
-    public async Task<ActionResult<VotesCount>> DeleteVote(string id)
+    public async Task<ActionResult<VotesDto>> DeleteVote(string id)
     {
         Guid treeId = ValidationHelpers.ValidateAndParseId(id);
         Guid userId = User.GetCurrentUserId();
 
-        VotesCount result = await _treeService.SetVoteAsync(treeId, userId, type: null);
+        VotesDto result = await _treeService.SetVoteAsync(treeId, userId, type: null);
 
         return Ok(result);
     }

@@ -1,7 +1,3 @@
-using System;
-using DrzewaAPI.Dtos.Application;
-using DrzewaAPI.Dtos.Municipality;
-
 namespace DrzewaAPI.Services;
 
 public interface IMunicipalityService

@@ -1,5 +1,3 @@
-using System;
-
 namespace DrzewaAPI.Services;
 
 public interface IFileGenerationService

@@ -1,9 +1,5 @@
-using DrzewaAPI.Dtos.Auth;
-using DrzewaAPI.Dtos.Species;
-using DrzewaAPI.Models;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DrzewaAPI.Controllers;

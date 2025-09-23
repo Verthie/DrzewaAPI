@@ -1,6 +1,3 @@
-using System;
-using DrzewaAPI.Dtos.Species;
-
 namespace DrzewaAPI.Services;
 
 public interface ISpeciesService

@@ -1,7 +1,3 @@
-using System;
-using DrzewaAPI.Data;
-using DrzewaAPI.Models.Enums;
-using Microsoft.EntityFrameworkCore;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
 

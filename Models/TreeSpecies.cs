@@ -1,6 +1,4 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-using DrzewaAPI.Models.ValueObjects;
 
 namespace DrzewaAPI.Models;
 
@@ -15,8 +13,8 @@ public class TreeSpecies
 	public required string Family { get; set; }
 	public string? Description { get; set; }
 	public List<string>? IdentificationGuide { get; set; }
-	public SeasonalChanges? SeasonalChanges { get; set; }
-	public Traits? Traits { get; set; }
+	public SeasonalChangesDto? SeasonalChanges { get; set; }
+	public TraitsDto? Traits { get; set; }
 
 	// Navigation Properties
 	public ICollection<TreeSpeciesImage> Images { get; set; } = new List<TreeSpeciesImage>();

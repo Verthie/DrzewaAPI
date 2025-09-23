@@ -1,8 +1,6 @@
-using System;
 using DrzewaAPI.Data;
-using DrzewaAPI.Dtos.Species;
-using DrzewaAPI.Models;
 using DrzewaAPI.Extensions;
+using DrzewaAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;

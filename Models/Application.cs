@@ -1,7 +1,3 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using DrzewaAPI.Models.Enums;
-
 namespace DrzewaAPI.Models;
 
 public class Application

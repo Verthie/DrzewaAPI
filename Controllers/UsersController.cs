@@ -1,8 +1,5 @@
 using System.Security.Claims;
-using DrzewaAPI.Dtos.Auth;
-using DrzewaAPI.Dtos.User;
 using DrzewaAPI.Extensions;
-using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Authorization;

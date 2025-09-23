@@ -1,9 +1,5 @@
-using System;
 using DrzewaAPI.Data;
-using DrzewaAPI.Dtos.User;
 using DrzewaAPI.Models;
-using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Models.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,7 +51,7 @@ public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _p
 					Avatar = user.Avatar,
 					RegistrationDate = user.RegistrationDate,
 					Role = user.Role,
-					Statistics = new UserStatistics
+					Statistics = new UserStatisticsDto
 					{
 						ApplicationCount = user.Applications.Count,
 						SubmissionCount = user.TreeSubmissions.Count
@@ -166,7 +162,7 @@ public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _p
 			PostalCode = u.PostalCode,
 			Avatar = u.Avatar,
 			RegistrationDate = u.RegistrationDate,
-			Statistics = new UserStatistics()
+			Statistics = new UserStatisticsDto()
 			{
 				ApplicationCount = u.Applications.Count,
 				SubmissionCount = u.TreeSubmissions.Count

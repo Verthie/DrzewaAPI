@@ -1,5 +1,3 @@
-using DrzewaAPI.Dtos.Auth;
-
 namespace DrzewaAPI.Services;
 
 public interface IAuthService
