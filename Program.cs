@@ -2,6 +2,7 @@ global using DrzewaAPI.Middleware.Exceptions;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Azure.Storage.Blobs;
 using DrzewaAPI.Configuration;
 using DrzewaAPI.Data;
 using DrzewaAPI.Middleware;
@@ -20,10 +21,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Azure Storage Configuration
+builder.Services.AddSingleton(provider =>
+{
+	var connectionString = builder.Configuration.GetConnectionString("AzureStorage");
+	return new BlobServiceClient(connectionString);
+});
+
 // Service Registration
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ITreeService, TreeService>();
 builder.Services.AddScoped<ISpeciesService, SpeciesService>();
