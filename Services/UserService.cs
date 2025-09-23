@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _passwordHasher, ILogger<UserService> _logger) : IUserService
+public class UserService(ApplicationDbContext _context, IAzureStorageService _azureStorageService, IPasswordHasher<User> _passwordHasher, ILogger<UserService> _logger) : IUserService
 {
 	public async Task<List<UserDto>> GetAllUsersAsync()
 	{
@@ -69,7 +69,7 @@ public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _p
 		}
 	}
 
-	public async Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, bool isModerator)
+	public async Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, IFormFile image, bool isModerator)
 	{
 		try
 		{
@@ -82,10 +82,27 @@ public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _p
 
 			// Field update
 			user.Phone = updateDto.Phone?.Trim();
-			user.Avatar = updateDto.Avatar?.Trim();
 			user.Address = updateDto.Address?.Trim();
 			user.City = updateDto.City?.Trim();
 			user.PostalCode = updateDto.PostalCode?.Trim();
+
+
+			// Handle image upload
+			if (image != null)
+			{
+				try
+				{
+					string folderPath = $"uploads/user-avatars/{user.Id}";
+					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(new FormFileCollection() { image }, folderPath);
+					user.Avatar = imagePaths[0];
+					await _context.SaveChangesAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error saving images for user {Id}", user.Id);
+					// TODO Notify the user that images couldn't be saved
+				}
+			}
 
 			await _context.SaveChangesAsync();
 

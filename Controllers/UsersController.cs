@@ -43,9 +43,14 @@ public class UsersController(IUserService _userService) : ControllerBase
     }
 
     [HttpPut("data")]
-    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto updateDto)
+    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto updateDto, IFormFile image)
     {
         ValidationHelpers.ValidateModelState(ModelState);
+
+        if (image == null)
+        {
+            return BadRequest("An image needs to be provided");
+        }
 
         updateDto.UserId ??= User.GetCurrentUserId().ToString();
 
@@ -55,7 +60,7 @@ public class UsersController(IUserService _userService) : ControllerBase
         string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
         bool isModerator = currentUserRole == UserRole.Moderator.ToString();
 
-        UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userId, updateDto, isModerator);
+        UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userId, updateDto, image, isModerator);
 
         return Ok(updatedUser);
     }

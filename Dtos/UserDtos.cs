@@ -42,9 +42,6 @@ public record UpdateUserDto
 	public string? Address { get; init; }
 	public string? City { get; init; }
 	public string? PostalCode { get; init; }
-
-	[Url(ErrorMessage = "Nieprawidłowy format URL avatara")]
-	public string? Avatar { get; init; }
 }
 
 public record UpdatePasswordDto
