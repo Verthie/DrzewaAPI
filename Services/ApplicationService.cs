@@ -10,19 +10,19 @@ public class ApplicationService : IApplicationService
 {
 	private readonly ApplicationDbContext _context;
 	private readonly IFileGenerationService _fileGenerationService;
+	private readonly IAzureStorageService _azureStorageService;
 	private readonly ILogger<ApplicationService> _logger;
-	private readonly IHttpContextAccessor _httpContextAccessor;
 
 	public ApplicationService(
 			ApplicationDbContext context,
 			IFileGenerationService fileGenerationService,
-			ILogger<ApplicationService> logger,
-			IHttpContextAccessor httpContextAccessor)
+			IAzureStorageService azureStorageService,
+			ILogger<ApplicationService> logger)
 	{
 		_context = context;
 		_fileGenerationService = fileGenerationService;
 		_logger = logger;
-		_httpContextAccessor = httpContextAccessor;
+		_azureStorageService = azureStorageService;
 	}
 
 	public async Task<List<ApplicationDto>> GetUserApplicationsAsync(Guid userId)
@@ -309,7 +309,7 @@ public class ApplicationService : IApplicationService
 			application.GeneratedPdfPath = pdfPath;
 			await _context.SaveChangesAsync();
 
-			string fileUrl = FileHelper.GetFileUrl(pdfPath, _httpContextAccessor);
+			string fileUrl = FileHelper.GetFileUrl(pdfPath, _azureStorageService);
 
 			return fileUrl;
 		}

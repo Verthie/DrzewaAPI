@@ -10,18 +10,15 @@ public class TreeService : ITreeService
 {
 	private readonly ApplicationDbContext _context;
 	private readonly ILogger<TreeService> _logger;
-	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly IAzureStorageService _azureStorageService;
 
 	public TreeService(
 			ApplicationDbContext context,
 			ILogger<TreeService> logger,
-			IHttpContextAccessor httpContextAccessor,
 			IAzureStorageService azureStorageService)
 	{
 		_context = context;
 		_logger = logger;
-		_httpContextAccessor = httpContextAccessor;
 		_azureStorageService = azureStorageService;
 	}
 
