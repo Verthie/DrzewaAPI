@@ -106,6 +106,12 @@ builder.Services.AddRateLimiter(options =>
         options.Window = TimeSpan.FromSeconds(5);
         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
     });
+    options.AddFixedWindowLimiter("SlowPolicy", options =>
+    {
+        options.PermitLimit = 3;
+        options.Window = TimeSpan.FromSeconds(6);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
 });
 
 // Swagger

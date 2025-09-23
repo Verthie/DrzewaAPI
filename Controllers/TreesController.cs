@@ -13,6 +13,7 @@ namespace DrzewaAPI.Controllers;
 public class TreesController(ITreeService _treeService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting("SlowPolicy")]
     public async Task<IActionResult> GetTreeSubmissions()
     {
         List<TreeSubmissionDto> trees = await _treeService.GetTreeSubmissionsAsync();
@@ -22,6 +23,7 @@ public class TreesController(ITreeService _treeService) : ControllerBase
 
     [Authorize]
     [HttpGet("user")]
+    [EnableRateLimiting("SlowPolicy")]
     public async Task<IActionResult> GetCurrentUserTreeSubmissions()
     {
         Guid userId = User.GetCurrentUserId();
