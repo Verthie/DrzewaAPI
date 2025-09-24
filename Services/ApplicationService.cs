@@ -80,11 +80,11 @@ public class ApplicationService : IApplicationService
 	{
 		try
 		{
-			// Verify that tree submission exists and belongs to user
+			// Verify that tree submission exists
 			TreeSubmission treeSubmission = await _context.TreeSubmissions
 					.Include(ts => ts.Species)
-					.FirstOrDefaultAsync(ts => ts.Id == createDto.TreeSubmissionId && ts.UserId == userId)
-					?? throw new EntityNotFoundException($"Nie znaleziono drzewa o ID {createDto.TreeSubmissionId} przypisanego do użytkownika o ID {userId}", "TREE_NOT_FOUND");
+					.FirstOrDefaultAsync(ts => ts.Id == createDto.TreeSubmissionId)
+					?? throw new EntityNotFoundException($"Nie znaleziono drzewa o ID {createDto.TreeSubmissionId}", "TREE_NOT_FOUND");
 
 			// Verify that application template exists and is active
 			ApplicationTemplate template = await _context.ApplicationTemplates
@@ -247,7 +247,7 @@ public class ApplicationService : IApplicationService
 			if (validationErrors.Count > 0)
 			{
 				Dictionary<string, string[]> errorDict = validationErrors.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
-				throw new Middleware.Exceptions.ValidationException(errorDict);
+				throw new ValidationException(errorDict);
 			}
 
 			// Update form data
