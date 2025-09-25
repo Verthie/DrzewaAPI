@@ -194,8 +194,8 @@ public class TokenService : ITokenService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Błąd podczas aktualizacji tokenów użytkownika");
-			throw new ServiceException($"Nieoczekiwany błąd podczas aktualizacji tokenów użytkownika", "TOKEN_UPDATE_ERROR");
+			_logger.LogError(ex, "Błąd podczas czyszczenia tokenów");
+			throw new ServiceException($"Nieoczekiwany błąd podczas czyszczenia tokenów", "TOKEN_CLEANUP_ERROR");
 		}
 	}
 

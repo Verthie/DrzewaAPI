@@ -59,7 +59,7 @@ public class TreeService : ITreeService
 					.ToListAsync();
 
 			List<TreeSubmissionDto> result = submissions
-				.Select(s => MapToTreeSubmissionDto(s))
+				.Select(MapToTreeSubmissionDto)
 				.ToList();
 
 			return result;

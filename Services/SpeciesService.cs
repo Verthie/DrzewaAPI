@@ -1,19 +1,38 @@
 using DrzewaAPI.Data;
 using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
+using DrzewaAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class SpeciesService(ApplicationDbContext _context, ILogger<SpeciesService> _logger) : ISpeciesService
+public class SpeciesService : ISpeciesService
 {
+	private readonly ApplicationDbContext _context;
+	private readonly ILogger<SpeciesService> _logger;
+	private readonly IAzureStorageService _azureStorageService;
+
+	public SpeciesService(
+			ApplicationDbContext context,
+			ILogger<SpeciesService> logger,
+			IAzureStorageService azureStorageService)
+	{
+		_context = context;
+		_logger = logger;
+		_azureStorageService = azureStorageService;
+	}
+
 	public async Task<List<TreeSpeciesDto>> GetAllSpeciesAsync()
 	{
 		try
 		{
-			List<TreeSpeciesDto> species = await _context.TreeSpecies.Include(s => s.Images).Select(s => MapToTreeSpeciesDto(s)).ToListAsync();
+			List<TreeSpecies> species = await _context.TreeSpecies.ToListAsync();
 
-			return species;
+			List<TreeSpeciesDto> result = species
+				.Select(MapToTreeSpeciesDto)
+				.ToList();
+
+			return result;
 		}
 		catch (Exception ex)
 		{
@@ -27,7 +46,6 @@ public class SpeciesService(ApplicationDbContext _context, ILogger<SpeciesServic
 		try
 		{
 			TreeSpecies species = await _context.TreeSpecies
-				.Include(s => s.Images)
 				.FirstOrDefaultAsync(s => s.Id == speciesId)
 				?? throw EntityNotFoundException.ForSpecies(speciesId);
 
@@ -44,15 +62,68 @@ public class SpeciesService(ApplicationDbContext _context, ILogger<SpeciesServic
 		}
 	}
 
-	private static TreeSpeciesDto MapToTreeSpeciesDto(TreeSpecies s)
+	public async Task<TreeSpeciesDto> CreateTreeSpeciesAsync(CreateTreeSpeciesDto req, IFormFile treeImage, IFormFile leafImage, IFormFile barkImage, IFormFile fruitImage)
 	{
-		var images = s.Images.Select(i => new TreeSpeciesImageDto
+		try
 		{
-			ImageUrl = i.ImageUrl,
-			Type = i.Type,
-			AltText = i.AltText ?? i.Type.GenerateAltText(s.PolishName)
-		}).ToList();
+			TreeSpecies species = new TreeSpecies
+			{
+				Id = Guid.NewGuid(),
+				PolishName = req.PolishName,
+				LatinName = req.LatinName,
+				Family = req.Family,
+				Description = req.Description,
+				IdentificationGuide = req.IdentificationGuide,
+				SeasonalChanges = req.SeasonalChanges,
+				Traits = req.Traits,
+			};
 
+			FormFileCollection images = new FormFileCollection { treeImage, leafImage, barkImage, fruitImage };
+
+			// Handle image uploads
+			if (images != null && images.Count == 4)
+			{
+				try
+				{
+					string folderPath = $"uploads/tree-species/{species.Id}";
+					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(images, folderPath);
+					species.Images = imagePaths;
+					await _context.SaveChangesAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error saving images for tree submission {Id}", species.Id);
+					// TODO Notify the user that images couldn't be saved
+				}
+			}
+			else
+			{
+				throw new ServiceException("All images need to be provided", "MISSING_IMAGES_ERROR");
+			}
+
+			_context.TreeSpecies.Add(species);
+			await _context.SaveChangesAsync();
+
+			return MapToTreeSpeciesDto(species);
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas zapisu drzewa do bazy danych");
+			throw EntityCreationFailedException.ForTree("Błąd podczas zapisu do bazy danych");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas tworzenia gatunku");
+			throw EntityCreationFailedException.ForTree("Nieoczekiwany błąd systemu");
+		}
+	}
+
+	private TreeSpeciesDto MapToTreeSpeciesDto(TreeSpecies s)
+	{
 		return new TreeSpeciesDto
 		{
 			Id = s.Id,
@@ -62,7 +133,8 @@ public class SpeciesService(ApplicationDbContext _context, ILogger<SpeciesServic
 			Description = s.Description,
 			IdentificationGuide = s.IdentificationGuide,
 			SeasonalChanges = s.SeasonalChanges,
-			Images = images,
+			Images = s.Images?.Select(path =>
+						FileHelper.GetFileUrl(path, _azureStorageService)).ToList() ?? new List<string>(),
 			Traits = s.Traits
 		};
 	}

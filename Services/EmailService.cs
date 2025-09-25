@@ -49,7 +49,7 @@ public class EmailService : IEmailService
             <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
                 <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
                     <h2 style='color: #2e7d32;'>Witaj {userName}!</h2>
-                    <p>Dziękujemy za rejestrację w aplikacji <strong>Pomniki Przyrody</strong>.</p>
+                    <p>Dziękujemy za rejestrację w aplikacji <strong>Zgłoś Pomnik</strong>.</p>
                     <p>Aby aktywować swoje konto, kliknij w poniższy przycisk:</p>
                     <div style='text-align: center; margin: 30px 0;'>
                         <a href='{verificationUrl}' 
@@ -62,14 +62,14 @@ public class EmailService : IEmailService
                     <p style='color: #666; font-size: 14px;'>Link jest ważny przez 24 godziny.</p>
                     <p style='color: #666; font-size: 14px;'>Jeśli nie rejestrowałeś się w naszej aplikacji, zignoruj tę wiadomość.</p>
                     <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
-                    <p style='color: #666; font-size: 12px;'>Zespół Pomniki Przyrody</p>
+                    <p style='color: #666; font-size: 12px;'>Zespół Zgłoś Pomnik</p>
                 </div>
             </body>
             </html>";
 
 		var plainTextBody = $@"Witaj {userName}!
 
-		Dziękujemy za rejestrację w aplikacji Pomniki Przyrody.
+		Dziękujemy za rejestrację w aplikacji Zgłoś Pomnik.
 		Aby aktywować swoje konto, przejdź na następujący adres:
 
 		{verificationUrl}
@@ -77,9 +77,9 @@ public class EmailService : IEmailService
 		Link jest ważny przez 24 godziny.
 		Jeśli nie rejestrowałeś się w naszej aplikacji, zignoruj tę wiadomość.
 
-		Zespół Pomniki Przyrody";
+		Zespół Zgłoś Pomnik";
 
-		await SendEmailAsync(toEmail, "Potwierdź swój adres email - Pomniki Przyrody", htmlBody, plainTextBody);
+		await SendEmailAsync(toEmail, "Potwierdź swój adres email - Zgłoś Pomnik", htmlBody, plainTextBody);
 	}
 
 	public async Task SendPasswordResetEmailAsync(string toEmail, string userName, string resetToken)
@@ -96,7 +96,7 @@ public class EmailService : IEmailService
             <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
                 <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
                     <h2 style='color: #d32f2f;'>Reset hasła - {userName}</h2>
-                    <p>Otrzymaliśmy prośbę o reset hasła dla Twojego konta w aplikacji <strong>Pomniki Przyrody</strong>.</p>
+                    <p>Otrzymaliśmy prośbę o reset hasła dla Twojego konta w aplikacji <strong>Zgłoś Pomnik</strong>.</p>
                     <p>Aby ustawić nowe hasło, kliknij w poniższy przycisk:</p>
                     <div style='text-align: center; margin: 30px 0;'>
                         <a href='{resetUrl}' 
@@ -109,14 +109,14 @@ public class EmailService : IEmailService
                     <p style='color: #666; font-size: 14px;'><strong>UWAGA:</strong> Link jest ważny tylko przez 1 godzinę ze względów bezpieczeństwa.</p>
                     <p style='color: #666; font-size: 14px;'>Jeśli nie prosiłeś o reset hasła, zignoruj tę wiadomość lub skontaktuj się z nami.</p>
                     <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
-                    <p style='color: #666; font-size: 12px;'>Zespół Pomniki Przyrody</p>
+                    <p style='color: #666; font-size: 12px;'>Zespół Zgłoś Pomnik</p>
                 </div>
             </body>
             </html>";
 
 		var plainTextBody = $@"Reset hasła - {userName}
 
-		Otrzymaliśmy prośbę o reset hasła dla Twojego konta w aplikacji Pomniki Przyrody.
+		Otrzymaliśmy prośbę o reset hasła dla Twojego konta w aplikacji Zgłoś Pomnik.
 		Aby ustawić nowe hasło, przejdź na następujący adres:
 
 		{resetUrl}
@@ -124,9 +124,9 @@ public class EmailService : IEmailService
 		UWAGA: Link jest ważny tylko przez 1 godzinę ze względów bezpieczeństwa.
 		Jeśli nie prosiłeś o reset hasła, zignoruj tę wiadomość.
 
-		Zespół Pomniki Przyrody";
+		Zespół Zgłoś Pomnik";
 
-		await SendEmailAsync(toEmail, "Reset hasła - Pomniki Przyrody", htmlBody, plainTextBody);
+		await SendEmailAsync(toEmail, "Reset hasła - Zgłoś Pomnik", htmlBody, plainTextBody);
 	}
 
 
@@ -137,11 +137,11 @@ public class EmailService : IEmailService
             <html>
             <head>
                 <meta charset='utf-8'>
-                <title>Witaj w Pomnikach Przyrody!</title>
+                <title>Witaj w Zgłoś Pomnik!</title>
             </head>
             <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
                 <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
-                    <h2 style='color: #2e7d32;'>Witaj w aplikacji Pomniki Przyrody, {userName}! 🌳</h2>
+                    <h2 style='color: #2e7d32;'>Witaj w aplikacji Zgłoś Pomnik, {userName}! 🌳</h2>
                     <p>Twoje konto zostało pomyślnie aktywowane i możesz teraz korzystać ze wszystkich funkcji aplikacji.</p>
                     
                     <h3 style='color: #2e7d32;'>Co możesz teraz robić:</h3>
@@ -166,7 +166,7 @@ public class EmailService : IEmailService
             </body>
             </html>";
 
-		await SendEmailAsync(toEmail, "Witaj w Pomnikach Przyrody! 🌳", htmlBody);
+		await SendEmailAsync(toEmail, "Witaj w Zgłoś Pomnik! 🌳", htmlBody);
 	}
 
 	public async Task SendPasswordChangedNotificationAsync(string toEmail, string userName)

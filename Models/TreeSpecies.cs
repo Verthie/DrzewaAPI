@@ -15,8 +15,8 @@ public class TreeSpecies
 	public List<string>? IdentificationGuide { get; set; }
 	public SeasonalChangesDto? SeasonalChanges { get; set; }
 	public TraitsDto? Traits { get; set; }
+	public List<string>? Images { get; set; }
 
 	// Navigation Properties
-	public ICollection<TreeSpeciesImage> Images { get; set; } = new List<TreeSpeciesImage>();
 	public ICollection<TreeSubmission> TreeSubmissions { get; set; } = new List<TreeSubmission>();
 }

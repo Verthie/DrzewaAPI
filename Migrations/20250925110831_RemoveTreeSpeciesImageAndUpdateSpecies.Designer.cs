@@ -4,6 +4,7 @@ using DrzewaAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrzewaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250925110831_RemoveTreeSpeciesImageAndUpdateSpecies")]
+    partial class RemoveTreeSpeciesImageAndUpdateSpecies
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -345,17 +348,6 @@ namespace DrzewaAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TreeSpecies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
-                            Description = "Dąb szypułkowy to jeden z najważniejszych gatunków drzew w Polsce. Może żyć ponad 1000 lat i osiągać wysokość do 40 metrów. Jest symbolem siły, trwałości i mądrości w kulturze słowiańskiej. Drewno dębu było używane do budowy statków, domów i mebli przez wieki.",
-                            Family = "Fagaceae",
-                            IdentificationGuide = "[\"Li\\u015Bcie z wyra\\u017Anymi wci\\u0119ciami, bez szypu\\u0142ek lub z bardzo kr\\u00F3tkimi szypu\\u0142kami\",\"\\u017Bo\\u0142\\u0119dzie na d\\u0142ugich szypu\\u0142kach (2-8 cm), dojrzewaj\\u0105 jesieni\\u0105\",\"Kora szara, g\\u0142\\u0119boko bruzdowna u starych okaz\\u00F3w, g\\u0142adka u m\\u0142odych\",\"Korona szeroka, roz\\u0142o\\u017Cysta, charakterystyczny pokr\\u00F3j \\u0022parasola\\u0022\",\"P\\u0105ki skupione na ko\\u0144cach p\\u0119d\\u00F3w, jajowate, br\\u0105zowe\"]",
-                            LatinName = "Quercus Robur",
-                            PolishName = "Dąb szypułkowy"
-                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeSubmission", b =>
@@ -633,16 +625,6 @@ namespace DrzewaAPI.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("TreeSpeciesId");
-
-                            b1.HasData(
-                                new
-                                {
-                                    TreeSpeciesId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
-                                    Autumn = "Liście żółto-brązowe, opadają późno w sezonie. Dojrzałe żołędzie opadają i są zbierane przez zwierzęta",
-                                    Spring = "Młode liście jasno-zielone, często z czerwonawym nalotem. Kwitnienie w maju - kotki męskie i niewielkie kwiaty żeńskie",
-                                    Summer = "Liście ciemno-zielone, gęsta korona dająca dużo cienia. Rozwijają się żołędzie",
-                                    Winter = "Charakterystyczna sylwetka z grubym pniem i rozłożystymi gałęziami. Kora wyraźnie bruzdowna"
-                                });
                         });
 
                     b.OwnsOne("DrzewaAPI.Dtos.TraitsDto", "Traits", b1 =>
@@ -665,15 +647,6 @@ namespace DrzewaAPI.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("TreeSpeciesId");
-
-                            b1.HasData(
-                                new
-                                {
-                                    TreeSpeciesId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
-                                    Lifespan = "Ponad 1000 lat",
-                                    MaxHeight = 40,
-                                    NativeToPoland = true
-                                });
                         });
 
                     b.Navigation("SeasonalChanges");

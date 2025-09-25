@@ -28,5 +28,22 @@ public class SpeciesController(ISpeciesService _speciesService) : ControllerBase
 
         return Ok(species);
     }
+
+    [Authorize(Roles = "Moderator")]
+    [HttpPost]
+    public async Task<IActionResult> CreateTreeSubmission([FromForm] CreateTreeSpeciesDto request, IFormFile treeImage, IFormFile leafImage, IFormFile barkImage, IFormFile fruitImage)
+    {
+        ValidationHelpers.ValidateModelState(ModelState);
+
+        if (treeImage == null || leafImage == null || barkImage == null || fruitImage == null)
+        {
+            return BadRequest("Images for all categories need to be provided");
+        }
+
+        Guid userId = User.GetCurrentUserId();
+        TreeSpeciesDto result = await _speciesService.CreateTreeSpeciesAsync(request, treeImage, leafImage, barkImage, fruitImage);
+
+        return CreatedAtAction(nameof(GetSpeciesById), new { id = result.Id }, result);
+    }
 }
 

@@ -164,12 +164,12 @@ public class ApplicationService : IApplicationService
 		}
 	}
 
-	public async Task DeleteApplicationAsync(Guid applicationId, Guid userId)
+	public async Task DeleteApplicationAsync(Guid applicationId, Guid userId, bool isModerator)
 	{
 		try
 		{
 			Application application = await _context.Applications
-					.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
+					.FirstOrDefaultAsync(a => a.Id == applicationId && (a.UserId == userId || isModerator))
 					?? throw EntityNotFoundException.ForUserApplication(applicationId, userId);
 
 			_context.Applications.Remove(application);

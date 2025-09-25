@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using DrzewaAPI.Extensions;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
@@ -64,7 +65,10 @@ public class ApplicationsController(IApplicationService _applicationService) : C
 		Guid applicationId = ValidationHelpers.ValidateAndParseId(id);
 		Guid userId = User.GetCurrentUserId();
 
-		await _applicationService.DeleteApplicationAsync(applicationId, userId);
+		string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+		bool isModerator = currentUserRole == UserRole.Moderator.ToString();
+
+		await _applicationService.DeleteApplicationAsync(applicationId, userId, isModerator);
 
 		return NoContent();
 	}
