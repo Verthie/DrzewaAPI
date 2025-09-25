@@ -213,6 +213,7 @@ public class CommentService(ApplicationDbContext _context, ILogger<CommentServic
 			TreePolishName = c.TreeSubmission?.Species.PolishName,
 			UserData = new UserDataDto
 			{
+				UserId = c.UserId,
 				UserName = c.User.FullName,
 				Avatar = c.User.Avatar
 			},

@@ -35,8 +35,6 @@ public record CurrentUserDto
 
 public record UpdateUserDto
 {
-	[DefaultValue(null)]
-	public string? UserId { get; set; } = null;
 	[Phone(ErrorMessage = "Nieprawidłowy numer telefonu")]
 	public string? Phone { get; init; }
 	public string? Address { get; init; }
