@@ -46,7 +46,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.Circumference).HasMaxLength(6);
 			entity.Property(e => e.Description).HasMaxLength(2000);
-			entity.OwnsOne(e => e.Location);
+			entity.OwnsOne(e => e.Location, location =>
+			{
+				location.Property(l => l.Lat).IsRequired();
+				location.Property(l => l.Lng).IsRequired();
+				location.Property(l => l.Address);
+			});
 
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.TreeSubmissions)
@@ -66,7 +71,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.PolishName).IsRequired().HasMaxLength(200);
 			entity.Property(e => e.LatinName).IsRequired().HasMaxLength(200);
 			entity.Property(e => e.Description).HasMaxLength(2000);
-
 			entity.OwnsOne(e => e.SeasonalChanges);
 			entity.OwnsOne(e => e.Traits);
 
@@ -223,8 +227,290 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		});
 
 		// Seed data
-		// modelBuilder.Entity<User>().HasData(
-		// new User { Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed5"), FirstName = "Adam", LastName = "Kowalski", Email = "mod@example.com", RegistrationDate = new DateTime(2024, 1, 15), PasswordHash = _hasher.HashPassword(user1, "Passw0rd!") },
-		// );
+		modelBuilder.Entity<User>().HasData(
+			new User { Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000001"), FirstName = "Adam", LastName = "Kowalski", Email = "mod@example.com", RegistrationDate = new DateTime(2024, 1, 15), PasswordHash = "AQAAAAIAAYagAAAAEHrSf4c5BhE6GMi8qlT3Q+oj6mJdQ2OAuPNUgxuc2sFGCxCeqhJwGOEUTqjSuPCFRw==", Role = UserRole.Moderator },
+			new User { Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"), FirstName = "Jan", LastName = "Kowalski", Email = "user@example.com", RegistrationDate = new DateTime(2024, 1, 15), PasswordHash = "AQAAAAIAAYagAAAAEDk+b31OOCvyrUQRFQztUECMUI+lPATVktwSn0Uysc66qax8wCdiejpv2Rd1YuophQ==", Role = UserRole.User }
+		);
+
+		modelBuilder.Entity<Municipality>().HasData(
+			new Municipality
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000003"),
+				Name = "Gmina Warszawa",
+				Address = "Plac Bankowy 3/5",
+				City = "Warszawa",
+				Province = "Mazowieckie",
+				PostalCode = "00-950",
+				Phone = "+48 22 443 01 00",
+				Email = "sekretariat@um.warszawa.pl",
+				Website = "https://www.warszawa.pl",
+				CreatedDate = new DateTime(2024, 1, 15)
+			},
+			new Municipality
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000004"),
+				Name = "Gmina Kraków",
+				Address = "Pl. Wszystkich Świętych 3-4",
+				City = "Kraków",
+				Province = "Małopolskie",
+				PostalCode = "31-004",
+				Phone = "+48 12 616 5555",
+				Email = "ws.umk@um.krakow.pl",
+				Website = "https://www.krakow.pl",
+				CreatedDate = new DateTime(2024, 1, 15)
+			}
+		);
+
+		modelBuilder.Entity<ApplicationTemplate>().HasData(
+			new ApplicationTemplate
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000005"),
+				MunicipalityId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000003"),
+				CreatedDate = new DateTime(2024, 1, 15),
+				Name = "Wniosek o rejestrację pomnika przyrody",
+				Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
+				HtmlTemplate = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Wniosek o rejestrację pomnika przyrody</title></head><body><h1>WNIOSEK O REJESTRACJĘ POMNIKA PRZYRODY</h1><div><h3>{{municipality_name}}</h3><p>{{municipality_address}}, {{municipality_city}} {{municipality_postal_code}}</p></div><div><h3>Dane wnioskodawcy:</h3><p>Imię i nazwisko: {{user_full_name}}</p><p>Adres: {{user_address}}, {{user_city}} {{user_postal_code}}</p><p>Telefon: {{user_phone}}</p><p>Email: {{user_email}}</p></div><div><h3>Dane drzewa:</h3><p>Gatunek: {{tree_species_polish}}</p><p>Obwód: {{tree_circumference}} cm</p><p>Wysokość: {{tree_height}} m</p><p>Wiek: {{tree_estimated_age}} lat</p><p>Stan: {{tree_condition}}</p></div><div><h3>Dodatkowe informacje:</h3><p>Uzasadnienie: {{justification}}</p><p>Przewidywany koszt opieki: {{estimated_care_cost}} zł/rok</p><p>Osoba odpowiedzialna: {{responsible_person}}</p><p>Telefon kontaktowy: {{contact_phone}}</p></div><div><p>Data: {{submission_date}}</p><p>Podpis: ................................</p></div></body></html>",
+				Fields = new List<ApplicationField>
+						{
+								new ApplicationField
+								{
+										Name = "justification",
+										Label = "Uzasadnienie wniosku",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę opisać dlaczego drzewo powinno zostać objęte ochroną...",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 50,
+												MaxLength = 1000,
+												ValidationMessage = "Uzasadnienie musi mieć od 50 do 1000 znaków"
+										},
+										HelpText = "Opisz walory przyrodnicze, historyczne lub krajobrazowe drzewa",
+										Order = 1
+								},
+								new ApplicationField
+								{
+										Name = "estimated_care_cost",
+										Label = "Szacowany koszt rocznej opieki (zł)",
+										Type = ApplicationFieldType.Number,
+										IsRequired = true,
+										Placeholder = "np. 500",
+										Validation = new ApplicationFieldValidation
+										{
+												Min = 0,
+												Max = 10000,
+												ValidationMessage = "Koszt musi być liczbą od 0 do 10000"
+										},
+										HelpText = "Przewidywany koszt opieki nad drzewem w ciągu roku",
+										Order = 2
+								},
+								new ApplicationField
+								{
+										Name = "responsible_person",
+										Label = "Osoba odpowiedzialna za opiekę",
+										Type = ApplicationFieldType.Text,
+										IsRequired = true,
+										Placeholder = "Imię i nazwisko",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 3,
+												MaxLength = 100
+										},
+										Order = 3
+								},
+								new ApplicationField
+								{
+										Name = "contact_phone",
+										Label = "Telefon kontaktowy osoby odpowiedzialnej",
+										Type = ApplicationFieldType.Phone,
+										IsRequired = true,
+										Placeholder = "+48 123 456 789",
+										Validation = new ApplicationFieldValidation
+										{
+												Pattern = @"^\+?[0-9\s\-\(\)]{9,15}$",
+												ValidationMessage = "Numer telefonu musi zawierać 9-15 cyfr"
+										},
+										Order = 4
+								},
+								new ApplicationField
+								{
+										Name = "care_agreement",
+										Label = "Zobowiązuję się do sprawowania opieki nad drzewem",
+										Type = ApplicationFieldType.Checkbox,
+										IsRequired = true,
+										DefaultValue = "false",
+										HelpText = "Wymagane potwierdzenie zobowiązania",
+										Order = 5
+								}
+						}
+			},
+
+			new ApplicationTemplate
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000006"),
+				MunicipalityId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000004"),
+				CreatedDate = new DateTime(2024, 1, 15),
+				Name = "Uznanie obiektu przyrodniczego za pomnik przyrody WS-13",
+				Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
+				HtmlTemplate = "<!DOCTYPE html><html><meta charset=UTF-8><style>body{font-family:Arial,sans-serif;font-size:12px}.header{text-align:left;margin:0 5px 20px 5px;font-size:12px}.title{margin:42px 5px 42px 5px}.title h1{text-align:center;font-size:22px;font-weight:300;margin:0}.title h2{text-align:center;font-size:15px;margin:0 0 12px 0}.title p{font-size:14px}table{border-collapse:collapse;margin:auto}td{border:1px solid #000;padding:4px 8px 8px 8px;vertical-align:top}.number-col{width:30px;text-align:center}.question-col{width:42%}.answer-col{width:55%}.footer{display:flex;justify-content:space-between;align-items:flex-start;margin:64px 5px 0 5px}.footer *{margin:0}.signature{display:flex;flex-direction:column;text-align:center;justify-content:center}.signature-text{font-size:10px}</style><div class=header>Załącznik do procedury WS-13</div><div class=title><h1>Wniosek</h1><h2>o uznanie obiektu przyrodniczego za pomnik przyrody</h2><p>na podstawie Art. 6 ust. 1 pkt 6, art. 40, art. 44 ustawy z dnia 16 kwietnia 2004 r. o ochronie przyrody.</div><table><tr><td class=number-col>1.<td class=question-col>Imię i nazwisko wnioskodawcy / nazwa wnioskodawcy<br>Adres / siedziba wnioskodawcy<td class=answer-col>{{user_full_name}}<br>{{user_address}}<br>{{user_city}}, {{user_postal_code}}<tr><td class=number-col>2.<td class=question-col>Nazwa i rodzaj pomnika przyrody<td class=answer-col>Nazwa polska: {{tree_species_polish}}<br>Nazwa łacińska: {{tree_species_latin}}<br>Rodzaj: drzewo<tr><td class=number-col>3.<td class=question-col>Określenie położenia geograficznego i administracyjnego pomnika przyrody (działka, obręb ewidencyjny, jednostka ewidencyjna)<td class=answer-col>Położenie geograficzne: {{geographic_location_lat}} lat, {{geographic_location_long}} long<br>Działka: {{plot}}<br>Obręb ewidencyjny: {{cadastral_district}}<br>Jednostka ewidencyjna: {{record_keeping_unit}}<tr><td class=number-col>4.<td class=question-col>Wskazanie formy własności i rodzajów gruntów<td class=answer-col>Forma własności: {{ownership_form}}<br>Rodzaj gruntów: {{land_type}}<tr><td class=number-col>5.<td class=question-col>Wskazanie mapy obrazującej lokalizację pomnika przyrody<td class=answer-col><tr><td class=number-col>6.<td class=question-col>Krótki opis pomnika przyrody<br>- dla pomników przyrody żywej gatunek, wiek, pierśnica, wysokość, rozpiętość korony, stan zdrowotny,<br>- dla pomników przyrody nieżywej typ, rodzaj, wielkość źródła, wodospadu, głazu, jaskini itp.<td class=answer-col>Wiek: {{tree_estimated_age}}<br>Pierśnica: {{tree_circumference}} cm<br>Wysokość: {{tree_height}} m<br>Rozpiętość:<br>Stan zdrowotny: {{tree_condition}}<tr><td class=number-col>7.<td class=question-col>Nazwa, autor opracowania potwierdzającego wartości przyrodnicze obiektu<td class=answer-col>Nazwa opracowania: {{study_name}}<br>Autor: {{study_author}}</table><div class=footer><p>{{municipality_city}}, dn. {{generation_date}}<div class=signature><p>..............................................<p class=signature-text><em>(podpis)</em></div></div></body></html>",
+				Fields = new List<ApplicationField>
+						{
+								new ApplicationField
+								{
+										Name = "plot",
+										Label = "Działka",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać działkę na której znajduje się pomnik przyrody",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 1
+								},
+								new ApplicationField
+								{
+										Name = "cadastral_district",
+										Label = "Obręb ewidencyjny",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać obręb ewidencyjny",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 2
+								},
+								new ApplicationField
+								{
+										Name = "record_keeping_unit",
+										Label = "Jednostka ewidencyjna",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać jednostkę ewidencyjną",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 3
+								},
+								new ApplicationField
+								{
+										Name = "ownership_form",
+										Label = "Forma własności",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać formę własności",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 4
+								},
+								new ApplicationField
+								{
+										Name = "land_type",
+										Label = "Rodzaj gruntów",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać rodzaj gruntów",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 5
+								},
+								new ApplicationField
+								{
+										Name = "study_name",
+										Label = "Nazwa opracowania",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać nazwę opracowania",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 6
+								},
+								new ApplicationField
+								{
+										Name = "study_author",
+										Label = "Autor",
+										Type = ApplicationFieldType.TextArea,
+										IsRequired = true,
+										Placeholder = "Proszę podać imię i nazwisko autora opracowania",
+										Validation = new ApplicationFieldValidation
+										{
+												MinLength = 2,
+												MaxLength = 100,
+												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+										},
+										Order = 7
+								},
+						}
+			}
+		);
+
+		modelBuilder.Entity<TreeSubmission>().HasData(
+		new
+		{
+			Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000007"),
+			UserId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
+			SpeciesId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
+			Circumference = 100,
+			Height = 20.0,
+			Condition = "Dobra",
+			IsAlive = true,
+			EstimatedAge = 100,
+			Description = "Pomnik przyrody",
+			Status = SubmissionStatus.Approved,
+			IsMonument = true,
+			SubmissionDate = new DateTime(2024, 1, 15),
+			ApprovalDate = new DateTime(2024, 1, 16)
+		},
+		new
+		{
+			Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000008"),
+			UserId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
+			SpeciesId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
+			Circumference = 115,
+			Height = 27.0,
+			Condition = "Zła",
+			IsAlive = true,
+			EstimatedAge = 350,
+			Description = "Dąb Pomnik przyrody",
+			IsMonument = true,
+			Status = SubmissionStatus.Pending,
+			SubmissionDate = new DateTime(2024, 1, 17)
+		});
+
+		modelBuilder.Entity<TreeSubmission>().OwnsOne(e => e.Location).HasData(
+		new
+		{
+			TreeSubmissionId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000007"),
+			Lat = 52.5269614,
+			Lng = 17.1284842,
+			Address = "111/2"
+		},
+		new
+		{
+			TreeSubmissionId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000008"),
+			Lat = 51.5369179,
+			Lng = 17.8664067,
+			Address = "210/1"
+		});
 	}
 };

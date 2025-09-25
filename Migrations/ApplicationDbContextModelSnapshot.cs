@@ -117,6 +117,30 @@ namespace DrzewaAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("ApplicationTemplates");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000005"),
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
+                            Fields = "[{\"Name\":\"justification\",\"Label\":\"Uzasadnienie wniosku\",\"Type\":6,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Prosz\\u0119 opisa\\u0107 dlaczego drzewo powinno zosta\\u0107 obj\\u0119te ochron\\u0105...\",\"Options\":null,\"Validation\":{\"MinLength\":50,\"MaxLength\":1000,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Uzasadnienie musi mie\\u0107 od 50 do 1000 znak\\u00F3w\"},\"HelpText\":\"Opisz walory przyrodnicze, historyczne lub krajobrazowe drzewa\",\"Order\":1},{\"Name\":\"estimated_care_cost\",\"Label\":\"Szacowany koszt rocznej opieki (z\\u0142)\",\"Type\":1,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"np. 500\",\"Options\":null,\"Validation\":{\"MinLength\":null,\"MaxLength\":null,\"Pattern\":null,\"Min\":0,\"Max\":10000,\"ValidationMessage\":\"Koszt musi by\\u0107 liczb\\u0105 od 0 do 10000\"},\"HelpText\":\"Przewidywany koszt opieki nad drzewem w ci\\u0105gu roku\",\"Order\":2},{\"Name\":\"responsible_person\",\"Label\":\"Osoba odpowiedzialna za opiek\\u0119\",\"Type\":0,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Imi\\u0119 i nazwisko\",\"Options\":null,\"Validation\":{\"MinLength\":3,\"MaxLength\":100,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":null},\"HelpText\":null,\"Order\":3},{\"Name\":\"contact_phone\",\"Label\":\"Telefon kontaktowy osoby odpowiedzialnej\",\"Type\":3,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"\\u002B48 123 456 789\",\"Options\":null,\"Validation\":{\"MinLength\":null,\"MaxLength\":null,\"Pattern\":\"^\\\\\\u002B?[0-9\\\\s\\\\-\\\\(\\\\)]{9,15}$\",\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Numer telefonu musi zawiera\\u0107 9-15 cyfr\"},\"HelpText\":null,\"Order\":4},{\"Name\":\"care_agreement\",\"Label\":\"Zobowi\\u0105zuj\\u0119 si\\u0119 do sprawowania opieki nad drzewem\",\"Type\":9,\"IsRequired\":true,\"DefaultValue\":\"false\",\"Placeholder\":null,\"Options\":null,\"Validation\":null,\"HelpText\":\"Wymagane potwierdzenie zobowi\\u0105zania\",\"Order\":5}]",
+                            HtmlTemplate = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Wniosek o rejestrację pomnika przyrody</title></head><body><h1>WNIOSEK O REJESTRACJĘ POMNIKA PRZYRODY</h1><div><h3>{{municipality_name}}</h3><p>{{municipality_address}}, {{municipality_city}} {{municipality_postal_code}}</p></div><div><h3>Dane wnioskodawcy:</h3><p>Imię i nazwisko: {{user_full_name}}</p><p>Adres: {{user_address}}, {{user_city}} {{user_postal_code}}</p><p>Telefon: {{user_phone}}</p><p>Email: {{user_email}}</p></div><div><h3>Dane drzewa:</h3><p>Gatunek: {{tree_species_polish}}</p><p>Obwód: {{tree_circumference}} cm</p><p>Wysokość: {{tree_height}} m</p><p>Wiek: {{tree_estimated_age}} lat</p><p>Stan: {{tree_condition}}</p></div><div><h3>Dodatkowe informacje:</h3><p>Uzasadnienie: {{justification}}</p><p>Przewidywany koszt opieki: {{estimated_care_cost}} zł/rok</p><p>Osoba odpowiedzialna: {{responsible_person}}</p><p>Telefon kontaktowy: {{contact_phone}}</p></div><div><p>Data: {{submission_date}}</p><p>Podpis: ................................</p></div></body></html>",
+                            IsActive = true,
+                            MunicipalityId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000003"),
+                            Name = "Wniosek o rejestrację pomnika przyrody"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000006"),
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
+                            Fields = "[{\"Name\":\"plot\",\"Label\":\"Dzia\\u0142ka\",\"Type\":6,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Prosz\\u0119 poda\\u0107 dzia\\u0142k\\u0119 na kt\\u00F3rej znajduje si\\u0119 pomnik przyrody\",\"Options\":null,\"Validation\":{\"MinLength\":2,\"MaxLength\":100,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Tekst musi mie\\u0107 od 2 do 100 znak\\u00F3w\"},\"HelpText\":null,\"Order\":1},{\"Name\":\"cadastral_district\",\"Label\":\"Obr\\u0119b ewidencyjny\",\"Type\":6,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Prosz\\u0119 poda\\u0107 obr\\u0119b ewidencyjny\",\"Options\":null,\"Validation\":{\"MinLength\":2,\"MaxLength\":100,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Tekst musi mie\\u0107 od 2 do 100 znak\\u00F3w\"},\"HelpText\":null,\"Order\":2},{\"Name\":\"record_keeping_unit\",\"Label\":\"Jednostka ewidencyjna\",\"Type\":6,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Prosz\\u0119 poda\\u0107 jednostk\\u0119 ewidencyjn\\u0105\",\"Options\":null,\"Validation\":{\"MinLength\":2,\"MaxLength\":100,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Tekst musi mie\\u0107 od 2 do 100 znak\\u00F3w\"},\"HelpText\":null,\"Order\":3},{\"Name\":\"ownership_form\",\"Label\":\"Forma w\\u0142asno\\u015Bci\",\"Type\":6,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Prosz\\u0119 poda\\u0107 form\\u0119 w\\u0142asno\\u015Bci\",\"Options\":null,\"Validation\":{\"MinLength\":2,\"MaxLength\":100,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Tekst musi mie\\u0107 od 2 do 100 znak\\u00F3w\"},\"HelpText\":null,\"Order\":4},{\"Name\":\"land_type\",\"Label\":\"Rodzaj grunt\\u00F3w\",\"Type\":6,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Prosz\\u0119 poda\\u0107 rodzaj grunt\\u00F3w\",\"Options\":null,\"Validation\":{\"MinLength\":2,\"MaxLength\":100,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Tekst musi mie\\u0107 od 2 do 100 znak\\u00F3w\"},\"HelpText\":null,\"Order\":5},{\"Name\":\"study_name\",\"Label\":\"Nazwa opracowania\",\"Type\":6,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Prosz\\u0119 poda\\u0107 nazw\\u0119 opracowania\",\"Options\":null,\"Validation\":{\"MinLength\":2,\"MaxLength\":100,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Tekst musi mie\\u0107 od 2 do 100 znak\\u00F3w\"},\"HelpText\":null,\"Order\":6},{\"Name\":\"study_author\",\"Label\":\"Autor\",\"Type\":6,\"IsRequired\":true,\"DefaultValue\":null,\"Placeholder\":\"Prosz\\u0119 poda\\u0107 imi\\u0119 i nazwisko autora opracowania\",\"Options\":null,\"Validation\":{\"MinLength\":2,\"MaxLength\":100,\"Pattern\":null,\"Min\":null,\"Max\":null,\"ValidationMessage\":\"Tekst musi mie\\u0107 od 2 do 100 znak\\u00F3w\"},\"HelpText\":null,\"Order\":7}]",
+                            HtmlTemplate = "<!DOCTYPE html><html><meta charset=UTF-8><style>body{font-family:Arial,sans-serif;font-size:12px}.header{text-align:left;margin:0 5px 20px 5px;font-size:12px}.title{margin:42px 5px 42px 5px}.title h1{text-align:center;font-size:22px;font-weight:300;margin:0}.title h2{text-align:center;font-size:15px;margin:0 0 12px 0}.title p{font-size:14px}table{border-collapse:collapse;margin:auto}td{border:1px solid #000;padding:4px 8px 8px 8px;vertical-align:top}.number-col{width:30px;text-align:center}.question-col{width:42%}.answer-col{width:55%}.footer{display:flex;justify-content:space-between;align-items:flex-start;margin:64px 5px 0 5px}.footer *{margin:0}.signature{display:flex;flex-direction:column;text-align:center;justify-content:center}.signature-text{font-size:10px}</style><div class=header>Załącznik do procedury WS-13</div><div class=title><h1>Wniosek</h1><h2>o uznanie obiektu przyrodniczego za pomnik przyrody</h2><p>na podstawie Art. 6 ust. 1 pkt 6, art. 40, art. 44 ustawy z dnia 16 kwietnia 2004 r. o ochronie przyrody.</div><table><tr><td class=number-col>1.<td class=question-col>Imię i nazwisko wnioskodawcy / nazwa wnioskodawcy<br>Adres / siedziba wnioskodawcy<td class=answer-col>{{user_full_name}}<br>{{user_address}}<br>{{user_city}}, {{user_postal_code}}<tr><td class=number-col>2.<td class=question-col>Nazwa i rodzaj pomnika przyrody<td class=answer-col>Nazwa polska: {{tree_species_polish}}<br>Nazwa łacińska: {{tree_species_latin}}<br>Rodzaj: drzewo<tr><td class=number-col>3.<td class=question-col>Określenie położenia geograficznego i administracyjnego pomnika przyrody (działka, obręb ewidencyjny, jednostka ewidencyjna)<td class=answer-col>Położenie geograficzne: {{geographic_location_lat}} lat, {{geographic_location_long}} long<br>Działka: {{plot}}<br>Obręb ewidencyjny: {{cadastral_district}}<br>Jednostka ewidencyjna: {{record_keeping_unit}}<tr><td class=number-col>4.<td class=question-col>Wskazanie formy własności i rodzajów gruntów<td class=answer-col>Forma własności: {{ownership_form}}<br>Rodzaj gruntów: {{land_type}}<tr><td class=number-col>5.<td class=question-col>Wskazanie mapy obrazującej lokalizację pomnika przyrody<td class=answer-col><tr><td class=number-col>6.<td class=question-col>Krótki opis pomnika przyrody<br>- dla pomników przyrody żywej gatunek, wiek, pierśnica, wysokość, rozpiętość korony, stan zdrowotny,<br>- dla pomników przyrody nieżywej typ, rodzaj, wielkość źródła, wodospadu, głazu, jaskini itp.<td class=answer-col>Wiek: {{tree_estimated_age}}<br>Pierśnica: {{tree_circumference}} cm<br>Wysokość: {{tree_height}} m<br>Rozpiętość:<br>Stan zdrowotny: {{tree_condition}}<tr><td class=number-col>7.<td class=question-col>Nazwa, autor opracowania potwierdzającego wartości przyrodnicze obiektu<td class=answer-col>Nazwa opracowania: {{study_name}}<br>Autor: {{study_author}}</table><div class=footer><p>{{municipality_city}}, dn. {{generation_date}}<div class=signature><p>..............................................<p class=signature-text><em>(podpis)</em></div></div></body></html>",
+                            IsActive = true,
+                            MunicipalityId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000004"),
+                            Name = "Uznanie obiektu przyrodniczego za pomnik przyrody WS-13"
+                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.Comment", b =>
@@ -284,6 +308,34 @@ namespace DrzewaAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("Municipalities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000003"),
+                            Address = "Plac Bankowy 3/5",
+                            City = "Warszawa",
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "sekretariat@um.warszawa.pl",
+                            Name = "Gmina Warszawa",
+                            Phone = "+48 22 443 01 00",
+                            PostalCode = "00-950",
+                            Province = "Mazowieckie",
+                            Website = "https://www.warszawa.pl"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000004"),
+                            Address = "Pl. Wszystkich Świętych 3-4",
+                            City = "Kraków",
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "ws.umk@um.krakow.pl",
+                            Name = "Gmina Kraków",
+                            Phone = "+48 12 616 5555",
+                            PostalCode = "31-004",
+                            Province = "Małopolskie",
+                            Website = "https://www.krakow.pl"
+                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.RefreshToken", b =>
@@ -413,6 +465,39 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TreeSubmissions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000007"),
+                            ApprovalDate = new DateTime(2024, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Circumference = 100,
+                            Condition = "Dobra",
+                            Description = "Pomnik przyrody",
+                            EstimatedAge = 100,
+                            Height = 20.0,
+                            IsAlive = true,
+                            IsMonument = true,
+                            SpeciesId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
+                            Status = 1,
+                            SubmissionDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UserId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000002")
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000008"),
+                            Circumference = 115,
+                            Condition = "Zła",
+                            Description = "Dąb Pomnik przyrody",
+                            EstimatedAge = 350,
+                            Height = 27.0,
+                            IsAlive = true,
+                            IsMonument = true,
+                            SpeciesId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
+                            Status = 0,
+                            SubmissionDate = new DateTime(2024, 1, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            UserId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000002")
+                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeVote", b =>
@@ -511,6 +596,30 @@ namespace DrzewaAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000001"),
+                            Email = "mod@example.com",
+                            FirstName = "Adam",
+                            IsEmailVerified = false,
+                            LastName = "Kowalski",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHrSf4c5BhE6GMi8qlT3Q+oj6mJdQ2OAuPNUgxuc2sFGCxCeqhJwGOEUTqjSuPCFRw==",
+                            RegistrationDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
+                            Email = "user@example.com",
+                            FirstName = "Jan",
+                            IsEmailVerified = false,
+                            LastName = "Kowalski",
+                            PasswordHash = "AQAAAAIAAYagAAAAEDk+b31OOCvyrUQRFQztUECMUI+lPATVktwSn0Uysc66qax8wCdiejpv2Rd1YuophQ==",
+                            RegistrationDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = 0
+                        });
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.Application", b =>
@@ -716,6 +825,22 @@ namespace DrzewaAPI.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("TreeSubmissionId");
+
+                            b1.HasData(
+                                new
+                                {
+                                    TreeSubmissionId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000007"),
+                                    Address = "111/2",
+                                    Lat = 52.526961399999998,
+                                    Lng = 17.128484199999999
+                                },
+                                new
+                                {
+                                    TreeSubmissionId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000008"),
+                                    Address = "210/1",
+                                    Lat = 51.536917899999999,
+                                    Lng = 17.866406699999999
+                                });
                         });
 
                     b.Navigation("Location")
