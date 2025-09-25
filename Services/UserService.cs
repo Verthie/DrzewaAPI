@@ -126,7 +126,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 		}
 	}
 
-	public async Task UpdatePasswordAsync(Guid currentUserId, Guid userId, UpdatePasswordDto updatePasswordDto, bool isModerator)
+	public async Task UpdatePasswordAsync(Guid userId, string newPassword)
 	{
 		try
 		{
@@ -134,17 +134,8 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 					.FirstOrDefaultAsync(u => u.Id == userId)
 					?? throw EntityNotFoundException.ForUser(userId);
 
-			// Check privileges
-			if (!isModerator && user.Id != currentUserId) throw EntityAccessDeniedException.ForUser(userId);
-
-			if (!isModerator)
-			{
-				PasswordVerificationResult passwordResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, updatePasswordDto.OldPassword);
-				if (passwordResult == PasswordVerificationResult.Failed) throw AccountException.ForIncorrectPassword();
-			}
-
 			// Field update
-			user.PasswordHash = _passwordHasher.HashPassword(user, updatePasswordDto.NewPassword);
+			user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
 
 			await _context.SaveChangesAsync();
 

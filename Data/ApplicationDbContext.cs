@@ -20,6 +20,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<Application> Applications { get; set; }
 	public DbSet<ApplicationTemplate> ApplicationTemplates { get; set; }
 	public DbSet<Municipality> Municipalities { get; set; }
+	public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -186,6 +187,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.Website).HasMaxLength(100);
 
 			entity.HasIndex(e => e.Name).IsUnique();
+		});
+
+		modelBuilder.Entity<EmailVerificationToken>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.Token).IsRequired().HasMaxLength(100);
+			entity.HasIndex(e => e.Token).IsUnique();
+
+			entity.HasOne(e => e.User)
+						.WithMany(u => u.EmailVerificationTokens)
+						.HasForeignKey(e => e.UserId)
+						.OnDelete(DeleteBehavior.Cascade);
 		});
 	}
 };

@@ -12,6 +12,7 @@ using DrzewaAPI.Middleware;
 using DrzewaAPI.Models;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -44,6 +45,14 @@ builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IApplicationTemplateService, ApplicationTemplateService>();
 builder.Services.AddScoped<IMunicipalityService, MunicipalityService>();
 builder.Services.AddScoped<IFileGenerationService, FileGenerationService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+
+// Validator
+builder.Services.AddScoped<IValidator<UpdatePasswordDto>, ResetPasswordValidator>();
+
+// Background Services
+builder.Services.AddHostedService<TokenCleanupService>();
 
 // JWT Configuration
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();

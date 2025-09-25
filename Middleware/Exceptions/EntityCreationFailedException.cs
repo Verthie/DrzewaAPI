@@ -18,4 +18,7 @@ public class EntityCreationFailedException(string message, string errorCode) : B
 
 	public static EntityCreationFailedException ForApplication(string reason) =>
 		new EntityCreationFailedException($"Nie udało się utworzyć wniosku: {reason}", "APPLICATION_CREATION_FAILED");
+
+	public static EntityCreationFailedException ForEmailToken(string reason) =>
+		new EntityCreationFailedException($"Nie udało się utworzyć tokena weryfikacyjnego: {reason}", "TOKEN_CREATION_FAILED");
 }

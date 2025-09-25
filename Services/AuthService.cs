@@ -17,18 +17,24 @@ public class AuthService : IAuthService
 	private readonly ApplicationDbContext _context;
 	private readonly IPasswordHasher<User> _passwordHasher;
 	private readonly JwtSettings _jwtSettings;
+	private readonly IEmailService _emailService;
+	private readonly ITokenService _tokenService;
 	private readonly ILogger<AuthService> _logger;
 
 	public AuthService(
 			ApplicationDbContext context,
 			IPasswordHasher<User> passwordHasher,
 			IOptions<JwtSettings> jwtSettings,
+			IEmailService emailService,
+			ITokenService tokenService,
 			ILogger<AuthService> logger
 			)
 	{
 		_context = context;
 		_passwordHasher = passwordHasher;
 		_jwtSettings = jwtSettings.Value;
+		_emailService = emailService;
+		_tokenService = tokenService;
 		_logger = logger;
 	}
 
@@ -37,9 +43,8 @@ public class AuthService : IAuthService
 		try
 		{
 			// Check if the user exists
-			User? existingUser = await _context.Users
-					.FirstOrDefaultAsync(u => u.Email.ToLower() == registerDto.Email.ToLower())
-					?? throw EntityNotFoundException.ForAccount(registerDto.Email);
+			bool userExists = await _context.Users.AnyAsync(u => u.Email.ToLower() == registerDto.Email.ToLower());
+			if (userExists) throw new ServiceException("Konto o podanym mailu już istnieje", "ACCOUNT_ALREADY_EXISTS");
 
 			// Create user
 			User user = new User
@@ -59,7 +64,16 @@ public class AuthService : IAuthService
 			_context.Users.Add(user);
 			await _context.SaveChangesAsync();
 
-			return await GenerateAuthResponseAsync(user);
+			var verificationToken = await _tokenService.GenerateEmailVerificationTokenAsync(user.Id);
+			await _emailService.SendVerificationEmailAsync(user.Email, $"{user.FirstName} {user.LastName}", verificationToken);
+
+			AuthResponseDto response = new AuthResponseDto
+			{
+				Message = "Konto zostało utworzone. Sprawdź email w celu weryfikacji konta.",
+				RequiresEmailVerification = true
+			};
+
+			return response;
 		}
 		catch (BusinessException)
 		{
@@ -73,6 +87,63 @@ public class AuthService : IAuthService
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas rejestracji użytkownika");
+			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+		}
+	}
+
+	public async Task<EmailVerificationResultDto> VerifyEmailAsync(Guid userId)
+	{
+		try
+		{
+			User user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw EntityNotFoundException.ForUser(userId);
+
+			if (user.IsEmailVerified)
+			{
+				return new EmailVerificationResultDto(false, "Konto już zostało zweryfikowane");
+			}
+
+			user.IsEmailVerified = true;
+			user.EmailVerifiedAt = DateTime.UtcNow;
+
+			await _context.SaveChangesAsync();
+
+			return new EmailVerificationResultDto(true, "Konto zostało pomyślnie zweryfikowane");
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas weryfikacji maila użytkownika");
+			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+		}
+	}
+
+	public async Task<EmailVerificationResultDto> ResendVerificationEmailAsync(string email)
+	{
+		try
+		{
+			User user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email)
+					?? throw new ServiceException("Konto o podanym mailu nie zostało znalezione", "EMAIL_NOT_FOUND");
+
+			if (user.IsEmailVerified)
+			{
+				return new EmailVerificationResultDto(false, "Konto już zostało zweryfikowane");
+			}
+
+			var verificationToken = await _tokenService.GenerateEmailVerificationTokenAsync(user.Id);
+			await _emailService.SendVerificationEmailAsync(email, user.FullName, verificationToken);
+
+			return new EmailVerificationResultDto(true, "Email weryfikacyjny został wysłany", DateTime.UtcNow.AddHours(24));
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas weryfikacji maila użytkownika");
 			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
 		}
 	}
@@ -94,7 +165,19 @@ public class AuthService : IAuthService
 			// user.LastLoginAt = DateTime.UtcNow;
 
 			// await _context.SaveChangesAsync();
-			return await GenerateAuthResponseAsync(user);
+			string accessToken = GenerateJwtToken(user);
+			string newRefreshToken = await GenerateRefreshToken(user);
+
+			AuthResponseDto response = new AuthResponseDto
+			{
+				Message = "Pomyślnie zalogowano",
+				AccessToken = accessToken,
+				RefreshToken = newRefreshToken,
+			};
+
+			_logger.LogInformation("Użytkownik zalogowany: {Email}", user.Email);
+
+			return response;
 		}
 		catch (BusinessException)
 		{
@@ -107,49 +190,66 @@ public class AuthService : IAuthService
 		}
 	}
 
-	public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
+	public async Task SendPasswordResetEmailAsync(string email)
 	{
-		RefreshToken token = await _context.RefreshTokens
-				.FirstOrDefaultAsync(rt => rt.Token == refreshToken && !rt.IsRevoked) ?? throw new ServiceException("Token odświeżania nie istnieje lub jest nieprawidłowy", "TOKEN_FETCH_ERROR");
+		try
+		{
+			User user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email)
+				?? throw new ServiceException("Konto o podanym mailu nie zostało znalezione", "EMAIL_NOT_FOUND");
 
-		if (token.ExpiresAt < DateTime.UtcNow) throw new ServiceException("Token odświeżania wygasł", "EXPIRED_TOKEN");
-
-		User user = await _context.Users.FirstOrDefaultAsync(u => u.Id == token.UserId) ?? throw EntityNotFoundException.ForUser(token.UserId);
-
-		// Revoke old token
-		token.IsRevoked = true;
-		_context.RefreshTokens.Update(token);
-
-		// Issue new tokens
-		AuthResponseDto response = await GenerateAuthResponseAsync(user);
-		await _context.SaveChangesAsync();
-
-		return response;
+			string resetToken = await _tokenService.GeneratePasswordResetTokenAsync(user.Id);
+			await _emailService.SendPasswordResetEmailAsync(email, user.FullName, resetToken);
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas wysyłania maila do zmiany hasła użytkownika");
+			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+		}
 	}
 
-	private async Task<AuthResponseDto> GenerateAuthResponseAsync(User user)
+	public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
 	{
-		// Generate JWT Token
-		string token = GenerateJwtToken(user);
-		string refreshToken = GenerateRefreshToken();
-
-		RefreshToken dbToken = new RefreshToken
+		try
 		{
-			Token = refreshToken,
-			UserId = user.Id,
-			ExpiresAt = DateTime.UtcNow.AddDays(7)
-		};
+			RefreshToken token = await _context.RefreshTokens
+					.FirstOrDefaultAsync(rt => rt.Token == refreshToken && !rt.IsRevoked) ?? throw new ServiceException("Token odświeżania nie istnieje lub jest nieprawidłowy", "TOKEN_FETCH_ERROR");
 
-		_context.RefreshTokens.Add(dbToken);
-		await _context.SaveChangesAsync();
+			if (token.ExpiresAt < DateTime.UtcNow) throw new ServiceException("Token odświeżania wygasł", "EXPIRED_TOKEN");
 
-		_logger.LogInformation("Użytkownik zalogowany: {Email}", user.Email);
+			User user = await _context.Users.FirstOrDefaultAsync(u => u.Id == token.UserId) ?? throw EntityNotFoundException.ForUser(token.UserId);
 
-		return new AuthResponseDto
+			// Revoke old token
+			token.IsRevoked = true;
+			_context.RefreshTokens.Update(token);
+
+			// Issue new tokens
+			string accessToken = GenerateJwtToken(user);
+			string newRefreshToken = await GenerateRefreshToken(user);
+
+			AuthResponseDto response = new AuthResponseDto
+			{
+				Message = "Odświeżono tokeny",
+				AccessToken = accessToken,
+				RefreshToken = newRefreshToken,
+			};
+
+			await _context.SaveChangesAsync();
+
+			return response;
+		}
+		catch (BusinessException)
 		{
-			AccessToken = token,
-			RefreshToken = refreshToken,
-		};
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas odświeżania tokenów");
+			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+		}
 	}
 
 	private string GenerateJwtToken(User user)
@@ -182,11 +282,24 @@ public class AuthService : IAuthService
 		return tokenHandler.WriteToken(token);
 	}
 
-	private string GenerateRefreshToken()
+	private async Task<string> GenerateRefreshToken(User user)
 	{
 		byte[] randomBytes = new byte[64];
 		using RandomNumberGenerator rng = RandomNumberGenerator.Create();
 		rng.GetBytes(randomBytes);
-		return Convert.ToBase64String(randomBytes);
+
+		string refreshToken = Convert.ToBase64String(randomBytes);
+
+		RefreshToken dbToken = new RefreshToken
+		{
+			Token = refreshToken,
+			UserId = user.Id,
+			ExpiresAt = DateTime.UtcNow.AddDays(7)
+		};
+
+		_context.RefreshTokens.Add(dbToken);
+		await _context.SaveChangesAsync();
+
+		return refreshToken;
 	}
 }

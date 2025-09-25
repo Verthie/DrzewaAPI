@@ -30,6 +30,8 @@ public class User
 	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; set; } = DateTime.UtcNow;
 	public UserRole Role { get; set; } = UserRole.User;
+	public bool IsEmailVerified { get; set; } = false;
+	public DateTime? EmailVerifiedAt { get; set; }
 
 	// public DateTime? LastLoginAt { get; set; }
 	// public bool IsActive { get; set; }
@@ -44,4 +46,5 @@ public class User
 	public ICollection<CommentVote> CommentVotes { get; set; } = new List<CommentVote>();
 	public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 	public ICollection<Application> Applications { get; set; } = new List<Application>();
+	public ICollection<EmailVerificationToken> EmailVerificationTokens { get; set; } = new List<EmailVerificationToken>();
 }

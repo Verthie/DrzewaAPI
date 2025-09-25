@@ -170,7 +170,7 @@ public class TreeService : ITreeService
 		}
 		catch (DbUpdateException ex)
 		{
-			_logger.LogError(ex, "Błąd bazy danych podczas tworzenia drzewa");
+			_logger.LogError(ex, "Błąd podczas zapisu drzewa do bazy danych");
 			throw EntityCreationFailedException.ForTree("Błąd podczas zapisu do bazy danych");
 		}
 		catch (Exception ex)

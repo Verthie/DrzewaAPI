@@ -43,7 +43,7 @@ public class UsersController(IUserService _userService) : ControllerBase
     }
 
     [HttpPut("data")]
-    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto updateDto, IFormFile image)
+    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto req, IFormFile image)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
@@ -52,33 +52,30 @@ public class UsersController(IUserService _userService) : ControllerBase
             return BadRequest("An image needs to be provided");
         }
 
-        updateDto.UserId ??= User.GetCurrentUserId().ToString();
+        req.UserId ??= User.GetCurrentUserId().ToString();
 
-        Guid userId = ValidationHelpers.ValidateAndParseId(updateDto.UserId);
+        Guid userId = ValidationHelpers.ValidateAndParseId(req.UserId);
         Guid currentUserId = User.GetCurrentUserId();
 
         string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
         bool isModerator = currentUserRole == UserRole.Moderator.ToString();
 
-        UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userId, updateDto, image, isModerator);
+        UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userId, req, image, isModerator);
 
         return Ok(updatedUser);
     }
 
+    /// <summary>
+    /// Allows user to update password when he is currently logged in a session
+    /// </summary>
     [HttpPut("password")]
-    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto updatePasswordDto)
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDto req)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
-        updatePasswordDto.UserId ??= User.GetCurrentUserId().ToString();
+        Guid userId = User.GetCurrentUserId();
 
-        Guid userId = ValidationHelpers.ValidateAndParseId(updatePasswordDto.UserId);
-        Guid currentUserId = User.GetCurrentUserId();
-
-        string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
-        bool isModerator = currentUserRole == UserRole.Moderator.ToString();
-
-        await _userService.UpdatePasswordAsync(currentUserId, userId, updatePasswordDto, isModerator);
+        await _userService.UpdatePasswordAsync(userId, req.ConfirmPassword);
 
         return NoContent();
     }

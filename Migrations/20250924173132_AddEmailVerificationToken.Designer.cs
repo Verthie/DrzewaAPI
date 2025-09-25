@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrzewaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250922084112_AddRefreshToken")]
-    partial class AddRefreshToken
+    [Migration("20250924173132_AddEmailVerificationToken")]
+    partial class AddEmailVerificationToken
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -183,6 +183,51 @@ namespace DrzewaAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("CommentVotes");
+                });
+
+            modelBuilder.Entity("DrzewaAPI.Models.EmailVerificationToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TokenType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EmailVerificationTokens");
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.Municipality", b =>
@@ -437,10 +482,16 @@ namespace DrzewaAPI.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<DateTime?>("EmailVerifiedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -557,9 +608,20 @@ namespace DrzewaAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DrzewaAPI.Models.EmailVerificationToken", b =>
+                {
+                    b.HasOne("DrzewaAPI.Models.User", "User")
+                        .WithMany("EmailVerificationTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DrzewaAPI.Models.TreeSpecies", b =>
                 {
-                    b.OwnsOne("DrzewaAPI.Models.ValueObjects.SeasonalChanges", "SeasonalChanges", b1 =>
+                    b.OwnsOne("DrzewaAPI.Dtos.SeasonalChangesDto", "SeasonalChanges", b1 =>
                         {
                             b1.Property<Guid>("TreeSpeciesId")
                                 .HasColumnType("uniqueidentifier");
@@ -588,7 +650,7 @@ namespace DrzewaAPI.Migrations
                                 .HasForeignKey("TreeSpeciesId");
                         });
 
-                    b.OwnsOne("DrzewaAPI.Models.ValueObjects.Traits", "Traits", b1 =>
+                    b.OwnsOne("DrzewaAPI.Dtos.TraitsDto", "Traits", b1 =>
                         {
                             b1.Property<Guid>("TreeSpeciesId")
                                 .HasColumnType("uniqueidentifier");
@@ -640,7 +702,7 @@ namespace DrzewaAPI.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsOne("DrzewaAPI.Models.ValueObjects.Location", "Location", b1 =>
+                    b.OwnsOne("DrzewaAPI.Dtos.LocationDto", "Location", b1 =>
                         {
                             b1.Property<Guid>("TreeSubmissionId")
                                 .HasColumnType("uniqueidentifier");
@@ -730,6 +792,8 @@ namespace DrzewaAPI.Migrations
                     b.Navigation("CommentVotes");
 
                     b.Navigation("Comments");
+
+                    b.Navigation("EmailVerificationTokens");
 
                     b.Navigation("TreeSubmissions");
 
