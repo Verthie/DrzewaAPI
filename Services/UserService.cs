@@ -157,6 +157,101 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 		}
 	}
 
+	public async Task DeleteUserAsync(Guid currentUserId, Guid userId, bool isModerator)
+	{
+		using var transaction = await _context.Database.BeginTransactionAsync();
+		try
+		{
+			User user = await _context.Users
+					.FirstOrDefaultAsync(u => u.Id == userId)
+					?? throw EntityNotFoundException.ForUser(userId);
+
+			if (!isModerator && user.Id != currentUserId) throw EntityAccessDeniedException.ForUser(userId);
+
+			_logger.LogInformation("Starting cascade deletion for user {UserId}", userId);
+
+			// 1. Delete EmailVerificationTokens
+			var emailTokens = await _context.EmailVerificationTokens
+					.Where(t => t.UserId == userId)
+					.ToListAsync();
+			if (emailTokens.Any())
+			{
+				_context.EmailVerificationTokens.RemoveRange(emailTokens);
+				_logger.LogDebug("Deleted {Count} email verification tokens for user {UserId}", emailTokens.Count, userId);
+			}
+
+			// 2. Delete CommentVotes
+			var commentVotes = await _context.CommentVotes
+					.Where(cv => cv.UserId == userId)
+					.ToListAsync();
+			if (commentVotes.Any())
+			{
+				_context.CommentVotes.RemoveRange(commentVotes);
+				_logger.LogDebug("Deleted {Count} comment votes for user {UserId}", commentVotes.Count, userId);
+			}
+
+			// 3. Delete TreeVotes
+			var treeVotes = await _context.TreeVotes
+					.Where(tv => tv.UserId == userId)
+					.ToListAsync();
+			if (treeVotes.Any())
+			{
+				_context.TreeVotes.RemoveRange(treeVotes);
+				_logger.LogDebug("Deleted {Count} tree votes for user {UserId}", treeVotes.Count, userId);
+			}
+
+			// 4. Delete Comments
+			var comments = await _context.Comments
+					.Where(c => c.UserId == userId)
+					.ToListAsync();
+			if (comments.Any())
+			{
+				_context.Comments.RemoveRange(comments);
+				_logger.LogDebug("Deleted {Count} comments for user {UserId}", comments.Count, userId);
+			}
+
+			// 5. Delete Applications
+			var applications = await _context.Applications
+					.Where(a => a.UserId == userId)
+					.ToListAsync();
+			if (applications.Any())
+			{
+				_context.Applications.RemoveRange(applications);
+				_logger.LogDebug("Deleted {Count} applications for user {UserId}", applications.Count, userId);
+			}
+
+			// 6. Delete TreeSubmissions (these might have complex relationships)
+			var treeSubmissions = await _context.TreeSubmissions
+					.Where(ts => ts.UserId == userId)
+					.ToListAsync();
+			if (treeSubmissions.Any())
+			{
+				_context.TreeSubmissions.RemoveRange(treeSubmissions);
+				_logger.LogDebug("Deleted {Count} tree submissions for user {UserId}", treeSubmissions.Count, userId);
+			}
+
+			// 7. Finally, delete the user
+			_context.Users.Remove(user);
+
+			// Save all changes
+			await _context.SaveChangesAsync();
+			await transaction.CommitAsync();
+
+			_logger.LogInformation("Successfully deleted user {UserId} and all associated data", userId);
+		}
+		catch (BusinessException)
+		{
+			await transaction.RollbackAsync();
+			throw;
+		}
+		catch (Exception ex)
+		{
+			await transaction.RollbackAsync();
+			_logger.LogError(ex, "Błąd podczas kaskadowego usuwania użytkownika {UserId}", userId);
+			throw new ServiceException($"Nie można usunąć użytkownika {userId}", "USER_DELETE_ERROR");
+		}
+	}
+
 	private static UserDto MapToUserDto(User u)
 	{
 		return new UserDto

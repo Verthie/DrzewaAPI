@@ -42,8 +42,8 @@ public class UsersController(IUserService _userService) : ControllerBase
         return Ok(user);
     }
 
-    [HttpPut("data")]
-    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto req, IFormFile image)
+    [HttpPut("data/{userId?}")]
+    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto req, string userId, IFormFile image)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
@@ -52,15 +52,15 @@ public class UsersController(IUserService _userService) : ControllerBase
             return BadRequest("An image needs to be provided");
         }
 
-        req.UserId ??= User.GetCurrentUserId().ToString();
+        userId ??= User.GetCurrentUserId().ToString();
 
-        Guid userId = ValidationHelpers.ValidateAndParseId(req.UserId);
+        Guid userGuid = ValidationHelpers.ValidateAndParseId(userId);
         Guid currentUserId = User.GetCurrentUserId();
 
         string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
         bool isModerator = currentUserRole == UserRole.Moderator.ToString();
 
-        UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userId, req, image, isModerator);
+        UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userGuid, req, image, isModerator);
 
         return Ok(updatedUser);
     }
@@ -80,5 +80,20 @@ public class UsersController(IUserService _userService) : ControllerBase
         return NoContent();
     }
 
-    // TODO Add User Deletion
+    [Authorize]
+    [HttpDelete("{userId?}")]
+    public async Task<IActionResult> DeleteUser(string? userId)
+    {
+        Guid currentUserId = User.GetCurrentUserId();
+        userId ??= User.GetCurrentUserId().ToString();
+
+        Guid userGuid = ValidationHelpers.ValidateAndParseId(userId);
+
+        string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+        bool isModerator = currentUserRole == UserRole.Moderator.ToString();
+
+        await _userService.DeleteUserAsync(currentUserId, userGuid, isModerator);
+
+        return NoContent();
+    }
 }
