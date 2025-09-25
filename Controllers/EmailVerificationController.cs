@@ -12,20 +12,20 @@ public class EmailVerificationController : ControllerBase
     private readonly IAuthService _authService;
     private readonly IEmailService _emailService;
     private readonly ITokenService _tokenService;
-    // private readonly IUserService _userService;
+    private readonly IUserService _userService;
     private readonly ILogger<EmailVerificationController> _logger;
 
     public EmailVerificationController(
         IAuthService authService,
         IEmailService emailService,
         ITokenService tokenService,
-        // IUserService userService,
+        IUserService userService,
         ILogger<EmailVerificationController> logger)
     {
         _authService = authService;
         _emailService = emailService;
         _tokenService = tokenService;
-        // _userService = userService;
+        _userService = userService;
         _logger = logger;
     }
 
@@ -70,22 +70,6 @@ public class EmailVerificationController : ControllerBase
         return Redirect($"{frontendUrl}?emailVerified=true");
     }
 
-    // [HttpPost("verify")]
-    // public async Task<ActionResult<EmailVerificationResultDto>> VerifyEmail([FromBody] VerifyEmailDto req)
-    // {
-    //     EmailVerificationToken token = await _tokenService.ValidateTokenAsync(req.Token, EmailTokenType.EmailVerification);
-
-    //     await _authService.VerifyEmailAsync(token.UserId);
-
-    //     var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-    //     var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-
-    //     await _tokenService.MarkTokenAsUsedAsync(req.Token, ipAddress, userAgent);
-    //     await _emailService.SendWelcomeEmailAsync(token.User.Email, token.User.FullName);
-
-    //     return Ok(new EmailVerificationResultDto(true, "Email został pomyślnie zweryfikowany"));
-    // }
-
     [HttpPost("resend")]
     public async Task<ActionResult<EmailVerificationResultDto>> ResendVerificationEmail([FromBody] SendVerificationEmailDto req)
     {
@@ -117,21 +101,21 @@ public class EmailVerificationController : ControllerBase
         return Redirect($"{frontendUrl}/reset-password?token={token}&email={resetToken.User.Email}");
     }
 
-    // [HttpPost("reset-password")]
-    // public async Task<ActionResult<EmailVerificationResultDto>> ResetPassword([FromBody] UpdatePasswordDto req)
-    // {
-    //     EmailVerificationToken token = await _tokenService.ValidateTokenAsync(req.Token, EmailTokenType.PasswordReset);
+    [HttpPost("reset-password")]
+    public async Task<ActionResult<EmailVerificationResultDto>> ResetPassword([FromBody] UpdatePasswordDto req)
+    {
+        EmailVerificationToken token = await _tokenService.ValidateTokenAsync(req.Token, EmailTokenType.PasswordReset);
 
-    //     await _userService.UpdatePasswordAsync(token.UserId, req.NewPassword);
+        await _userService.UpdatePasswordAsync(token.UserId, req.NewPassword);
 
-    //     var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-    //     var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 
-    //     await _tokenService.MarkTokenAsUsedAsync(req.Token, ipAddress, userAgent);
-    //     await _emailService.SendPasswordChangedNotificationAsync(token.User.Email, token.User.FullName);
+        await _tokenService.MarkTokenAsUsedAsync(req.Token, ipAddress, userAgent);
+        await _emailService.SendPasswordChangedNotificationAsync(token.User.Email, token.User.FullName);
 
-    //     return Ok(new EmailVerificationResultDto(true, "Hasło zostało pomyślnie zmienione"));
-    // }
+        return Ok(new EmailVerificationResultDto(true, "Hasło zostało pomyślnie zmienione"));
+    }
 
     private string GetFrontendUrl()
     {

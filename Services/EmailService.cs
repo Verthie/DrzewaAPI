@@ -161,7 +161,7 @@ public class EmailService : IEmailService
                     </div>
                     
                     <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
-                    <p style='color: #666; font-size: 12px;'>Zespół Pomniki Przyrody</p>
+                    <p style='color: #666; font-size: 12px;'>Zespół Zgłoś Pomnik</p>
                 </div>
             </body>
             </html>";
@@ -181,7 +181,7 @@ public class EmailService : IEmailService
             <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
                 <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
                     <h2 style='color: #2e7d32;'>Hasło zostało zmienione - {userName}</h2>
-                    <p>Informujemy, że hasło do Twojego konta w aplikacji <strong>Pomniki Przyrody</strong> zostało pomyślnie zmienione.</p>
+                    <p>Informujemy, że hasło do Twojego konta w aplikacji <strong>Zgłoś Pomnik</strong> zostało pomyślnie zmienione.</p>
                     
                     <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0;'>
                         <p style='margin: 0; color: #856404;'>
@@ -193,12 +193,12 @@ public class EmailService : IEmailService
                     <p>Zmiana hasła została wykonana: <strong>{DateTime.Now:yyyy-MM-dd HH:mm}</strong></p>
                     
                     <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
-                    <p style='color: #666; font-size: 12px;'>Zespół Pomniki Przyrody</p>
+                    <p style='color: #666; font-size: 12px;'>Zespół Zgłoś Pomnik</p>
                 </div>
             </body>
             </html>";
 
-		await SendEmailAsync(toEmail, "Hasło zostało zmienione - Pomniki Przyrody", htmlBody);
+		await SendEmailAsync(toEmail, "Hasło zostało zmienione - Zgłoś Pomnik", htmlBody);
 	}
 
 	public async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody, string? plainTextBody = null)
