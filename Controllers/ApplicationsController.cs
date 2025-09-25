@@ -35,8 +35,8 @@ public class ApplicationsController(IApplicationService _applicationService) : C
 	}
 
 	[HttpPost]
-	[IdempotentAction(10)] // Cache for 10 minutes
-	public async Task<IActionResult> CreateApplication([FromBody] CreateApplicationDto createDto, [FromHeader(Name = "X-Idempotency-Key")][Required] string idempotencyKey)
+	// [IdempotentAction(10)] // Cache for 10 minutes
+	public async Task<IActionResult> CreateApplication([FromBody] CreateApplicationDto createDto /*, [FromHeader(Name = "X-Idempotency-Key")][Required] string idempotencyKey */)
 	{
 		ValidationHelpers.ValidateModelState(ModelState);
 		Guid userId = User.GetCurrentUserId();
