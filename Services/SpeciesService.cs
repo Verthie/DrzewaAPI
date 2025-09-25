@@ -6,21 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class SpeciesService : ISpeciesService
+public class SpeciesService(
+		ApplicationDbContext _context,
+		ILogger<SpeciesService> _logger,
+		IAzureStorageService _azureStorageService) : ISpeciesService
 {
-	private readonly ApplicationDbContext _context;
-	private readonly ILogger<SpeciesService> _logger;
-	private readonly IAzureStorageService _azureStorageService;
-
-	public SpeciesService(
-			ApplicationDbContext context,
-			ILogger<SpeciesService> logger,
-			IAzureStorageService azureStorageService)
-	{
-		_context = context;
-		_logger = logger;
-		_azureStorageService = azureStorageService;
-	}
 
 	public async Task<List<TreeSpeciesDto>> GetAllSpeciesAsync()
 	{
