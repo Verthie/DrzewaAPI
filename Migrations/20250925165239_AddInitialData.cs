@@ -13,6 +13,32 @@ namespace DrzewaAPI.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "Images",
+                table: "TreeSpecies");
+
+            migrationBuilder.CreateTable(
+                name: "TreeSpeciesImageDto",
+                columns: table => new
+                {
+                    TreeSpeciesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    AltText = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TreeSpeciesImageDto", x => new { x.TreeSpeciesId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_TreeSpeciesImageDto_TreeSpecies_TreeSpeciesId",
+                        column: x => x.TreeSpeciesId,
+                        principalTable: "TreeSpecies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Municipalities",
                 columns: new[] { "Id", "Address", "City", "CreatedDate", "Email", "LastModifiedDate", "Name", "Phone", "PostalCode", "Province", "Website" },
@@ -24,8 +50,8 @@ namespace DrzewaAPI.Migrations
 
             migrationBuilder.InsertData(
                 table: "TreeSpecies",
-                columns: new[] { "Id", "SeasonalChanges_Autumn", "SeasonalChanges_Spring", "SeasonalChanges_Summer", "SeasonalChanges_Winter", "Traits_Lifespan", "Traits_MaxHeight", "Traits_NativeToPoland", "Description", "Family", "IdentificationGuide", "Images", "LatinName", "PolishName" },
-                values: new object[] { new Guid("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"), "Liście żółto-brązowe, opadają późno w sezonie. Dojrzałe żołędzie opadają i są zbierane przez zwierzęta", "Młode liście jasno-zielone, często z czerwonawym nalotem. Kwitnienie w maju - kotki męskie i niewielkie kwiaty żeńskie", "Liście ciemno-zielone, gęsta korona dająca dużo cienia. Rozwijają się żołędzie", "Charakterystyczna sylwetka z grubym pniem i rozłożystymi gałęziami. Kora wyraźnie bruzdowna", "Ponad 1000 lat", 40, true, "Dąb szypułkowy to jeden z najważniejszych gatunków drzew w Polsce. Może żyć ponad 1000 lat i osiągać wysokość do 40 metrów. Jest symbolem siły, trwałości i mądrości w kulturze słowiańskiej. Drewno dębu było używane do budowy statków, domów i mebli przez wieki.", "Fagaceae", "[\"Li\\u015Bcie z wyra\\u017Anymi wci\\u0119ciami, bez szypu\\u0142ek lub z bardzo kr\\u00F3tkimi szypu\\u0142kami\",\"\\u017Bo\\u0142\\u0119dzie na d\\u0142ugich szypu\\u0142kach (2-8 cm), dojrzewaj\\u0105 jesieni\\u0105\",\"Kora szara, g\\u0142\\u0119boko bruzdowna u starych okaz\\u00F3w, g\\u0142adka u m\\u0142odych\",\"Korona szeroka, roz\\u0142o\\u017Cysta, charakterystyczny pokr\\u00F3j \\u0022parasola\\u0022\",\"P\\u0105ki skupione na ko\\u0144cach p\\u0119d\\u00F3w, jajowate, br\\u0105zowe\"]", null, "Quercus Robur", "Dąb szypułkowy" });
+                columns: new[] { "Id", "SeasonalChanges_Autumn", "SeasonalChanges_Spring", "SeasonalChanges_Summer", "SeasonalChanges_Winter", "Traits_Lifespan", "Traits_MaxHeight", "Traits_NativeToPoland", "Description", "Family", "IdentificationGuide", "LatinName", "PolishName" },
+                values: new object[] { new Guid("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"), "Liście żółto-brązowe, opadają późno w sezonie. Dojrzałe żołędzie opadają i są zbierane przez zwierzęta", "Młode liście jasno-zielone, często z czerwonawym nalotem. Kwitnienie w maju - kotki męskie i niewielkie kwiaty żeńskie", "Liście ciemno-zielone, gęsta korona dająca dużo cienia. Rozwijają się żołędzie", "Charakterystyczna sylwetka z grubym pniem i rozłożystymi gałęziami. Kora wyraźnie bruzdowna", "Ponad 1000 lat", 40, true, "Dąb szypułkowy to jeden z najważniejszych gatunków drzew w Polsce. Może żyć ponad 1000 lat i osiągać wysokość do 40 metrów. Jest symbolem siły, trwałości i mądrości w kulturze słowiańskiej. Drewno dębu było używane do budowy statków, domów i mebli przez wieki.", "Fagaceae", "[\"Li\\u015Bcie z wyra\\u017Anymi wci\\u0119ciami, bez szypu\\u0142ek lub z bardzo kr\\u00F3tkimi szypu\\u0142kami\",\"\\u017Bo\\u0142\\u0119dzie na d\\u0142ugich szypu\\u0142kach (2-8 cm), dojrzewaj\\u0105 jesieni\\u0105\",\"Kora szara, g\\u0142\\u0119boko bruzdowna u starych okaz\\u00F3w, g\\u0142adka u m\\u0142odych\",\"Korona szeroka, roz\\u0142o\\u017Cysta, charakterystyczny pokr\\u00F3j \\u0022parasola\\u0022\",\"P\\u0105ki skupione na ko\\u0144cach p\\u0119d\\u00F3w, jajowate, br\\u0105zowe\"]", "Quercus Robur", "Dąb szypułkowy" });
 
             migrationBuilder.InsertData(
                 table: "Users",
@@ -59,6 +85,9 @@ namespace DrzewaAPI.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "TreeSpeciesImageDto");
+
             migrationBuilder.DeleteData(
                 table: "ApplicationTemplates",
                 keyColumn: "Id",
@@ -103,6 +132,12 @@ namespace DrzewaAPI.Migrations
                 table: "Users",
                 keyColumn: "Id",
                 keyValue: new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000002"));
+
+            migrationBuilder.AddColumn<string>(
+                name: "Images",
+                table: "TreeSpecies",
+                type: "nvarchar(max)",
+                nullable: true);
         }
     }
 }

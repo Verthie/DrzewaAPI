@@ -11,7 +11,7 @@ public record TreeSpeciesDto
 	public string? Description { get; set; }
 	public List<string>? IdentificationGuide { get; set; }
 	public SeasonalChangesDto? SeasonalChanges { get; set; }
-	public List<string>? Images { get; set; }
+	public List<TreeSpeciesImageDto>? Images { get; set; }
 	public TraitsDto? Traits { get; set; }
 }
 
@@ -25,6 +25,13 @@ public record CreateTreeSpeciesDto
 	public SeasonalChangesDto? SeasonalChanges { get; set; }
 	public TraitsDto? Traits
 	{ get; set; }
+}
+
+public record TreeSpeciesImageDto
+{
+	public required string ImageUrl { get; set; }
+	public ImageType Type { get; set; } // Tree, Bark, Leaf, Fruit
+	public string? AltText { get; set; }
 }
 
 public record SeasonalChangesDto

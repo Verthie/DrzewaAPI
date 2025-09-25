@@ -77,7 +77,25 @@ public class SpeciesService(
 				{
 					string folderPath = $"uploads/tree-species/{species.Id}";
 					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(images, folderPath);
-					species.Images = imagePaths;
+					species.Images = new List<TreeSpeciesImageDto>
+					{
+							new(){
+								ImageUrl = FileHelper.GetFileUrl(imagePaths[0], _azureStorageService),
+								Type = ImageType.Tree,
+							},
+							new(){
+								ImageUrl = FileHelper.GetFileUrl(imagePaths[1], _azureStorageService),
+								Type = ImageType.Leaf,
+							},
+							new(){
+								ImageUrl = FileHelper.GetFileUrl(imagePaths[2], _azureStorageService),
+								Type = ImageType.Bark,
+							},
+							new(){
+								ImageUrl = FileHelper.GetFileUrl(imagePaths[3], _azureStorageService),
+								Type = ImageType.Fruit,
+							}
+					};
 					await _context.SaveChangesAsync();
 				}
 				catch (Exception ex)
@@ -112,8 +130,37 @@ public class SpeciesService(
 		}
 	}
 
+	public async Task DeleteSpeciesAsync(Guid speciesId)
+	{
+		try
+		{
+			TreeSpecies species = await _context.TreeSpecies
+					.FirstOrDefaultAsync(s => s.Id == speciesId)
+					?? throw EntityNotFoundException.ForSpecies(speciesId);
+
+			_context.TreeSpecies.Remove(species);
+			await _context.SaveChangesAsync();
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas usuwania gatunku");
+			throw new ServiceException("Nieoczekiwany błąd podczas ususwania gatunku", "SPECIES_DELETE_ERROR");
+		}
+	}
+
 	private TreeSpeciesDto MapToTreeSpeciesDto(TreeSpecies s)
 	{
+		var images = s.Images!.Select(i => new TreeSpeciesImageDto
+		{
+			ImageUrl = i.ImageUrl,
+			Type = i.Type,
+			AltText = i.AltText ?? i.Type.GenerateAltText(s.PolishName)
+		}).ToList();
+
 		return new TreeSpeciesDto
 		{
 			Id = s.Id,
@@ -123,8 +170,7 @@ public class SpeciesService(
 			Description = s.Description,
 			IdentificationGuide = s.IdentificationGuide,
 			SeasonalChanges = s.SeasonalChanges,
-			Images = s.Images?.Select(path =>
-						FileHelper.GetFileUrl(path, _azureStorageService)).ToList() ?? new List<string>(),
+			Images = images,
 			Traits = s.Traits
 		};
 	}

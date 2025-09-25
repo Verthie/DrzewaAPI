@@ -45,5 +45,16 @@ public class SpeciesController(ISpeciesService _speciesService) : ControllerBase
 
         return CreatedAtAction(nameof(GetSpeciesById), new { id = result.Id }, result);
     }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Moderator")]
+    public async Task<IActionResult> DeleteSpecies(string id)
+    {
+        Guid speciesId = ValidationHelpers.ValidateAndParseId(id);
+
+        await _speciesService.DeleteSpeciesAsync(speciesId);
+
+        return NoContent();
+    }
 }
 

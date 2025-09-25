@@ -381,9 +381,6 @@ namespace DrzewaAPI.Migrations
                     b.PrimitiveCollection<string>("IdentificationGuide")
                         .HasColumnType("nvarchar(max)");
 
-                    b.PrimitiveCollection<string>("Images")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("LatinName")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -784,6 +781,37 @@ namespace DrzewaAPI.Migrations
                                     NativeToPoland = true
                                 });
                         });
+
+                    b.OwnsMany("DrzewaAPI.Dtos.TreeSpeciesImageDto", "Images", b1 =>
+                        {
+                            b1.Property<Guid>("TreeSpeciesId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("AltText")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("ImageUrl")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("int");
+
+                            b1.HasKey("TreeSpeciesId", "Id");
+
+                            b1.ToTable("TreeSpeciesImageDto");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TreeSpeciesId");
+                        });
+
+                    b.Navigation("Images");
 
                     b.Navigation("SeasonalChanges");
 

@@ -181,14 +181,26 @@ public class ApplicationTemplateService(ApplicationDbContext _context, ILogger<A
 
 	public async Task DeleteTemplateAsync(Guid id)
 	{
-		ApplicationTemplate template = await _context.ApplicationTemplates
-				.FirstOrDefaultAsync(t => t.Id == id)
-				?? throw EntityNotFoundException.ForTemplate(id);
+		try
+		{
+			ApplicationTemplate template = await _context.ApplicationTemplates
+					.FirstOrDefaultAsync(t => t.Id == id)
+					?? throw EntityNotFoundException.ForTemplate(id);
 
-		// Soft delete - mark as inactive
-		template.IsActive = false;
-		template.LastModifiedDate = DateTime.UtcNow;
+			// Soft delete - mark as inactive
+			template.IsActive = false;
+			template.LastModifiedDate = DateTime.UtcNow;
 
-		await _context.SaveChangesAsync();
+			await _context.SaveChangesAsync();
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas dezaktywowania szablonu");
+			throw new ServiceException("Nieoczekiwany błąd podczas dezaktywowania szablonu", "TEMPLATE_DISABLE_ERROR");
+		}
 	}
 }
