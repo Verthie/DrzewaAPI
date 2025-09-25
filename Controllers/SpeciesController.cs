@@ -1,5 +1,7 @@
+using DrzewaAPI.Extensions;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DrzewaAPI.Controllers;

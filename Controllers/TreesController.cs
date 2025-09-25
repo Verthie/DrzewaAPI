@@ -13,7 +13,6 @@ namespace DrzewaAPI.Controllers;
 public class TreesController(ITreeService _treeService) : ControllerBase
 {
     [HttpGet]
-    [EnableRateLimiting("SlowPolicy")]
     public async Task<IActionResult> GetTreeSubmissions()
     {
         List<TreeSubmissionDto> trees = await _treeService.GetTreeSubmissionsAsync();
@@ -23,7 +22,6 @@ public class TreesController(ITreeService _treeService) : ControllerBase
 
     [Authorize]
     [HttpGet("user")]
-    [EnableRateLimiting("SlowPolicy")]
     public async Task<IActionResult> GetCurrentUserTreeSubmissions()
     {
         Guid userId = User.GetCurrentUserId();
@@ -45,8 +43,30 @@ public class TreesController(ITreeService _treeService) : ControllerBase
 
     [Authorize]
     [HttpPost]
-    [EnableRateLimiting("UserPolicy")]
     public async Task<IActionResult> CreateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images)
+    {
+        ValidationHelpers.ValidateModelState(ModelState);
+
+        if (images == null || images.Count == 0)
+        {
+            return BadRequest("At least one image needs to be provided");
+        }
+
+        // Validate images
+        if (images.Count > 5) // Limit to 5 images
+        {
+            return BadRequest("Maximum 5 images allowed");
+        }
+
+        Guid userId = User.GetCurrentUserId();
+        TreeSubmissionDto result = await _treeService.CreateTreeSubmissionAsync(request, images, userId);
+
+        return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
+    }
+
+    [Authorize]
+    [HttpPut]
+    public async Task<IActionResult> UpdateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
