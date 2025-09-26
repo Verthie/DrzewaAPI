@@ -131,6 +131,22 @@ public class AzureStorageService : IAzureStorageService
 		}
 	}
 
+	public async Task DeleteImagesAsync(List<string> imagePaths)
+	{
+		foreach (string imagePath in imagePaths)
+		{
+			try
+			{
+				await DeleteBlobAsync(imagePath);
+				_logger.LogInformation($"Image deleted from Azure Storage: {imagePath}");
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, $"Error deleting image from Azure Storage: {imagePath}");
+			}
+		}
+	}
+
 	public async Task DeletePdfAsync(string pdfPath)
 	{
 		try

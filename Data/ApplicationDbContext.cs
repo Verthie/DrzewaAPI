@@ -259,6 +259,84 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 				Email = "ws.umk@um.krakow.pl",
 				Website = "https://www.krakow.pl",
 				CreatedDate = new DateTime(2024, 1, 15)
+			},
+			new Municipality
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000009"),
+				Name = "Gmina Wrocław",
+				Address = "Pl. Nowy Targ 1-8",
+				City = "Wrocław",
+				Province = "Dolnośląskie",
+				PostalCode = "50-141",
+				Phone = "+48 71 777 7777",
+				Email = "urzad@um.wroc.pl",
+				Website = "https://www.wroclaw.pl",
+				CreatedDate = new DateTime(2024, 1, 15)
+			},
+			new Municipality
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000010"),
+				Name = "Gmina Gdańsk",
+				Address = "Ul. Nowe Ogrody 8/12",
+				City = "Gdańsk",
+				Province = "Pomorskie",
+				PostalCode = "80-803",
+				Phone = "+48 58 323 7000",
+				Email = "prezydent@gedanopedia.pl",
+				Website = "https://www.gdansk.pl",
+				CreatedDate = new DateTime(2024, 1, 15)
+			},
+			new Municipality
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000011"),
+				Name = "Gmina Poznań",
+				Address = "Pl. Kolegiacki 17",
+				City = "Poznań",
+				Province = "Wielkopolskie",
+				PostalCode = "61-841",
+				Phone = "+48 61 878 5000",
+				Email = "um@poznan.pl",
+				Website = "https://www.poznan.pl",
+				CreatedDate = new DateTime(2024, 1, 15)
+			},
+			new Municipality
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000012"),
+				Name = "Gmina Łódź",
+				Address = "Ul. Piotrkowska 104",
+				City = "Łódź",
+				Province = "Łódzkie",
+				PostalCode = "90-926",
+				Phone = "+48 42 638 4000",
+				Email = "um@uml.lodz.pl",
+				Website = "https://www.lodz.pl",
+				CreatedDate = new DateTime(2024, 1, 15)
+			},
+			new Municipality
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000013"),
+				Name = "Gmina Katowice",
+				Address = "Ul. Młyńska 4",
+				City = "Katowice",
+				Province = "Śląskie",
+				PostalCode = "40-098",
+				Phone = "+48 32 259 3500",
+				Email = "umkatowice@katowice.eu",
+				Website = "https://www.katowice.eu",
+				CreatedDate = new DateTime(2024, 1, 15)
+			},
+			new Municipality
+			{
+				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000014"),
+				Name = "Gmina Rzeszów",
+				Address = "Ul. Lubelska 9",
+				City = "Rzeszów",
+				Province = "Podkarpackie",
+				PostalCode = "35-021",
+				Phone = "+48 17 875 4000",
+				Email = "um@erzeszow.pl",
+				Website = "https://www.rzeszow.pl",
+				CreatedDate = new DateTime(2024, 1, 15)
 			}
 		);
 

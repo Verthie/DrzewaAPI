@@ -65,26 +65,24 @@ public class TreesController(ITreeService _treeService) : ControllerBase
     }
 
     [Authorize]
-    [HttpPut]
-    public async Task<IActionResult> UpdateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateTreeSubmission(Guid id, [FromForm] UpdateTreeSubmissionDto request, IFormFileCollection? images)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
-        if (images == null || images.Count == 0)
-        {
-            return BadRequest("At least one image needs to be provided");
-        }
-
-        // Validate images
-        if (images.Count > 5) // Limit to 5 images
+        // Validate images if provided
+        if (images != null && images.Count > 5) // Limit to 5 images
         {
             return BadRequest("Maximum 5 images allowed");
         }
 
-        Guid userId = User.GetCurrentUserId();
-        TreeSubmissionDto result = await _treeService.CreateTreeSubmissionAsync(request, images, userId);
+        string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+        bool isModerator = currentUserRole == UserRole.Moderator.ToString();
 
-        return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
+        Guid userId = User.GetCurrentUserId();
+
+        TreeSubmissionDto result = await _treeService.UpdateTreeSubmissionAsync(id, request, images, userId, isModerator);
+        return Ok(result);
     }
 
     [Authorize]

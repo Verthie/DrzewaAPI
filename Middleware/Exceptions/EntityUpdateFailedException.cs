@@ -15,4 +15,10 @@ public class EntityUpdateFailedException(string message, string errorCode) : Bus
 
 	public static EntityUpdateFailedException ForApplication(Guid applicationId, string reason) =>
 		new EntityUpdateFailedException($"Nie udało się zaktualizować danych wniosku {applicationId}: {reason}", "APPLICATION_UPDATE_FAILED");
+
+	public static EntityUpdateFailedException ForTree(Guid treeId, string reason) =>
+		new EntityUpdateFailedException($"Nie udało się zaktualizować danych drzewa {treeId}: {reason}", "TREE_UPDATE_FAILED");
+
+	public static EntityUpdateFailedException ForSpecies(Guid speciesId, string reason) =>
+		new EntityUpdateFailedException($"Nie udało się zaktualizować danych gatunku {speciesId}: {reason}", "SPECIES_UPDATE_FAILED");
 }

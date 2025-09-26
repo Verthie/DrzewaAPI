@@ -49,6 +49,20 @@ public record CreateTreeSubmissionDto
 	public bool IsMonument { get; init; } = false;
 }
 
+public class UpdateTreeSubmissionDto
+{
+	public Guid? SpeciesId { get; set; }
+	public LocationDto? Location { get; set; }
+	public int? Circumference { get; set; }
+	public double? Height { get; set; }
+	public string? Condition { get; set; }
+	public bool? IsAlive { get; set; }
+	public int? EstimatedAge { get; set; }
+	public string? Description { get; set; }
+	public bool? IsMonument { get; set; }
+	public bool? ReplaceImages { get; set; } = false; // If true, replace all images; if false, append
+}
+
 public record VoteRequestDto
 {
 	public VoteType Type { get; set; }

@@ -335,6 +335,84 @@ namespace DrzewaAPI.Migrations
                             PostalCode = "31-004",
                             Province = "Małopolskie",
                             Website = "https://www.krakow.pl"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000009"),
+                            Address = "Pl. Nowy Targ 1-8",
+                            City = "Wrocław",
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "urzad@um.wroc.pl",
+                            Name = "Gmina Wrocław",
+                            Phone = "+48 71 777 7777",
+                            PostalCode = "50-141",
+                            Province = "Dolnośląskie",
+                            Website = "https://www.wroclaw.pl"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000010"),
+                            Address = "Ul. Nowe Ogrody 8/12",
+                            City = "Gdańsk",
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "prezydent@gedanopedia.pl",
+                            Name = "Gmina Gdańsk",
+                            Phone = "+48 58 323 7000",
+                            PostalCode = "80-803",
+                            Province = "Pomorskie",
+                            Website = "https://www.gdansk.pl"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000011"),
+                            Address = "Pl. Kolegiacki 17",
+                            City = "Poznań",
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "um@poznan.pl",
+                            Name = "Gmina Poznań",
+                            Phone = "+48 61 878 5000",
+                            PostalCode = "61-841",
+                            Province = "Wielkopolskie",
+                            Website = "https://www.poznan.pl"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000012"),
+                            Address = "Ul. Piotrkowska 104",
+                            City = "Łódź",
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "um@uml.lodz.pl",
+                            Name = "Gmina Łódź",
+                            Phone = "+48 42 638 4000",
+                            PostalCode = "90-926",
+                            Province = "Łódzkie",
+                            Website = "https://www.lodz.pl"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000013"),
+                            Address = "Ul. Młyńska 4",
+                            City = "Katowice",
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "umkatowice@katowice.eu",
+                            Name = "Gmina Katowice",
+                            Phone = "+48 32 259 3500",
+                            PostalCode = "40-098",
+                            Province = "Śląskie",
+                            Website = "https://www.katowice.eu"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000014"),
+                            Address = "Ul. Lubelska 9",
+                            City = "Rzeszów",
+                            CreatedDate = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "um@erzeszow.pl",
+                            Name = "Gmina Rzeszów",
+                            Phone = "+48 17 875 4000",
+                            PostalCode = "35-021",
+                            Province = "Podkarpackie",
+                            Website = "https://www.rzeszow.pl"
                         });
                 });
 

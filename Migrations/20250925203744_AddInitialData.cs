@@ -45,7 +45,13 @@ namespace DrzewaAPI.Migrations
                 values: new object[,]
                 {
                     { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000003"), "Plac Bankowy 3/5", "Warszawa", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "sekretariat@um.warszawa.pl", null, "Gmina Warszawa", "+48 22 443 01 00", "00-950", "Mazowieckie", "https://www.warszawa.pl" },
-                    { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000004"), "Pl. Wszystkich Świętych 3-4", "Kraków", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "ws.umk@um.krakow.pl", null, "Gmina Kraków", "+48 12 616 5555", "31-004", "Małopolskie", "https://www.krakow.pl" }
+                    { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000004"), "Pl. Wszystkich Świętych 3-4", "Kraków", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "ws.umk@um.krakow.pl", null, "Gmina Kraków", "+48 12 616 5555", "31-004", "Małopolskie", "https://www.krakow.pl" },
+                    { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000009"), "Pl. Nowy Targ 1-8", "Wrocław", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "urzad@um.wroc.pl", null, "Gmina Wrocław", "+48 71 777 7777", "50-141", "Dolnośląskie", "https://www.wroclaw.pl" },
+                    { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000010"), "Ul. Nowe Ogrody 8/12", "Gdańsk", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "prezydent@gedanopedia.pl", null, "Gmina Gdańsk", "+48 58 323 7000", "80-803", "Pomorskie", "https://www.gdansk.pl" },
+                    { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000011"), "Pl. Kolegiacki 17", "Poznań", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "um@poznan.pl", null, "Gmina Poznań", "+48 61 878 5000", "61-841", "Wielkopolskie", "https://www.poznan.pl" },
+                    { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000012"), "Ul. Piotrkowska 104", "Łódź", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "um@uml.lodz.pl", null, "Gmina Łódź", "+48 42 638 4000", "90-926", "Łódzkie", "https://www.lodz.pl" },
+                    { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000013"), "Ul. Młyńska 4", "Katowice", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "umkatowice@katowice.eu", null, "Gmina Katowice", "+48 32 259 3500", "40-098", "Śląskie", "https://www.katowice.eu" },
+                    { new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000014"), "Ul. Lubelska 9", "Rzeszów", new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "um@erzeszow.pl", null, "Gmina Rzeszów", "+48 17 875 4000", "35-021", "Podkarpackie", "https://www.rzeszow.pl" }
                 });
 
             migrationBuilder.InsertData(
@@ -97,6 +103,36 @@ namespace DrzewaAPI.Migrations
                 table: "ApplicationTemplates",
                 keyColumn: "Id",
                 keyValue: new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000006"));
+
+            migrationBuilder.DeleteData(
+                table: "Municipalities",
+                keyColumn: "Id",
+                keyValue: new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000009"));
+
+            migrationBuilder.DeleteData(
+                table: "Municipalities",
+                keyColumn: "Id",
+                keyValue: new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000010"));
+
+            migrationBuilder.DeleteData(
+                table: "Municipalities",
+                keyColumn: "Id",
+                keyValue: new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000011"));
+
+            migrationBuilder.DeleteData(
+                table: "Municipalities",
+                keyColumn: "Id",
+                keyValue: new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000012"));
+
+            migrationBuilder.DeleteData(
+                table: "Municipalities",
+                keyColumn: "Id",
+                keyValue: new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000013"));
+
+            migrationBuilder.DeleteData(
+                table: "Municipalities",
+                keyColumn: "Id",
+                keyValue: new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000014"));
 
             migrationBuilder.DeleteData(
                 table: "TreeSubmissions",

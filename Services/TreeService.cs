@@ -169,6 +169,125 @@ public class TreeService(
 		}
 	}
 
+	public async Task<TreeSubmissionDto> UpdateTreeSubmissionAsync(Guid id, UpdateTreeSubmissionDto req, IFormFileCollection? images, Guid currentUserId, bool isModerator)
+	{
+		try
+		{
+			// Find existing submission
+			TreeSubmission? submission = await _context.TreeSubmissions
+					.Include(s => s.User)
+					.Include(s => s.Species)
+					.Include(s => s.TreeVotes)
+					.Include(s => s.Comments)
+					.FirstOrDefaultAsync(s => s.Id == id);
+
+			if (submission == null)
+				throw EntityNotFoundException.ForTree(id);
+
+			// Check if user owns the submission or has admin rights
+			if (submission.UserId != currentUserId && !isModerator)
+				throw EntityAccessDeniedException.ForTree(id, currentUserId);
+
+			// Validate species exists if being updated
+			if (req.SpeciesId.HasValue)
+			{
+				bool speciesExists = await _context.TreeSpecies.AnyAsync(s => s.Id == req.SpeciesId.Value);
+				if (!speciesExists) throw EntityNotFoundException.ForSpecies(req.SpeciesId.Value);
+				submission.SpeciesId = req.SpeciesId.Value;
+			}
+
+			// Validate updated data
+			await ValidateTreeSubmissionData(CreateTreeSubmissionDtoFromUpdate(req, submission));
+
+			// Update properties if provided
+			if (req.Location != null)
+			{
+				submission.Location = new LocationDto
+				{
+					Lat = req.Location.Lat,
+					Lng = req.Location.Lng,
+					Address = req.Location.Address,
+				};
+			}
+
+			if (req.Circumference.HasValue)
+				submission.Circumference = req.Circumference.Value;
+
+			if (req.Height.HasValue)
+				submission.Height = req.Height.Value;
+
+			if (!string.IsNullOrEmpty(req.Condition))
+				submission.Condition = req.Condition;
+
+			if (req.IsAlive.HasValue)
+				submission.IsAlive = req.IsAlive.Value;
+
+			if (req.EstimatedAge.HasValue)
+				submission.EstimatedAge = req.EstimatedAge.Value;
+
+			if (req.Description != null) // Allow setting to empty string
+				submission.Description = req.Description;
+
+			if (req.IsMonument.HasValue)
+				submission.IsMonument = req.IsMonument.Value;
+
+			await _context.SaveChangesAsync();
+
+			// Handle image uploads if provided
+			if (images != null && images.Count > 0)
+			{
+				try
+				{
+					string folderPath = $"uploads/tree-submissions/{submission.Id}";
+
+					// Delete existing images if replace mode
+					if (req.ReplaceImages == true && submission.Images?.Any() == true)
+					{
+						await _azureStorageService.DeleteImagesAsync(submission.Images);
+						submission.Images = new List<string>();
+					}
+
+					// Upload new images
+					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(images, folderPath);
+
+					if (req.ReplaceImages == true)
+					{
+						submission.Images = imagePaths;
+					}
+					else
+					{
+						// Append to existing images
+						submission.Images ??= new List<string>();
+						submission.Images.AddRange(imagePaths);
+					}
+
+					await _context.SaveChangesAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error updating images for tree submission {Id}", submission.Id);
+					// TODO: Notify the user that images couldn't be updated
+				}
+			}
+
+			return MapToTreeSubmissionDto(submission);
+		}
+		catch (BusinessException)
+		{
+			throw;
+		}
+		catch (DbUpdateException ex)
+		{
+			_logger.LogError(ex, "Błąd podczas aktualizacji drzewa w bazie danych");
+			throw EntityUpdateFailedException.ForTree(id, "Błąd podczas aktualizacji w bazie danych");
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas aktualizacji drzewa");
+			throw EntityUpdateFailedException.ForTree(id, "Nieoczekiwany błąd systemu");
+		}
+	}
+
 	public async Task DeleteTreeSubmissionAsync(Guid treeId, Guid userId, bool isModerator)
 	{
 		try
@@ -326,6 +445,23 @@ public class TreeService(
 			CommentCount = s.Comments.Count
 		};
 	}
+
+	private CreateTreeSubmissionDto CreateTreeSubmissionDtoFromUpdate(UpdateTreeSubmissionDto updateDto, TreeSubmission existing)
+	{
+		return new CreateTreeSubmissionDto
+		{
+			SpeciesId = updateDto.SpeciesId ?? existing.SpeciesId,
+			Location = updateDto.Location ?? existing.Location,
+			Circumference = updateDto.Circumference ?? existing.Circumference,
+			Height = updateDto.Height ?? existing.Height,
+			Condition = updateDto.Condition ?? existing.Condition,
+			IsAlive = updateDto.IsAlive ?? existing.IsAlive,
+			EstimatedAge = updateDto.EstimatedAge ?? existing.EstimatedAge,
+			Description = updateDto.Description ?? existing.Description,
+			IsMonument = updateDto.IsMonument ?? existing.IsMonument
+		};
+	}
+
 
 	private async Task ValidateTreeSubmissionData(CreateTreeSubmissionDto request)
 	{
