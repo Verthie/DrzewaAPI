@@ -1,28 +1,54 @@
-# Dockerfile
+# Use the ASP.NET runtime as base
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Install Chromium and its dependencies
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["DrzewaAPI.csproj", "."]
-RUN dotnet restore "./DrzewaAPI.csproj"
+
+# Copy csproj and restore dependencies
+COPY ["DrzewaAPI/DrzewaAPI.csproj", "DrzewaAPI/"]
+RUN dotnet restore "DrzewaAPI/DrzewaAPI.csproj"
+
+# Copy everything else and build
 COPY . .
-WORKDIR "/src/."
+WORKDIR "/src/DrzewaAPI"
 RUN dotnet build "DrzewaAPI.csproj" -c Release -o /app/build
 
+# Publish stage
 FROM build AS publish
 RUN dotnet publish "DrzewaAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
+# Final stage
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-# Create logs directory
-RUN mkdir -p /app/logs
-
-# Create uploads directory
-RUN mkdir -p /app/wwwroot/uploads
+# Set environment variable for Puppeteer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 ENTRYPOINT ["dotnet", "DrzewaAPI.dll"]
