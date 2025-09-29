@@ -31,12 +31,11 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copy csproj and restore dependencies
-COPY ["DrzewaAPI/DrzewaAPI.csproj", "DrzewaAPI/"]
-RUN dotnet restore "DrzewaAPI/DrzewaAPI.csproj"
+COPY ["DrzewaAPI.csproj", "./"]
+RUN dotnet restore "DrzewaAPI.csproj"
 
 # Copy everything else and build
 COPY . .
-WORKDIR "/src/DrzewaAPI"
 RUN dotnet build "DrzewaAPI.csproj" -c Release -o /app/build
 
 # Publish stage
