@@ -48,6 +48,7 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 # Set environment variable for Puppeteer
+ENV ASPNETCORE_ENVIRONMENT=Production
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-ENTRYPOINT ["dotnet", "DrzewaAPI.dll"]
+ENTRYPOINT ["dotnet", "DrzewaAPI.dll"] 

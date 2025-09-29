@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Azure.Storage.Blobs;
+using DotNetEnv;
 using DrzewaAPI.Configuration;
 using DrzewaAPI.Data;
 using DrzewaAPI.Middleware;
@@ -21,6 +22,13 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Env.Load();
+
+// Add appsettings.json + environment variables
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();
 
 // Database Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -183,6 +191,19 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Drzewa API V1");
         c.RoutePrefix = "";
     }); ;
+}
+
+// Replace or modify your HTTPS redirection
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
+// Only use HTTPS redirection if not in a container
+if (!string.IsNullOrEmpty(builder.Configuration["App:BaseUrl"])
+    || app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
 }
 
 app.UseHttpsRedirection();
