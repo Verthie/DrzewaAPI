@@ -36,19 +36,38 @@ public class FileGenerationService(IAzureStorageService _azureStorageService, IL
 		{
 			string uniqueFileName = $"wniosek_{Guid.NewGuid()}.pdf";
 
-			// PDF generation with PuppeteerSharp
-			BrowserFetcher browserFetcher = new BrowserFetcher();
-			await browserFetcher.DownloadAsync();
-
-			using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+			// Configure launch options for containerized environment
+			var launchOptions = new LaunchOptions
 			{
-				Headless = true
-			});
+				Headless = true,
+				Args = new[]
+				{
+				"--no-sandbox",
+				"--disable-setuid-sandbox",
+				"--disable-dev-shm-usage", // Overcome limited resource problems
+                "--disable-gpu"
+			}
+			};
 
+			// Check if running in container (system Chromium available)
+			var executablePath = Environment.GetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH");
+			if (!string.IsNullOrEmpty(executablePath) && File.Exists(executablePath))
+			{
+				launchOptions.ExecutablePath = executablePath;
+				_logger.LogInformation($"Using system Chromium at: {executablePath}");
+			}
+			else
+			{
+				// Local development - download Chromium
+				_logger.LogInformation("Downloading Chromium for local development");
+				BrowserFetcher browserFetcher = new BrowserFetcher();
+				await browserFetcher.DownloadAsync();
+			}
+
+			using var browser = await Puppeteer.LaunchAsync(launchOptions);
 			using var page = await browser.NewPageAsync();
 			await page.SetContentAsync(htmlContent);
 
-			// Generate PDF to memory stream
 			byte[] pdfBytes = await page.PdfDataAsync(new PdfOptions
 			{
 				Format = PaperFormat.A4,
@@ -62,11 +81,8 @@ public class FileGenerationService(IAzureStorageService _azureStorageService, IL
 				}
 			});
 
-			// Save PDF to Azure Storage
 			string relativePath = await _azureStorageService.SavePdfAsync(pdfBytes, uniqueFileName, folderPath);
-
 			_logger.LogInformation($"PDF wygenerowany i zapisany w Azure Storage: {relativePath}");
-
 			return relativePath;
 		}
 		catch (Exception ex)
