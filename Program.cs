@@ -206,7 +206,6 @@ if (!string.IsNullOrEmpty(builder.Configuration["App:BaseUrl"])
     app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseCors("AllowAll");
