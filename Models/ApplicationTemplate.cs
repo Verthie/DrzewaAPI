@@ -5,7 +5,7 @@ namespace DrzewaAPI.Models;
 public class ApplicationTemplate
 {
 	public Guid Id { get; set; }
-	public Guid MunicipalityId { get; set; }
+	public Guid CommuneId { get; set; }
 
 	[Required]
 	[MaxLength(100)]
@@ -23,6 +23,6 @@ public class ApplicationTemplate
 	public DateTime? LastModifiedDate { get; set; }
 
 	// Navigation Properties
-	public Municipality Municipality { get; set; } = default!;
+	public Commune Commune { get; set; } = default!;
 	public ICollection<Application> Applications { get; set; } = new List<Application>();
 }

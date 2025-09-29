@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DrzewaAPI.Dtos;
 
-public record MunicipalityDto
+public record CommuneDto
 {
 	public Guid Id { get; set; }
 	public string Name { get; set; } = string.Empty;
@@ -19,7 +19,7 @@ public record MunicipalityDto
 	public DateTime? LastModifiedDate { get; set; }
 }
 
-public record CreateMunicipalityDto
+public record CreateCommuneDto
 {
 	[Required]
 	[MaxLength(100)]
@@ -56,7 +56,7 @@ public record CreateMunicipalityDto
 }
 
 
-public record class UpdateMunicipalityDto
+public record class UpdateCommuneDto
 {
 	[MaxLength(100)]
 	public string? Name { get; set; }

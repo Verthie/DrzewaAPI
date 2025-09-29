@@ -16,8 +16,8 @@ public class EntityNotFoundException(string message, string errorCode) : Busines
 	public static EntityNotFoundException ForSpecies(Guid speciesId) =>
 			new EntityNotFoundException($"Gatunek o ID {speciesId} nie został znaleziony", "SPECIES_NOT_FOUND");
 
-	public static EntityNotFoundException ForMunicipality(Guid municipalityId) =>
-			new EntityNotFoundException($"Gmina o ID {municipalityId} nie została znaleziona", "MUNICIPALITY_NOT_FOUND");
+	public static EntityNotFoundException ForCommune(Guid communeId) =>
+			new EntityNotFoundException($"Gmina o ID {communeId} nie została znaleziona", "COMMUNE_NOT_FOUND");
 
 	public static EntityNotFoundException ForComment(Guid commentId) =>
 			new EntityNotFoundException($"Komentarz o ID {commentId} nie został znaleziony", "COMMENT_NOT_FOUND");

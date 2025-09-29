@@ -12,7 +12,7 @@ public class ApplicationTemplateService(ApplicationDbContext _context, ILogger<A
 		try
 		{
 			List<ApplicationTemplateDto> templates = await _context.ApplicationTemplates
-					.OrderBy(t => t.Municipality)
+					.OrderBy(t => t.Commune)
 					.ThenBy(t => t.Name)
 					.Select(t => t.MapToDto())
 					.ToListAsync();
@@ -36,7 +36,7 @@ public class ApplicationTemplateService(ApplicationDbContext _context, ILogger<A
 		{
 			List<ApplicationTemplateDto> templates = await _context.ApplicationTemplates
 					.Where(t => t.IsActive)
-					.OrderBy(t => t.Municipality)
+					.OrderBy(t => t.Commune)
 					.ThenBy(t => t.Name)
 					.Select(t => t.MapToDto())
 					.ToListAsync();
@@ -75,16 +75,16 @@ public class ApplicationTemplateService(ApplicationDbContext _context, ILogger<A
 		}
 	}
 
-	public async Task<List<ApplicationTemplateDto>> GetTemplatesByMunicipalityIdAsync(Guid municipalityId)
+	public async Task<List<ApplicationTemplateDto>> GetTemplatesByCommuneIdAsync(Guid communeId)
 	{
 		try
 		{
-			bool municipalityExists = await _context.Municipalities.AnyAsync(m => m.Id == municipalityId);
-			if (!municipalityExists) throw EntityNotFoundException.ForMunicipality(municipalityId);
+			bool communeExists = await _context.Communes.AnyAsync(m => m.Id == communeId);
+			if (!communeExists) throw EntityNotFoundException.ForCommune(communeId);
 
 			List<ApplicationTemplateDto> templates = await _context.ApplicationTemplates
-					.Include(t => t.Municipality)
-					.Where(t => t.MunicipalityId == municipalityId && t.IsActive)
+					.Include(t => t.Commune)
+					.Where(t => t.CommuneId == communeId && t.IsActive)
 					.OrderBy(t => t.Name)
 					.Select(t => t.MapToDto())
 					.ToListAsync();
@@ -106,14 +106,14 @@ public class ApplicationTemplateService(ApplicationDbContext _context, ILogger<A
 	{
 		try
 		{
-			bool municipalityExists = await _context.Municipalities.AnyAsync(m => m.Id == createDto.MunicipalityId);
-			if (!municipalityExists) throw EntityNotFoundException.ForMunicipality(createDto.MunicipalityId);
+			bool communeExists = await _context.Communes.AnyAsync(m => m.Id == createDto.CommuneId);
+			if (!communeExists) throw EntityNotFoundException.ForCommune(createDto.CommuneId);
 
 			ApplicationTemplate template = new ApplicationTemplate
 			{
 				Id = Guid.NewGuid(),
 				Name = createDto.Name,
-				MunicipalityId = createDto.MunicipalityId,
+				CommuneId = createDto.CommuneId,
 				Description = createDto.Description,
 				HtmlTemplate = createDto.HtmlTemplate,
 				Fields = createDto.Fields.ToList(),
@@ -151,7 +151,7 @@ public class ApplicationTemplateService(ApplicationDbContext _context, ILogger<A
 					?? throw EntityNotFoundException.ForTemplate(id);
 
 			template.Name = updateDto.Name;
-			template.MunicipalityId = updateDto.MunicipalityId;
+			template.CommuneId = updateDto.CommuneId;
 			template.Description = updateDto.Description;
 			template.HtmlTemplate = updateDto.HtmlTemplate;
 			template.Fields = updateDto.Fields.ToList();

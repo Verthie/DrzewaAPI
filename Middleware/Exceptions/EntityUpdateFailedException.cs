@@ -7,8 +7,8 @@ public class EntityUpdateFailedException(string message, string errorCode) : Bus
 	public static EntityUpdateFailedException ForUser(Guid userId, string reason) =>
 		new EntityUpdateFailedException($"Nie udało się zaktualizować danych użytkownika {userId}: {reason}", "USER_UPDATE_FAILED");
 
-	public static EntityUpdateFailedException ForMunicipality(Guid municipalityId, string reason) =>
-		new EntityUpdateFailedException($"Nie udało się zaktualizować danych gminy {municipalityId}: {reason}", "MUNICIPALITY_UPDATE_FAILED");
+	public static EntityUpdateFailedException ForCommune(Guid communeId, string reason) =>
+		new EntityUpdateFailedException($"Nie udało się zaktualizować danych gminy {communeId}: {reason}", "COMMUNE_UPDATE_FAILED");
 
 	public static EntityUpdateFailedException ForTemplate(Guid templateId, string reason) =>
 		new EntityUpdateFailedException($"Nie udało się zaktualizować danych szablonu {templateId}: {reason}", "TEMPLATE_UPDATE_FAILED");

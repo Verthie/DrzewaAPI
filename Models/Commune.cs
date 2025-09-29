@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DrzewaAPI.Models;
 
-public class Municipality
+public class Commune
 {
 	public Guid Id { get; set; }
 

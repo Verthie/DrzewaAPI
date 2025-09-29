@@ -23,7 +23,7 @@ public static class ApplicationExtensions
 		return new ApplicationTemplateDto
 		{
 			Id = template.Id,
-			MunicipalityId = template.MunicipalityId,
+			CommuneId = template.CommuneId,
 			Name = template.Name,
 			Description = template.Description,
 			IsActive = template.IsActive,

@@ -36,12 +36,12 @@ public class ApplicationTemplatesController(IApplicationTemplateService _templat
 		return Ok(template);
 	}
 
-	[HttpGet("municipality/{municipalityId}")]
-	public async Task<IActionResult> GetTemplatesByMunicipalityId(string municipalityId)
+	[HttpGet("commune/{communeId}")]
+	public async Task<IActionResult> GetTemplatesByCommuneId(string communeId)
 	{
-		Guid municipalityGuid = ValidationHelpers.ValidateAndParseId(municipalityId);
+		Guid communeGuid = ValidationHelpers.ValidateAndParseId(communeId);
 
-		List<ApplicationTemplateDto> templates = await _templateService.GetTemplatesByMunicipalityIdAsync(municipalityGuid);
+		List<ApplicationTemplateDto> templates = await _templateService.GetTemplatesByCommuneIdAsync(communeGuid);
 
 		return Ok(templates);
 	}

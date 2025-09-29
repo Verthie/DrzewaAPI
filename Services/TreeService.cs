@@ -9,7 +9,8 @@ namespace DrzewaAPI.Services;
 public class TreeService(
 		ApplicationDbContext _context,
 		ILogger<TreeService> _logger,
-		IAzureStorageService _azureStorageService) : ITreeService
+		IAzureStorageService _azureStorageService,
+		IGeoportalService _geoportalService) : ITreeService
 {
 	public async Task<List<TreeSubmissionDto>> GetTreeSubmissionsAsync()
 	{
@@ -125,6 +126,32 @@ public class TreeService(
 				IsMonument = req.IsMonument,
 			};
 
+			// Get plot data from Geoportal API
+			try
+			{
+				_logger.LogInformation($"Pobieranie danych działki dla zgłoszenia: {submission.Id}");
+
+				var plot = await _geoportalService.GetPlotByLocationAsync(
+					submission.Location.Lng,
+					submission.Location.Lat
+				);
+
+				if (plot != null)
+				{
+					submission.Location.PlotNumber = plot.PlotNumber;
+
+					_logger.LogInformation($"Dane działki uzupełnione: {plot.PlotNumber}");
+				}
+				else
+				{
+					_logger.LogWarning("Nie udało się pobrać danych działki - zgłoszenie zostanie utworzone bez tych danych");
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Błąd podczas pobierania danych działki - kontynuowanie bez tych danych");
+			}
+
 			_context.TreeSubmissions.Add(submission);
 			await _context.SaveChangesAsync();
 
@@ -230,6 +257,32 @@ public class TreeService(
 
 			if (req.IsMonument.HasValue)
 				submission.IsMonument = req.IsMonument.Value;
+
+
+			try
+			{
+				_logger.LogInformation($"Pobieranie danych działki dla zgłoszenia: {submission.Id}");
+
+				var plot = await _geoportalService.GetPlotByLocationAsync(
+					submission.Location.Lat,
+					submission.Location.Lng
+				);
+
+				if (plot != null)
+				{
+					submission.Location.PlotNumber = plot.PlotNumber;
+
+					_logger.LogInformation($"Dane działki uzupełnione: {plot.PlotNumber}");
+				}
+				else
+				{
+					_logger.LogWarning("Nie udało się pobrać danych działki - zgłoszenie zostanie utworzone bez tych danych");
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Błąd podczas pobierania danych działki - kontynuowanie bez tych danych");
+			}
 
 			await _context.SaveChangesAsync();
 

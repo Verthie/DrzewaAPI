@@ -51,16 +51,19 @@ builder.Services.AddScoped<ISpeciesService, SpeciesService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IApplicationTemplateService, ApplicationTemplateService>();
-builder.Services.AddScoped<IMunicipalityService, MunicipalityService>();
+builder.Services.AddScoped<ICommuneService, CommuneService>();
 builder.Services.AddScoped<IFileGenerationService, FileGenerationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-// Validator
+// Validators
 builder.Services.AddScoped<IValidator<UpdatePasswordDto>, ResetPasswordValidator>();
 
 // Background Services
 builder.Services.AddHostedService<TokenCleanupService>();
+
+// API Connections
+builder.Services.AddHttpClient<IGeoportalService, GeoportalService>();
 
 // JWT Configuration
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();

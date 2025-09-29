@@ -192,14 +192,14 @@ public class ApplicationService : IApplicationService
 		{
 			Application application = await _context.Applications
 					.Include(a => a.ApplicationTemplate)
-						.ThenInclude(at => at.Municipality)
+						.ThenInclude(at => at.Commune)
 					.Include(a => a.TreeSubmission)
 							.ThenInclude(ts => ts.Species)
 					.Include(a => a.User)
 					.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
 					?? throw EntityNotFoundException.ForUserApplication(applicationId, userId);
 
-			// Get prefilled data from user, tree submission and municipality
+			// Get prefilled data from user, tree submission and commune
 			Dictionary<string, object> prefilledData = GetPrefilledData(application);
 
 			List<ApplicationField> requiredFields = GetRequiredFields(application, prefilledData);
@@ -230,7 +230,7 @@ public class ApplicationService : IApplicationService
 		{
 			Application application = await _context.Applications
 					.Include(a => a.ApplicationTemplate)
-						.ThenInclude(at => at.Municipality)
+						.ThenInclude(at => at.Commune)
 					.Include(a => a.TreeSubmission)
 							.ThenInclude(ts => ts.Species)
 					.Include(a => a.User)
@@ -371,7 +371,7 @@ public class ApplicationService : IApplicationService
 	{
 		User user = application.User;
 		TreeSubmission treeSubmission = application.TreeSubmission;
-		Municipality municipality = application.ApplicationTemplate.Municipality;
+		Commune commune = application.ApplicationTemplate.Commune;
 
 		return new Dictionary<string, object>
 		{
@@ -397,13 +397,13 @@ public class ApplicationService : IApplicationService
 			["tree_location_longitude"] = treeSubmission.Location.Lng,
 			["tree_description"] = treeSubmission.Description ?? "",
 			["submission_date"] = treeSubmission.SubmissionDate.ToString("dd.MM.yyyy"),
-			["municipality_name"] = municipality.Name,
-			["municipality_address"] = municipality.Address,
-			["municipality_city"] = municipality.City,
-			["municipality_province"] = municipality.Province,
-			["municipality_postal_code"] = municipality.PostalCode,
-			["municipality_phone"] = municipality.Phone,
-			["municipality_email"] = municipality.Email,
+			["commune_name"] = commune.Name,
+			["commune_address"] = commune.Address,
+			["commune_city"] = commune.City,
+			["commune_province"] = commune.Province,
+			["commune_postal_code"] = commune.PostalCode,
+			["commune_phone"] = commune.Phone,
+			["commune_email"] = commune.Email,
 		};
 	}
 

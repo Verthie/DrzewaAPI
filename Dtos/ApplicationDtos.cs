@@ -27,7 +27,7 @@ public record ApplicationFormSchemaDto
 public record ApplicationTemplateDto
 {
 	public Guid Id { get; init; }
-	public Guid MunicipalityId { get; init; }
+	public Guid CommuneId { get; init; }
 	public string Name { get; init; } = string.Empty;
 	public string? Description { get; init; }
 	public bool IsActive { get; init; }
@@ -49,7 +49,7 @@ public record CreateApplicationDto
 public record CreateApplicationTemplateDto
 {
 	[Required]
-	public Guid MunicipalityId { get; set; }
+	public Guid CommuneId { get; set; }
 
 	[Required]
 	[MaxLength(100)]
@@ -78,7 +78,7 @@ public record UpdateApplicationDto
 
 public record UpdateApplicationTemplateDto
 {
-	public Guid MunicipalityId { get; init; }
+	public Guid CommuneId { get; init; }
 
 	[MaxLength(100)]
 	public required string Name { get; init; }
