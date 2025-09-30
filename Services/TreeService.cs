@@ -139,8 +139,17 @@ public class TreeService(
 				if (plot != null)
 				{
 					submission.Location.PlotNumber = plot.PlotNumber;
+					submission.Location.District = plot.District;
+					submission.Location.Province = plot.Province;
+					submission.Location.County = plot.County;
+					submission.Location.Commune = plot.Commune;
 
-					_logger.LogInformation($"Dane działki uzupełnione: {plot.PlotNumber}");
+					_logger.LogInformation("Dane działki uzupełnione");
+					_logger.LogInformation($"Numer Działki: {plot.PlotNumber}");
+					_logger.LogInformation($"Obręb Ewidencyjny: {plot.District}");
+					_logger.LogInformation($"Województwo: {plot.Province}");
+					_logger.LogInformation($"Powiat: {plot.County}");
+					_logger.LogInformation($"Gmina: {plot.Commune}");
 				}
 				else
 				{

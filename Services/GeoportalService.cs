@@ -76,11 +76,11 @@ public class GeoportalService : IGeoportalService
 				return null;
 			}
 
-			var content = await response.Content.ReadAsStringAsync();
+			string content = await response.Content.ReadAsStringAsync();
 
 			_logger.LogDebug($"Odpowiedź z API: {content}");
 
-			string[] segments = content.Split("|");
+			string[] segments = content.TrimEnd('\r', '\n').Split("|");
 
 			Plot plot = new Plot
 			{

@@ -74,4 +74,8 @@ public record LocationDto
 	public required double Lng { get; init; }
 	public string? Address { get; init; }
 	public string? PlotNumber { get; set; }
+	public string? District { get; set; }
+	public string? Province { get; set; }
+	public string? County { get; set; }
+	public string? Commune { get; set; }
 }

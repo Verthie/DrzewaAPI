@@ -52,6 +52,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 				location.Property(l => l.Lng).IsRequired();
 				location.Property(l => l.Address).IsRequired();
 				location.Property(l => l.PlotNumber);
+				location.Property(l => l.District);
+				location.Property(l => l.Province);
+				location.Property(l => l.County);
+				location.Property(l => l.Commune);
 			});
 
 			entity.HasOne(e => e.User)
@@ -583,14 +587,24 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			TreeSubmissionId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000007"),
 			Lat = 52.5269614,
 			Lng = 17.1284842,
-			Address = "111/2"
+			Address = "Nieznany",
+			PlotNumber = "112/2",
+			District = "string",
+			Province = "string",
+			County = "string",
+			Commune = "string",
 		},
 		new
 		{
 			TreeSubmissionId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000008"),
 			Lat = 51.5369179,
 			Lng = 17.8664067,
-			Address = "210/1"
+			Address = "Nieznany",
+			PlotNumber = "11/1",
+			District = "string",
+			Province = "string",
+			County = "string",
+			Commune = "string",
 		});
 	}
 };
