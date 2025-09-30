@@ -10,7 +10,7 @@ public class TreeSubmission
 	[Required]
 	public required LocationDto Location { get; set; }
 	[Required]
-	public required int Circumference { get; set; } // Pierśnica
+	public required double Circumference { get; set; } // Pierśnica
 	[Required]
 	public required double Height { get; set; }
 	[Required]
@@ -18,6 +18,8 @@ public class TreeSubmission
 	public bool IsAlive { get; set; } = true;
 	[Required]
 	public required int EstimatedAge { get; set; }
+	[Required]
+	public required double CrownSpread { get; set; }
 	public string? Description { get; set; }
 	public List<string>? Images { get; set; }
 	public bool IsMonument { get; set; } = false;

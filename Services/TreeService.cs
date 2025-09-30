@@ -121,6 +121,7 @@ public class TreeService(
 				Condition = req.Condition,
 				IsAlive = req.IsAlive,
 				EstimatedAge = req.EstimatedAge,
+				CrownSpread = req.CrownSpread,
 				Description = req.Description,
 				Images = new List<string>(),
 				IsMonument = req.IsMonument,
@@ -519,6 +520,7 @@ public class TreeService(
 			Condition = updateDto.Condition ?? existing.Condition,
 			IsAlive = updateDto.IsAlive ?? existing.IsAlive,
 			EstimatedAge = updateDto.EstimatedAge ?? existing.EstimatedAge,
+			CrownSpread = updateDto.CrownSpread ?? existing.CrownSpread,
 			Description = updateDto.Description ?? existing.Description,
 			IsMonument = updateDto.IsMonument ?? existing.IsMonument
 		};

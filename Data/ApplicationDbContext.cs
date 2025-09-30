@@ -44,7 +44,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<TreeSubmission>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Circumference).HasMaxLength(6);
 			entity.Property(e => e.Description).HasMaxLength(2000);
 			entity.OwnsOne(e => e.Location, location =>
 			{
@@ -200,6 +199,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		});
 
 		// Seed data
+		SeedInitialData(modelBuilder);
+	}
+
+	private void SeedInitialData(ModelBuilder modelBuilder)
+	{
 		modelBuilder.Entity<User>().HasData(
 			new User { Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000001"), FirstName = "Adam", LastName = "Kowalski", Email = "mod@example.com", RegistrationDate = new DateTime(2024, 1, 15), PasswordHash = "AQAAAAIAAYagAAAAEHrSf4c5BhE6GMi8qlT3Q+oj6mJdQ2OAuPNUgxuc2sFGCxCeqhJwGOEUTqjSuPCFRw==", Role = UserRole.Moderator },
 			new User { Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"), FirstName = "Jan", LastName = "Kowalski", Email = "user@example.com", RegistrationDate = new DateTime(2024, 1, 15), PasswordHash = "AQAAAAIAAYagAAAAEDk+b31OOCvyrUQRFQztUECMUI+lPATVktwSn0Uysc66qax8wCdiejpv2Rd1YuophQ==", Role = UserRole.User }
@@ -554,11 +558,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000007"),
 			UserId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
 			SpeciesId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
-			Circumference = 100,
+			Circumference = 100.0,
 			Height = 20.0,
 			Condition = "Dobra",
 			IsAlive = true,
 			EstimatedAge = 100,
+			CrownSpread = 150.0,
 			Description = "Pomnik przyrody",
 			Status = SubmissionStatus.Approved,
 			IsMonument = true,
@@ -570,11 +575,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000008"),
 			UserId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
 			SpeciesId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-13e2a62f3ed8"),
-			Circumference = 115,
+			Circumference = 115.0,
 			Height = 27.0,
 			Condition = "Zła",
 			IsAlive = true,
 			EstimatedAge = 350,
+			CrownSpread = 150.0,
 			Description = "Dąb Pomnik przyrody",
 			IsMonument = true,
 			Status = SubmissionStatus.Pending,

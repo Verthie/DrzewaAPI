@@ -494,13 +494,15 @@ namespace DrzewaAPI.Migrations
                     b.Property<DateTime?>("ApprovalDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Circumference")
-                        .HasMaxLength(6)
-                        .HasColumnType("int");
+                    b.Property<double>("Circumference")
+                        .HasColumnType("float");
 
                     b.Property<string>("Condition")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("CrownSpread")
+                        .HasColumnType("float");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
@@ -546,8 +548,9 @@ namespace DrzewaAPI.Migrations
                         {
                             Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000007"),
                             ApprovalDate = new DateTime(2024, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Circumference = 100,
+                            Circumference = 100.0,
                             Condition = "Dobra",
+                            CrownSpread = 150.0,
                             Description = "Pomnik przyrody",
                             EstimatedAge = 100,
                             Height = 20.0,
@@ -561,8 +564,9 @@ namespace DrzewaAPI.Migrations
                         new
                         {
                             Id = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000008"),
-                            Circumference = 115,
+                            Circumference = 115.0,
                             Condition = "Zła",
+                            CrownSpread = 150.0,
                             Description = "Dąb Pomnik przyrody",
                             EstimatedAge = 350,
                             Height = 27.0,

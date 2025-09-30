@@ -387,7 +387,7 @@ public class ApplicationService : IApplicationService
 			["tree_species_latin"] = treeSubmission.Species.LatinName,
 			["geographic_location_lat"] = treeSubmission.Location.Lat,
 			["geographic_location_long"] = treeSubmission.Location.Lng,
-			["geographic_location_address"] = treeSubmission.Location.Address,
+			["geographic_location_address"] = treeSubmission.Location.Address ?? "",
 			["tree_circumference"] = treeSubmission.Circumference,
 			["tree_height"] = treeSubmission.Height,
 			["tree_condition"] = treeSubmission.Condition,
