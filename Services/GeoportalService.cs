@@ -104,12 +104,6 @@ public class GeoportalService : IGeoportalService
 
 			_logger.LogDebug($"Odpowiedź z API: {content}");
 
-			if (string.IsNullOrWhiteSpace(content) || content == "[]")
-			{
-				_logger.LogInformation("Nie znaleziono działki dla podanych współrzędnych");
-				return null;
-			}
-
 			string[] segments = content.Split("|");
 
 			Plot plot = new Plot
@@ -121,7 +115,7 @@ public class GeoportalService : IGeoportalService
 				Commune = segments[4],
 			};
 
-			return null;
+			return plot;
 		}
 		catch (HttpRequestException ex)
 		{

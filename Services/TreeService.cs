@@ -131,7 +131,7 @@ public class TreeService(
 			{
 				_logger.LogInformation($"Pobieranie danych działki dla zgłoszenia: {submission.Id}");
 
-				var plot = await _geoportalService.GetPlotByLocationAsync(
+				Plot? plot = await _geoportalService.GetPlotByLocationAsync(
 					submission.Location.Lng,
 					submission.Location.Lat
 				);
