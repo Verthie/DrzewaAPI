@@ -292,6 +292,7 @@ public class ApplicationService : IApplicationService
 		{
 			Application application = await _context.Applications
 			.Include(a => a.TreeSubmission)
+			.Include(a => a.ApplicationTemplate)
 			.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId)
 			?? throw EntityNotFoundException.ForApplication(applicationId);
 
@@ -303,7 +304,7 @@ public class ApplicationService : IApplicationService
 
 			// Generate PDF
 			string folderPath = $"pdfs/tree-submissions/{application.TreeSubmissionId}";
-			string pdfPath = await _fileGenerationService.GeneratePdfAsync(application.GeneratedHtmlContent, folderPath);
+			string pdfPath = await _fileGenerationService.GeneratePdfAsync(application.GeneratedHtmlContent, folderPath, application.ApplicationTemplate.Signature);
 
 			// Update application with PDF path
 			application.GeneratedPdfPath = pdfPath;

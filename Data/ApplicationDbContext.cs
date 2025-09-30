@@ -3,6 +3,7 @@ using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
 using DrzewaAPI.Models.Enums;
 using DrzewaAPI.Utils;
+using iText.Forms.Xfdf;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Data;
@@ -49,7 +50,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			{
 				location.Property(l => l.Lat).IsRequired();
 				location.Property(l => l.Lng).IsRequired();
-				location.Property(l => l.Address).IsRequired();
+				location.Property(l => l.Address);
 				location.Property(l => l.PlotNumber);
 				location.Property(l => l.District);
 				location.Property(l => l.Province);
@@ -153,6 +154,34 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 								.OnDelete(DeleteBehavior.Restrict);
 		});
 
+
+		modelBuilder.Entity<TreeSubmission>(entity =>
+		{
+			entity.HasKey(e => e.Id);
+			entity.Property(e => e.Description).HasMaxLength(2000);
+			entity.OwnsOne(e => e.Location, location =>
+			{
+				location.Property(l => l.Lat).IsRequired();
+				location.Property(l => l.Lng).IsRequired();
+				location.Property(l => l.Address);
+				location.Property(l => l.PlotNumber);
+				location.Property(l => l.District);
+				location.Property(l => l.Province);
+				location.Property(l => l.County);
+				location.Property(l => l.Commune);
+			});
+
+			entity.HasOne(e => e.User)
+									.WithMany(e => e.TreeSubmissions)
+									.HasForeignKey(e => e.UserId)
+									.OnDelete(DeleteBehavior.Restrict);
+
+			entity.HasOne(e => e.Species)
+									.WithMany(e => e.TreeSubmissions)
+									.HasForeignKey(e => e.SpeciesId)
+									.OnDelete(DeleteBehavior.Restrict);
+		});
+
 		// ApplicationTemplate Configuration
 		modelBuilder.Entity<ApplicationTemplate>(entity =>
 		{
@@ -162,6 +191,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.Property(e => e.HtmlTemplate).IsRequired();
 			entity.Property(e => e.Fields).HasJsonConversion();
 			entity.HasIndex(e => new { e.CommuneId, e.Name }).IsUnique();
+
+			entity.OwnsOne(e => e.Signature, signature =>
+			{
+				signature.Property(s => s.Height);
+				signature.Property(s => s.Width);
+				signature.Property(s => s.X);
+				signature.Property(s => s.Y);
+			});
 
 			entity.HasOne(e => e.Commune)
 								.WithMany(at => at.ApplicationTemplates)
@@ -549,6 +586,25 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Order = 7
 								},
 						}
+			}
+		);
+
+		modelBuilder.Entity<ApplicationTemplate>().OwnsOne(e => e.Signature).HasData(
+			new
+			{
+				ApplicationTemplateId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000005"),
+				Height = 10.0F,
+				Width = 10.0F,
+				X = 10.0F,
+				Y = 10.0F,
+			},
+			new
+			{
+				ApplicationTemplateId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000006"),
+				Height = 10.0F,
+				Width = 10.0F,
+				X = 10.0F,
+				Y = 10.0F,
 			}
 		);
 

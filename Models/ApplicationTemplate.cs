@@ -25,4 +25,5 @@ public class ApplicationTemplate
 	// Navigation Properties
 	public Commune Commune { get; set; } = default!;
 	public ICollection<Application> Applications { get; set; } = new List<Application>();
+	public SignatureDto Signature { get; set; } = default!;
 }

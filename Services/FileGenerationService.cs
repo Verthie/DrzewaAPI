@@ -1,3 +1,9 @@
+using iText.Forms;
+using iText.Forms.Fields;
+using iText.Kernel.Colors;
+using iText.Kernel.Geom;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
 
@@ -30,7 +36,7 @@ public class FileGenerationService(IAzureStorageService _azureStorageService, IL
 		}
 	}
 
-	public async Task<string> GeneratePdfAsync(string htmlContent, string folderPath)
+	public async Task<string> GeneratePdfAsync(string htmlContent, string folderPath, SignatureDto signature)
 	{
 		try
 		{
@@ -81,13 +87,85 @@ public class FileGenerationService(IAzureStorageService _azureStorageService, IL
 				}
 			});
 
-			string relativePath = await _azureStorageService.SavePdfAsync(pdfBytes, uniqueFileName, folderPath);
-			_logger.LogInformation($"PDF wygenerowany i zapisany w Azure Storage: {relativePath}");
+			// Adding Signature Field to PDF
+			byte[] pdfWithSignature = AddSignatureFieldToBytes(pdfBytes, signature);
+
+			// Saving final PDF
+			string relativePath = await _azureStorageService.SavePdfAsync(pdfWithSignature, uniqueFileName, folderPath);
+			_logger.LogInformation($"PDF z polem podpisu zapisany w Azure Storage: {relativePath}");
+
 			return relativePath;
 		}
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Błąd podczas generowania PDF");
+			throw;
+		}
+	}
+
+	private byte[] AddSignatureFieldToBytes(byte[] inputPdfBytes, SignatureDto signature)
+	{
+		try
+		{
+			using var inputStream = new MemoryStream(inputPdfBytes);
+			using var outputStream = new MemoryStream();
+			using var reader = new PdfReader(inputStream);
+			using var writer = new PdfWriter(outputStream);
+			using var pdfDoc = new PdfDocument(reader, writer);
+
+			// Adding Metadata
+			var info = pdfDoc.GetDocumentInfo();
+			info.SetTitle("Dokument do podpisu elektronicznego");
+			info.SetAuthor("System");
+			info.SetCreator("PuppeteerSharp + iText7");
+
+			var page = pdfDoc.GetFirstPage();
+			var pageSize = page.GetPageSize();
+
+			// Setting the position of the field
+			float signatureWidth = signature.Width;
+			float signatureHeight = signature.Height;
+			float signatureX = signature.X;
+			float signatureY = signature.Y;
+
+			Rectangle signatureRect = new Rectangle(
+				signatureX,
+				signatureY,
+				signatureWidth,
+				signatureHeight
+			);
+
+			PdfAcroForm form = PdfAcroForm.GetAcroForm(pdfDoc, true);
+
+			// Creation of signature field
+			PdfSignatureFormField signatureField = new SignatureFormFieldBuilder(pdfDoc, "Podpis_Cyfrowy")
+				.SetWidgetRectangle(signatureRect)
+				.SetPage(1)
+				.CreateSignature();
+
+			signatureField.SetFieldName("Podpis_Cyfrowy");
+
+			// Adding field to form
+			form.AddField(signatureField);
+
+			// Adding visualization for the field
+			var canvas = new PdfCanvas(page);
+			canvas.SaveState()
+				.SetStrokeColor(ColorConstants.BLUE)
+				.SetLineWidth(1)
+				.Rectangle(signatureRect)
+				.Stroke()
+				.RestoreState();
+
+			_logger.LogInformation("✓ Pole podpisu dodane do PDF");
+
+			pdfDoc.Close();
+
+			return outputStream.ToArray();
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Błąd podczas dodawania pola podpisu");
 			throw;
 		}
 	}
