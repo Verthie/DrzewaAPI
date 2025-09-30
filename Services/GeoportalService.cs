@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using DotNetEnv;
+using DotSpatial.Projections;
 using DrzewaAPI.Models;
 
 namespace DrzewaAPI.Services;
@@ -23,48 +24,23 @@ public class GeoportalService : IGeoportalService
 		_httpClient.DefaultRequestHeaders.Add("Accept-Language", "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7");
 	}
 
-	public async Task<double[]> ConvertCoordinates(double longitude, double latitude)
+	public double[] ConvertCoordinates(double longitude, double latitude)
 	{
 		try
 		{
-			double x = 20;
-			double y = 20;
+			var source = ProjectionInfo.FromEpsgCode(4326);
+			var target = ProjectionInfo.FromEpsgCode(2180);
 
-			Env.Load();
+			double[] xy = { longitude, latitude };  // longitude, latitude
+			double[] z = { 0 };
 
-			string? key = Environment.GetEnvironmentVariable("MAPTILER_KEY");
+			Reproject.ReprojectPoints(xy, z, source, target, 0, 1);
 
-			Uri url = new Uri($"https://api.maptiler.com/coordinates/transform/{longitude},{latitude}.json?key={key}&s_srs=4326&t_srs=2180");
+			Console.WriteLine($"X: {xy[0]}, Y: {xy[1]}");
 
-			var response = await _httpClient.GetAsync(url);
+			_logger.LogInformation($"Przekonwertowano koordynaty na współrzędne: X = {xy[0]}, Y = {xy[1]}");
 
-			if (!response.IsSuccessStatusCode)
-			{
-				_logger.LogWarning($"API Geoportal zwróciło status: {response.StatusCode}");
-			}
-
-			var json = await response.Content.ReadAsStringAsync();
-
-			if (string.IsNullOrWhiteSpace(json) || json == "[]")
-			{
-				_logger.LogInformation("Nie udało się uzyskać konwersji dla podanych koordynatów");
-			}
-
-			using var doc = JsonDocument.Parse(json);
-
-			x = doc.RootElement
-			  .GetProperty("results")[0]
-			  .GetProperty("x")
-			  .GetDouble();
-
-			y = doc.RootElement
-			  .GetProperty("results")[0]
-			  .GetProperty("y")
-			  .GetDouble();
-
-			_logger.LogInformation($"Przekonwertowano koordynaty na współrzędne: X = {x}, Y = {y}");
-
-			return [x, y];
+			return xy;
 		}
 		catch (HttpRequestException ex)
 		{
@@ -80,7 +56,7 @@ public class GeoportalService : IGeoportalService
 
 	public async Task<Plot?> GetPlotByLocationAsync(double longitude, double latitude)
 	{
-		double[] coordinates = await ConvertCoordinates(longitude, latitude);
+		double[] coordinates = ConvertCoordinates(longitude, latitude);
 
 		double x = coordinates[0];
 		double y = coordinates[1];
