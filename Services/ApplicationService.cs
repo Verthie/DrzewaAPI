@@ -386,9 +386,14 @@ public class ApplicationService : IApplicationService
 			["user_postal_code"] = user.PostalCode ?? "",
 			["tree_species_polish"] = treeSubmission.Species.PolishName,
 			["tree_species_latin"] = treeSubmission.Species.LatinName,
-			["geographic_location_lat"] = treeSubmission.Location.Lat,
-			["geographic_location_long"] = treeSubmission.Location.Lng,
-			["geographic_location_address"] = treeSubmission.Location.Address ?? "",
+			["location_lat"] = treeSubmission.Location.Lat,
+			["location_long"] = treeSubmission.Location.Lng,
+			["location_address"] = treeSubmission.Location.Address ?? "",
+			["location_plot"] = treeSubmission.Location.PlotNumber ?? "",
+			["location_district"] = treeSubmission.Location.District ?? "",
+			["location_commune"] = treeSubmission.Location.Commune ?? "",
+			["location_county"] = treeSubmission.Location.County ?? "",
+			["location_province"] = treeSubmission.Location.Province ?? "",
 			["tree_circumference"] = treeSubmission.Circumference,
 			["tree_height"] = treeSubmission.Height,
 			["tree_condition"] = treeSubmission.Condition,
@@ -404,7 +409,7 @@ public class ApplicationService : IApplicationService
 			["commune_province"] = commune.Province,
 			["commune_postal_code"] = commune.PostalCode,
 			["commune_phone"] = commune.Phone,
-			["commune_email"] = commune.Email,
+			["commune_email"] = commune.Email
 		};
 	}
 

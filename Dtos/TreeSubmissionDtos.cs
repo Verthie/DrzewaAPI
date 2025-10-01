@@ -37,7 +37,7 @@ public record CreateTreeSubmissionDto
 	[Range(0, double.MaxValue)]
 	public required double Circumference { get; init; }
 	[Required(ErrorMessage = "Wysokość jest wymagana")]
-	[Range(0, int.MaxValue)]
+	[Range(0, double.MaxValue)]
 	public required double Height { get; init; }
 	[Required(ErrorMessage = "Kondycja jest wymagana")]
 	public required string Condition { get; init; }
