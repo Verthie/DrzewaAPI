@@ -180,16 +180,6 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 				_logger.LogDebug("Deleted {Count} email verification tokens for user {UserId}", emailTokens.Count, userId);
 			}
 
-			// 2. Delete CommentVotes
-			var commentVotes = await _context.CommentVotes
-					.Where(cv => cv.UserId == userId)
-					.ToListAsync();
-			if (commentVotes.Any())
-			{
-				_context.CommentVotes.RemoveRange(commentVotes);
-				_logger.LogDebug("Deleted {Count} comment votes for user {UserId}", commentVotes.Count, userId);
-			}
-
 			// 3. Delete TreeVotes
 			var treeVotes = await _context.TreeVotes
 					.Where(tv => tv.UserId == userId)
@@ -198,16 +188,6 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 			{
 				_context.TreeVotes.RemoveRange(treeVotes);
 				_logger.LogDebug("Deleted {Count} tree votes for user {UserId}", treeVotes.Count, userId);
-			}
-
-			// 4. Delete Comments
-			var comments = await _context.Comments
-					.Where(c => c.UserId == userId)
-					.ToListAsync();
-			if (comments.Any())
-			{
-				_context.Comments.RemoveRange(comments);
-				_logger.LogDebug("Deleted {Count} comments for user {UserId}", comments.Count, userId);
 			}
 
 			// 5. Delete Applications

@@ -9,5 +9,5 @@ public interface ITreeService
 	Task<TreeSubmissionDto> UpdateTreeSubmissionAsync(Guid id, UpdateTreeSubmissionDto req, IFormFileCollection? images, Guid currentUserId, bool isModerator);
 	Task DeleteTreeSubmissionAsync(Guid treeId, Guid userId, bool isModerator);
 	Task ApproveTreeAsync(Guid treeId);
-	Task<VotesDto> SetVoteAsync(Guid treeId, Guid userId, VoteType? type);
+	Task<int> SetVoteAsync(Guid treeId, Guid userId, bool vote);
 }

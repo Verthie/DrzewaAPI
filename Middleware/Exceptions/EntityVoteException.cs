@@ -6,7 +6,4 @@ public class EntityVoteException(string message, string errorCode, int statusCod
 {
 	public static EntityVoteException ForTree(Guid treeId, string reason) =>
 		new EntityVoteException($"Nie udało się zagłosować na drzewo {treeId}: {reason}", "TREE_VOTE_FAILED");
-
-	public static EntityVoteException ForComment(Guid commentId, string reason) =>
-		new EntityVoteException($"Nie udało się zagłosować na komentarz {commentId}: {reason}", "COMMENT_VOTE_FAILED");
 }

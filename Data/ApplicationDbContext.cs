@@ -15,8 +15,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<TreeSubmission> TreeSubmissions { get; set; }
 	public DbSet<TreeSpecies> TreeSpecies { get; set; }
 	public DbSet<TreeVote> TreeVotes { get; set; }
-	public DbSet<CommentVote> CommentVotes { get; set; }
-	public DbSet<Comment> Comments { get; set; }
 	public DbSet<Application> Applications { get; set; }
 	public DbSet<ApplicationTemplate> ApplicationTemplates { get; set; }
 	public DbSet<Commune> Communes { get; set; }
@@ -98,39 +96,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 									.OnDelete(DeleteBehavior.Cascade);
 		});
 
-		modelBuilder.Entity<CommentVote>(entity =>
-		{
-			entity.HasKey(e => e.Id);
-			entity.HasIndex(e => new { e.UserId, e.CommentId }).IsUnique();
-
-			entity.HasOne(e => e.User)
-									.WithMany(e => e.CommentVotes)
-									.HasForeignKey(e => e.UserId)
-									.OnDelete(DeleteBehavior.Restrict);
-
-			entity.HasOne(e => e.Comment)
-									.WithMany(e => e.CommentVotes)
-									.HasForeignKey(e => e.CommentId)
-									.OnDelete(DeleteBehavior.Cascade);
-		});
-
-		// Comment Configuration
-		modelBuilder.Entity<Comment>(entity =>
-		{
-			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Content).IsRequired().HasMaxLength(3000);
-
-			entity.HasOne(e => e.User)
-									.WithMany(e => e.Comments)
-									.HasForeignKey(e => e.UserId)
-									.OnDelete(DeleteBehavior.Restrict);
-
-			entity.HasOne(e => e.TreeSubmission)
-									.WithMany(e => e.Comments)
-									.HasForeignKey(e => e.TreeSubmissionId)
-									.OnDelete(DeleteBehavior.Cascade);
-		});
-
 		// Application Configuration
 		modelBuilder.Entity<Application>(entity =>
 		{
@@ -144,14 +109,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 								.OnDelete(DeleteBehavior.Restrict);
 
 			entity.HasOne(e => e.TreeSubmission)
-								.WithMany(ts => ts.Applications)
-								.HasForeignKey(e => e.TreeSubmissionId)
-								.OnDelete(DeleteBehavior.Cascade);
+										.WithMany(ts => ts.Applications)
+										.HasForeignKey(e => e.TreeSubmissionId)
+										.OnDelete(DeleteBehavior.Cascade);
 
 			entity.HasOne(e => e.ApplicationTemplate)
-								.WithMany(at => at.Applications)
-								.HasForeignKey(e => e.ApplicationTemplateId)
-								.OnDelete(DeleteBehavior.Restrict);
+										.WithMany(at => at.Applications)
+										.HasForeignKey(e => e.ApplicationTemplateId)
+										.OnDelete(DeleteBehavior.Restrict);
 		});
 
 
@@ -160,16 +125,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.Description).HasMaxLength(2000);
 			entity.OwnsOne(e => e.Location, location =>
-			{
-				location.Property(l => l.Lat).IsRequired();
-				location.Property(l => l.Lng).IsRequired();
-				location.Property(l => l.Address);
-				location.Property(l => l.PlotNumber);
-				location.Property(l => l.District);
-				location.Property(l => l.Province);
-				location.Property(l => l.County);
-				location.Property(l => l.Commune);
-			});
+						{
+							location.Property(l => l.Lat).IsRequired();
+							location.Property(l => l.Lng).IsRequired();
+							location.Property(l => l.Address);
+							location.Property(l => l.PlotNumber);
+							location.Property(l => l.District);
+							location.Property(l => l.Province);
+							location.Property(l => l.County);
+							location.Property(l => l.Commune);
+						});
 
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.TreeSubmissions)

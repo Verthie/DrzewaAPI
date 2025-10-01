@@ -20,7 +20,6 @@ public class TreeService(
 				.Include(s => s.Species)
 				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
-				.Include(s => s.Comments)
 				.ToListAsync();
 
 			List<TreeSubmissionDto> result = submissions
@@ -45,7 +44,6 @@ public class TreeService(
 					.Include(s => s.Species)
 					.Include(s => s.TreeVotes)
 					.Include(s => s.User)
-					.Include(s => s.Comments)
 					.ToListAsync();
 
 			List<TreeSubmissionDto> result = submissions
@@ -79,7 +77,6 @@ public class TreeService(
 				.Include(s => s.Species)
 				.Include(s => s.TreeVotes)
 				.Include(s => s.User)
-				.Include(s => s.Comments)
 				.FirstOrDefaultAsync(s => s.Id == treeId)
 				?? throw EntityNotFoundException.ForTree(treeId);
 
@@ -186,7 +183,6 @@ public class TreeService(
 			await _context.Entry(submission).Reference(s => s.User).LoadAsync();
 			await _context.Entry(submission).Reference(s => s.Species).LoadAsync();
 			await _context.Entry(submission).Collection(s => s.TreeVotes).LoadAsync();
-			await _context.Entry(submission).Collection(s => s.Comments).LoadAsync();
 
 			return MapToTreeSubmissionDto(submission);
 		}
@@ -215,7 +211,6 @@ public class TreeService(
 					.Include(s => s.User)
 					.Include(s => s.Species)
 					.Include(s => s.TreeVotes)
-					.Include(s => s.Comments)
 					.FirstOrDefaultAsync(s => s.Id == id);
 
 			if (submission == null)
@@ -407,18 +402,19 @@ public class TreeService(
 		}
 	}
 
-	public async Task<VotesDto> SetVoteAsync(Guid treeId, Guid userId, VoteType? type)
+	public async Task<int> SetVoteAsync(Guid treeId, Guid userId, bool vote = true)
 	{
 		try
 		{
 			TreeSubmission submission = await _context.TreeSubmissions
+				.Include(s => s.TreeVotes)
 				.FirstOrDefaultAsync(s => s.Id == treeId)
 				?? throw EntityNotFoundException.ForTree(treeId);
 
 			TreeVote? existing = await _context.TreeVotes
 				.SingleOrDefaultAsync(v => v.TreeSubmissionId == treeId && v.UserId == userId);
 
-			if (type == null)
+			if (!vote)
 			{
 				if (existing == null) throw new ServiceException($"Nie znaleziono istniejącego głosu dla użytkownika o ID {userId} na drzewo o ID {treeId}", "VOTE_NOT_FOUND");
 
@@ -427,36 +423,20 @@ public class TreeService(
 			}
 			else
 			{
-				if (existing == null)
+				// add new vote
+				_context.TreeVotes.Add(new TreeVote
 				{
-					// add new vote
-					_context.TreeVotes.Add(new TreeVote
-					{
-						Id = Guid.NewGuid(),
-						TreeSubmissionId = submission.Id,
-						UserId = userId,
-						Type = type.Value,
-					});
-				}
-				else if (existing.Type != type.Value)
-				{
-					existing.Type = type.Value; // change the vote from one type to another
-				}
+					Id = Guid.NewGuid(),
+					TreeSubmissionId = submission.Id,
+					UserId = userId,
+				});
 			}
 
 			await _context.SaveChangesAsync();
 
-			var counts = await _context.TreeVotes
-				.Where(v => v.TreeSubmissionId == treeId)
-				.GroupBy(_ => 1)
-				.Select(g => new VotesDto
-				{
-					Like = g.Count(v => v.Type == VoteType.Like),
-					Dislike = g.Count(v => v.Type == VoteType.Dislike)
-				})
-				.FirstOrDefaultAsync() ?? new VotesDto();
+			int voteCount = submission.TreeVotes.Count;
 
-			return counts;
+			return voteCount;
 		}
 		catch (BusinessException)
 		{
@@ -500,12 +480,7 @@ public class TreeService(
 			Status = s.Status,
 			SubmissionDate = s.SubmissionDate,
 			ApprovalDate = s.ApprovalDate,
-			Votes = new VotesDto
-			{
-				Like = s.TreeVotes.Count(v => v.Type == VoteType.Like),
-				Dislike = s.TreeVotes.Count(v => v.Type == VoteType.Dislike)
-			},
-			CommentCount = s.Comments.Count
+			VotesCount = s.TreeVotes.Count,
 		};
 	}
 

@@ -10,9 +10,6 @@ public class EntityCreationFailedException(string message, string errorCode) : B
 	public static EntityCreationFailedException ForCommune(string reason) =>
 		new EntityCreationFailedException($"Nie udało się utworzyć gminy: {reason}", "COMMUNE_CREATION_FAILED");
 
-	public static EntityCreationFailedException ForComment(string reason) =>
-		new EntityCreationFailedException($"Nie udało się utworzyć komentarza: {reason}", "COMMENT_CREATION_FAILED");
-
 	public static EntityCreationFailedException ForUser(string reason) =>
 		new EntityCreationFailedException($"Nie udało się zarejestrować użytkownika: {reason}", "USER_REGISTRATION_FAILED");
 

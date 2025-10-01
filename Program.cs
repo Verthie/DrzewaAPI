@@ -48,7 +48,6 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
 builder.Services.AddScoped<ITreeService, TreeService>();
 builder.Services.AddScoped<ISpeciesService, SpeciesService>();
-builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IApplicationTemplateService, ApplicationTemplateService>();
 builder.Services.AddScoped<ICommuneService, CommuneService>();

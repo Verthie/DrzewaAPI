@@ -23,8 +23,7 @@ public record TreeSubmissionDto
 	public SubmissionStatus Status { get; init; }
 	public DateTime SubmissionDate { get; init; }
 	public DateTime? ApprovalDate { get; init; }
-	public required VotesDto Votes { get; init; }
-	public required int CommentCount { get; init; }
+	public required int VotesCount { get; init; }
 }
 
 public record CreateTreeSubmissionDto
@@ -66,11 +65,6 @@ public record UpdateTreeSubmissionDto
 	public string? Description { get; init; }
 	public bool? IsMonument { get; init; }
 	public bool? ReplaceImages { get; init; } = false; // If true, replace all images; if false, append
-}
-
-public record VoteRequestDto
-{
-	public VoteType Type { get; init; }
 }
 
 public record LocationDto

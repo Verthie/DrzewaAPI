@@ -10,9 +10,6 @@ public class EntityAccessDeniedException(string message, string errorCode) : Bus
 	public static EntityAccessDeniedException ForTree(Guid treeId, Guid userId) =>
 		new EntityAccessDeniedException($"Użytkownik {userId} nie ma uprawnień do drzewa {treeId}", "TREE_ACCESS_DENIED");
 
-	public static EntityAccessDeniedException ForComment(Guid commentId, Guid userId) =>
-		new EntityAccessDeniedException($"Użytkownik {userId} nie ma uprawnień do komentarza {commentId}", "COMMENT_ACCESS_DENIED");
-
 	public static EntityAccessDeniedException ForApplication(Guid applicationId, Guid userId) =>
 		new EntityAccessDeniedException($"Użytkownik {userId} nie ma uprawnień do wniosku {applicationId}", "APPLICATION_ACCESS_DENIED");
 }
