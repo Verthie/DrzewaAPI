@@ -71,7 +71,7 @@ public record LocationDto
 {
 	public required double Lat { get; init; }
 	public required double Lng { get; init; }
-	public string? Address { get; init; }
+	public string? Address { get; set; }
 	public string? PlotNumber { get; set; }
 	public string? District { get; set; }
 	public string? Province { get; set; }

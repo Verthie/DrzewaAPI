@@ -16,7 +16,7 @@ public class GeoportalService : IGeoportalService
 		_httpClient = httpClient;
 		_logger = logger;
 
-		_httpClient.Timeout = TimeSpan.FromSeconds(10);
+		_httpClient.Timeout = TimeSpan.FromSeconds(20);
 
 		_httpClient.DefaultRequestHeaders.Clear();
 		_httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");

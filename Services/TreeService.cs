@@ -1,6 +1,7 @@
 using DrzewaAPI.Data;
 using DrzewaAPI.Models;
 using DrzewaAPI.Utils;
+using Nominatim.API.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,8 @@ public class TreeService(
 		ApplicationDbContext _context,
 		ILogger<TreeService> _logger,
 		IAzureStorageService _azureStorageService,
-		IGeoportalService _geoportalService) : ITreeService
+		IGeoportalService _geoportalService,
+		INominatimService _nominatimService) : ITreeService
 {
 	public async Task<List<TreeSubmissionDto>> GetTreeSubmissionsAsync()
 	{
@@ -123,6 +125,29 @@ public class TreeService(
 				Images = new List<string>(),
 				IsMonument = req.IsMonument,
 			};
+
+			// Get address from Nominatim if not provided
+			try
+			{
+				_logger.LogInformation($"Pobieranie adresu dla zgłoszenia: {submission.Id}");
+				string? address = await _nominatimService.GetAddressByLocationAsync(
+					submission.Location.Lat,
+					submission.Location.Lng
+				);
+				if (!string.IsNullOrWhiteSpace(address))
+				{
+					submission.Location.Address = address;
+					_logger.LogInformation("Adres uzupełniony: {Address}", address);
+				}
+				else
+				{
+					_logger.LogWarning("Nie udało się pobrać adresu - zgłoszenie zostanie utworzone bez adresu");
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Błąd podczas pobierania adresu - kontynuowanie bez adresu");
+			}
 
 			// Get plot data from Geoportal API
 			try
@@ -281,7 +306,7 @@ public class TreeService(
 				}
 				else
 				{
-					_logger.LogWarning("Nie udało się pobrać danych działki - zgłoszenie zostanie utworzone bez tych danych");
+					_logger.LogWarning("Nie udało się pobrać danych działki - zgłoszenie zostanie zaktualizowane bez tych danych");
 				}
 			}
 			catch (Exception ex)
@@ -473,6 +498,7 @@ public class TreeService(
 			Condition = s.Condition,
 			IsAlive = s.IsAlive,
 			EstimatedAge = s.EstimatedAge,
+			CrownSpread = s.CrownSpread,
 			Description = s.Description,
 			ImageUrls = s.Images?.Select(path =>
 						FileHelper.GetFileUrl(path, _azureStorageService)).ToList() ?? new List<string>(),

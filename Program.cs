@@ -63,6 +63,7 @@ builder.Services.AddHostedService<TokenCleanupService>();
 
 // API Connections
 builder.Services.AddHttpClient<IGeoportalService, GeoportalService>();
+builder.Services.AddHttpClient<INominatimService, NominatimService>();
 
 // JWT Configuration
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
