@@ -324,7 +324,7 @@ public class TreeService(
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Error updating images for tree submission {Id}", submission.Id);
-					// TODO: Notify the user that images couldn't be updated
+					// TODO Notify the user that images couldn't be updated
 				}
 			}
 

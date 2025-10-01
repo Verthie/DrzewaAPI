@@ -54,9 +54,9 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         }
 
         // Validate images
-        if (images.Count > 5) // Limit to 5 images
+        if (images.Count > 6) // Limit to 6 images
         {
-            return BadRequest("Maximum 5 images allowed");
+            return BadRequest("Maximum 6 images allowed");
         }
 
         Guid userId = User.GetCurrentUserId();
@@ -72,9 +72,9 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         ValidationHelpers.ValidateModelState(ModelState);
 
         // Validate images if provided
-        if (images != null && images.Count > 5) // Limit to 5 images
+        if (images != null && images.Count > 6) // Limit to 6 images
         {
-            return BadRequest("Maximum 5 images allowed");
+            return BadRequest("Maximum 6 images allowed");
         }
 
         string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
