@@ -402,6 +402,7 @@ public class ApplicationService : IApplicationService
 			["tree_location_latitude"] = treeSubmission.Location.Lat,
 			["tree_location_longitude"] = treeSubmission.Location.Lng,
 			["tree_description"] = treeSubmission.Description ?? "",
+			["tree_spread"] = treeSubmission.CrownSpread,
 			["submission_date"] = treeSubmission.SubmissionDate.ToString("dd.MM.yyyy"),
 			["commune_name"] = commune.Name,
 			["commune_address"] = commune.Address,

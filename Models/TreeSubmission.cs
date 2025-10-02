@@ -7,6 +7,7 @@ public class TreeSubmission
 	public Guid Id { get; set; }
 	public Guid UserId { get; set; }
 	public Guid SpeciesId { get; set; }
+	public string? Name { get; set; }
 	[Required]
 	public required LocationDto Location { get; set; }
 	[Required]
@@ -21,6 +22,7 @@ public class TreeSubmission
 	[Required]
 	public required double CrownSpread { get; set; }
 	public string? Description { get; set; }
+	public string? Legend { get; set; }
 	public List<string>? Images { get; set; }
 	public bool IsMonument { get; set; } = false;
 	public SubmissionStatus Status { get; set; } = SubmissionStatus.Pending;

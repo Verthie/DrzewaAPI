@@ -109,6 +109,7 @@ public class TreeService(
 				Id = Guid.NewGuid(),
 				UserId = userId,
 				SpeciesId = req.SpeciesId,
+				Name = req.Name,
 				Location = new LocationDto
 				{
 					Lat = req.Location.Lat,
@@ -122,6 +123,7 @@ public class TreeService(
 				EstimatedAge = req.EstimatedAge,
 				CrownSpread = req.CrownSpread,
 				Description = req.Description,
+				Legend = req.Legend,
 				Images = new List<string>(),
 				IsMonument = req.IsMonument,
 			};
@@ -256,6 +258,9 @@ public class TreeService(
 			// Validate updated data
 			await ValidateTreeSubmissionData(CreateTreeSubmissionDtoFromUpdate(req, submission));
 
+			if (req.Name != null)
+				submission.Name = req.Name;
+
 			// Update properties if provided
 			if (req.Location != null)
 			{
@@ -288,6 +293,8 @@ public class TreeService(
 			if (req.IsMonument.HasValue)
 				submission.IsMonument = req.IsMonument.Value;
 
+			if (req.Legend != null)
+				submission.Legend = req.Legend;
 
 			try
 			{
@@ -492,6 +499,7 @@ public class TreeService(
 			},
 			Species = s.Species.PolishName,
 			SpeciesLatin = s.Species.LatinName,
+			Name = s.Name,
 			Location = s.Location,
 			Circumference = s.Circumference,
 			Height = s.Height,
@@ -500,6 +508,7 @@ public class TreeService(
 			EstimatedAge = s.EstimatedAge,
 			CrownSpread = s.CrownSpread,
 			Description = s.Description,
+			Legend = s.Legend,
 			ImageUrls = s.Images?.Select(path =>
 						FileHelper.GetFileUrl(path, _azureStorageService)).ToList() ?? new List<string>(),
 			IsMonument = s.IsMonument,
@@ -515,6 +524,7 @@ public class TreeService(
 		return new CreateTreeSubmissionDto
 		{
 			SpeciesId = updateDto.SpeciesId ?? existing.SpeciesId,
+			Name = updateDto.Name ?? existing.Name,
 			Location = updateDto.Location ?? existing.Location,
 			Circumference = updateDto.Circumference ?? existing.Circumference,
 			Height = updateDto.Height ?? existing.Height,
@@ -523,6 +533,7 @@ public class TreeService(
 			EstimatedAge = updateDto.EstimatedAge ?? existing.EstimatedAge,
 			CrownSpread = updateDto.CrownSpread ?? existing.CrownSpread,
 			Description = updateDto.Description ?? existing.Description,
+			Legend = updateDto.Legend ?? existing.Legend,
 			IsMonument = updateDto.IsMonument ?? existing.IsMonument
 		};
 	}

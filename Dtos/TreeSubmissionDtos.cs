@@ -8,6 +8,7 @@ public record TreeSubmissionDto
 {
 	public Guid Id { get; init; }
 	public required UserDataDto UserData { get; init; }
+	public string? Name { get; init; }
 	public required string Species { get; init; }
 	public required string SpeciesLatin { get; init; }
 	public required LocationDto Location { get; init; }
@@ -18,6 +19,7 @@ public record TreeSubmissionDto
 	public int EstimatedAge { get; init; }
 	public double CrownSpread { get; init; }
 	public string? Description { get; init; }
+	public string? Legend { get; init; }
 	public List<string> ImageUrls { get; init; } = new();
 	public bool IsMonument { get; init; } = false;
 	public SubmissionStatus Status { get; init; }
@@ -30,6 +32,7 @@ public record CreateTreeSubmissionDto
 {
 	[Required(ErrorMessage = "Gatunek jest wymagany")]
 	public required Guid SpeciesId { get; init; }
+	public string? Name { get; init; }
 	[Required(ErrorMessage = "Lokalizacja jest wymagana")]
 	public required LocationDto Location { get; init; }
 	[Required(ErrorMessage = "Pierśnica jest wymagana")]
@@ -48,6 +51,7 @@ public record CreateTreeSubmissionDto
 	[Range(0, double.MaxValue)]
 	public required double CrownSpread { get; init; }
 	public string? Description { get; init; }
+	public string? Legend { get; init; }
 	[Required(ErrorMessage = "Przynajmniej jeden załącznik jest wymagany")]
 	public bool IsMonument { get; init; } = false;
 }
@@ -55,6 +59,7 @@ public record CreateTreeSubmissionDto
 public record UpdateTreeSubmissionDto
 {
 	public Guid? SpeciesId { get; init; }
+	public string? Name { get; init; }
 	public LocationDto? Location { get; init; }
 	public double? Circumference { get; init; }
 	public double? Height { get; init; }
@@ -63,6 +68,7 @@ public record UpdateTreeSubmissionDto
 	public int? EstimatedAge { get; init; }
 	public double? CrownSpread { get; init; }
 	public string? Description { get; init; }
+	public string? Legend { get; init; }
 	public bool? IsMonument { get; init; }
 	public bool? ReplaceImages { get; init; } = false; // If true, replace all images; if false, append
 }
