@@ -186,15 +186,15 @@ builder.Services.AddMemoryCache();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+// if (app.Environment.IsDevelopment())
+// {
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Drzewa API V1");
-        c.RoutePrefix = "";
-    }); ;
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Drzewa API V1");
+    c.RoutePrefix = "";
+}); ;
+// }
 
 // Replace or modify your HTTPS redirection
 if (!app.Environment.IsDevelopment())
