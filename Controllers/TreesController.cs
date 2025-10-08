@@ -42,6 +42,7 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         return Ok(tree);
     }
 
+    // TODO Add screenshot to submissions functionality
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images)
@@ -65,6 +66,7 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
     }
 
+    // TODO Update screenshot in submissions functionality 
     [Authorize]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateTreeSubmission(Guid id, [FromForm] UpdateTreeSubmissionDto request, IFormFileCollection? images)
@@ -72,7 +74,7 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         ValidationHelpers.ValidateModelState(ModelState);
 
         // Validate images if provided
-        if (images != null && images.Count > 6) // Limit to 6 images
+        if (images?.Count > 6) // Limit to 6 images
         {
             return BadRequest("Maximum 6 images allowed");
         }

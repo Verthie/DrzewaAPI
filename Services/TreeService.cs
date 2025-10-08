@@ -118,7 +118,6 @@ public class TreeService(
 				},
 				Circumference = req.Circumference,
 				Height = req.Height,
-				Condition = req.Condition,
 				IsAlive = req.IsAlive,
 				EstimatedAge = req.EstimatedAge,
 				CrownSpread = req.CrownSpread,
@@ -238,10 +237,8 @@ public class TreeService(
 					.Include(s => s.User)
 					.Include(s => s.Species)
 					.Include(s => s.TreeVotes)
-					.FirstOrDefaultAsync(s => s.Id == id);
-
-			if (submission == null)
-				throw EntityNotFoundException.ForTree(id);
+					.FirstOrDefaultAsync(s => s.Id == id)
+					?? throw EntityNotFoundException.ForTree(id);
 
 			// Check if user owns the submission or has admin rights
 			if (submission.UserId != currentUserId && !isModerator)
@@ -261,8 +258,12 @@ public class TreeService(
 			if (req.Name != null)
 				submission.Name = req.Name;
 
+			bool locationChanged = false;
+
+			bool isLocationProvided = req.Location.Lat != 0 || req.Location.Lng != 0;
+
 			// Update properties if provided
-			if (req.Location != null)
+			if (isLocationProvided && (req.Location.Lat != submission.Location.Lat || req.Location.Lng != submission.Location.Lng))
 			{
 				submission.Location = new LocationDto
 				{
@@ -270,6 +271,8 @@ public class TreeService(
 					Lng = req.Location.Lng,
 					Address = req.Location.Address,
 				};
+
+				locationChanged = true;
 			}
 
 			if (req.Circumference.HasValue)
@@ -277,9 +280,6 @@ public class TreeService(
 
 			if (req.Height.HasValue)
 				submission.Height = req.Height.Value;
-
-			if (!string.IsNullOrEmpty(req.Condition))
-				submission.Condition = req.Condition;
 
 			if (req.IsAlive.HasValue)
 				submission.IsAlive = req.IsAlive.Value;
@@ -296,32 +296,66 @@ public class TreeService(
 			if (req.Legend != null)
 				submission.Legend = req.Legend;
 
-			try
+			if (locationChanged)
 			{
-				_logger.LogInformation($"Pobieranie danych działki dla zgłoszenia: {submission.Id}");
-
-				var plot = await _geoportalService.GetPlotByLocationAsync(
-					submission.Location.Lat,
-					submission.Location.Lng
-				);
-
-				if (plot != null)
+				// Get address from Nominatim if not provided
+				try
 				{
-					submission.Location.PlotNumber = plot.PlotNumber;
-
-					_logger.LogInformation($"Dane działki uzupełnione: {plot.PlotNumber}");
+					_logger.LogInformation($"Pobieranie adresu dla zgłoszenia: {submission.Id}");
+					string? address = await _nominatimService.GetAddressByLocationAsync(
+						submission.Location.Lat,
+						submission.Location.Lng
+					);
+					if (!string.IsNullOrWhiteSpace(address))
+					{
+						submission.Location.Address = address;
+						_logger.LogInformation("Adres uzupełniony: {Address}", address);
+					}
+					else
+					{
+						_logger.LogWarning("Nie udało się pobrać adresu - zgłoszenie zostanie utworzone bez adresu");
+					}
 				}
-				else
+				catch (Exception ex)
 				{
-					_logger.LogWarning("Nie udało się pobrać danych działki - zgłoszenie zostanie zaktualizowane bez tych danych");
+					_logger.LogError(ex, "Błąd podczas pobierania adresu - kontynuowanie bez adresu");
+				}
+
+				// Get plot data from Geoportal API
+				try
+				{
+					_logger.LogInformation($"Pobieranie danych działki dla zgłoszenia: {submission.Id}");
+
+					Plot? plot = await _geoportalService.GetPlotByLocationAsync(
+						submission.Location.Lng,
+						submission.Location.Lat
+					);
+
+					if (plot != null)
+					{
+						submission.Location.PlotNumber = plot.PlotNumber;
+						submission.Location.District = plot.District;
+						submission.Location.Province = plot.Province;
+						submission.Location.County = plot.County;
+						submission.Location.Commune = plot.Commune;
+
+						_logger.LogInformation("Dane działki uzupełnione");
+						_logger.LogInformation($"Numer Działki: {plot.PlotNumber}");
+						_logger.LogInformation($"Obręb Ewidencyjny: {plot.District}");
+						_logger.LogInformation($"Województwo: {plot.Province}");
+						_logger.LogInformation($"Powiat: {plot.County}");
+						_logger.LogInformation($"Gmina: {plot.Commune}");
+					}
+					else
+					{
+						_logger.LogWarning("Nie udało się pobrać danych działki - zgłoszenie zostanie utworzone bez tych danych");
+					}
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Błąd podczas pobierania danych działki - kontynuowanie bez tych danych");
 				}
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Błąd podczas pobierania danych działki - kontynuowanie bez tych danych");
-			}
-
-			await _context.SaveChangesAsync();
 
 			// Handle image uploads if provided
 			if (images != null && images.Count > 0)
@@ -340,6 +374,8 @@ public class TreeService(
 					// Upload new images
 					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(images, folderPath);
 
+					// TODO Add logic that prevents adding more than 6 images through update 
+
 					if (req.ReplaceImages == true)
 					{
 						submission.Images = imagePaths;
@@ -350,8 +386,6 @@ public class TreeService(
 						submission.Images ??= new List<string>();
 						submission.Images.AddRange(imagePaths);
 					}
-
-					await _context.SaveChangesAsync();
 				}
 				catch (Exception ex)
 				{
@@ -359,6 +393,8 @@ public class TreeService(
 					// TODO Notify the user that images couldn't be updated
 				}
 			}
+
+			await _context.SaveChangesAsync();
 
 			return MapToTreeSubmissionDto(submission);
 		}
@@ -495,7 +531,7 @@ public class TreeService(
 			{
 				UserId = s.User.Id,
 				UserName = s.User.FullName,
-				Avatar = s.User.Avatar
+				Avatar = s.User.Avatar != null ? FileHelper.GetFileUrl(s.User.Avatar, _azureStorageService) : ""
 			},
 			Species = s.Species.PolishName,
 			SpeciesLatin = s.Species.LatinName,
@@ -503,7 +539,6 @@ public class TreeService(
 			Location = s.Location,
 			Circumference = s.Circumference,
 			Height = s.Height,
-			Condition = s.Condition,
 			IsAlive = s.IsAlive,
 			EstimatedAge = s.EstimatedAge,
 			CrownSpread = s.CrownSpread,
@@ -528,7 +563,6 @@ public class TreeService(
 			Location = updateDto.Location ?? existing.Location,
 			Circumference = updateDto.Circumference ?? existing.Circumference,
 			Height = updateDto.Height ?? existing.Height,
-			Condition = updateDto.Condition ?? existing.Condition,
 			IsAlive = updateDto.IsAlive ?? existing.IsAlive,
 			EstimatedAge = updateDto.EstimatedAge ?? existing.EstimatedAge,
 			CrownSpread = updateDto.CrownSpread ?? existing.CrownSpread,
@@ -537,7 +571,6 @@ public class TreeService(
 			IsMonument = updateDto.IsMonument ?? existing.IsMonument
 		};
 	}
-
 
 	private async Task ValidateTreeSubmissionData(CreateTreeSubmissionDto request)
 	{
@@ -556,8 +589,8 @@ public class TreeService(
 
 		// Check if there are any existing tree submissions in 10m radius
 		var nearbyTree = await _context.TreeSubmissions
-				.AnyAsync(t => Math.Abs(t.Location.Lat - request.Location.Lat) < 0.0001
-										&& Math.Abs(t.Location.Lng - request.Location.Lng) < 0.0001);
+				.AnyAsync(t => Math.Abs(t.Location!.Lat - request.Location.Lat) < 0.0001
+										&& Math.Abs(t.Location!.Lng - request.Location.Lng) < 0.0001);
 
 		if (nearbyTree)
 		{

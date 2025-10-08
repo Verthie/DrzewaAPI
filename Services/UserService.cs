@@ -1,5 +1,6 @@
 using DrzewaAPI.Data;
 using DrzewaAPI.Models;
+using DrzewaAPI.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,7 +49,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 					Address = user.Address,
 					City = user.City,
 					PostalCode = user.PostalCode,
-					Avatar = user.Avatar,
+					Avatar = user.Avatar != null ? FileHelper.GetFileUrl(user.Avatar, _azureStorageService) : "",
 					RegistrationDate = user.RegistrationDate,
 					Role = user.Role,
 					Statistics = new UserStatisticsDto
@@ -232,7 +233,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 		}
 	}
 
-	private static UserDto MapToUserDto(User u)
+	private UserDto MapToUserDto(User u)
 	{
 		return new UserDto
 		{
@@ -243,7 +244,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 			Address = u.Address,
 			City = u.City,
 			PostalCode = u.PostalCode,
-			Avatar = u.Avatar,
+			Avatar = u.Avatar != null ? FileHelper.GetFileUrl(u.Avatar, _azureStorageService) : "",
 			RegistrationDate = u.RegistrationDate,
 			Statistics = new UserStatisticsDto()
 			{

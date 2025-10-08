@@ -14,7 +14,9 @@ public record TreeSubmissionDto
 	public required LocationDto Location { get; init; }
 	public required double Circumference { get; init; }
 	public double Height { get; init; }
-	public required string Condition { get; init; }
+	public List<string>? Soil { get; set; }
+	public List<string>? Health { get; set; }
+	public List<string>? Environment { get; set; }
 	public bool IsAlive { get; init; } = true;
 	public int EstimatedAge { get; init; }
 	public double CrownSpread { get; init; }
@@ -22,6 +24,7 @@ public record TreeSubmissionDto
 	public string? Legend { get; init; }
 	public List<string> ImageUrls { get; init; } = new();
 	public bool IsMonument { get; init; } = false;
+	public string? TreeScreenshotUrl { get; init; }
 	public SubmissionStatus Status { get; init; }
 	public DateTime SubmissionDate { get; init; }
 	public DateTime? ApprovalDate { get; init; }
@@ -41,8 +44,9 @@ public record CreateTreeSubmissionDto
 	[Required(ErrorMessage = "Wysokość jest wymagana")]
 	[Range(0, double.MaxValue)]
 	public required double Height { get; init; }
-	[Required(ErrorMessage = "Kondycja jest wymagana")]
-	public required string Condition { get; init; }
+	public List<string>? Soil { get; init; }
+	public List<string>? Health { get; init; }
+	public List<string>? Environment { get; init; }
 	public bool IsAlive { get; init; } = true;
 	[Required(ErrorMessage = "Wiek jest wymagany")]
 	[Range(0, int.MaxValue)]
@@ -60,23 +64,26 @@ public record UpdateTreeSubmissionDto
 {
 	public Guid? SpeciesId { get; init; }
 	public string? Name { get; init; }
-	public LocationDto? Location { get; init; }
+	public LocationDto Location { get; init; } = new LocationDto();
 	public double? Circumference { get; init; }
 	public double? Height { get; init; }
-	public string? Condition { get; init; }
+	public List<string>? Soil { get; init; }
+	public List<string>? Health { get; init; }
+	public List<string>? Environment { get; init; }
 	public bool? IsAlive { get; init; }
 	public int? EstimatedAge { get; init; }
 	public double? CrownSpread { get; init; }
 	public string? Description { get; init; }
 	public string? Legend { get; init; }
 	public bool? IsMonument { get; init; }
-	public bool? ReplaceImages { get; init; } = false; // If true, replace all images; if false, append
+	public string? TreeScreenshotUrl { get; init; }
+	public bool? ReplaceImages { get; init; } = true; // If true, replace all images; if false, append
 }
 
 public record LocationDto
 {
-	public required double Lat { get; init; }
-	public required double Lng { get; init; }
+	public double Lat { get; init; } = 0;
+	public double Lng { get; init; } = 0;
 	public string? Address { get; set; }
 	public string? PlotNumber { get; set; }
 	public string? District { get; set; }

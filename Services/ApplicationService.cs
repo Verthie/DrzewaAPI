@@ -396,7 +396,7 @@ public class ApplicationService : IApplicationService
 			["location_province"] = treeSubmission.Location.Province ?? "",
 			["tree_circumference"] = treeSubmission.Circumference,
 			["tree_height"] = treeSubmission.Height,
-			["tree_condition"] = treeSubmission.Condition,
+			// ["tree_condition"] = treeSubmission.Condition,
 			["tree_estimated_age"] = treeSubmission.EstimatedAge,
 			["tree_is_alive"] = treeSubmission.IsAlive,
 			["tree_location_latitude"] = treeSubmission.Location.Lat,

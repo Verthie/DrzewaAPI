@@ -14,8 +14,9 @@ public class TreeSubmission
 	public required double Circumference { get; set; } // Pierśnica
 	[Required]
 	public required double Height { get; set; }
-	[Required]
-	public required string Condition { get; set; }
+	public List<string>? Soil { get; set; }
+	public List<string>? Health { get; set; }
+	public List<string>? Environment { get; set; }
 	public bool IsAlive { get; set; } = true;
 	[Required]
 	public required int EstimatedAge { get; set; }
@@ -25,6 +26,7 @@ public class TreeSubmission
 	public string? Legend { get; set; }
 	public List<string>? Images { get; set; }
 	public bool IsMonument { get; set; } = false;
+	public string? TreeScreenshotUrl { get; set; }
 	public SubmissionStatus Status { get; set; } = SubmissionStatus.Pending;
 	public DateTime SubmissionDate { get; set; } = DateTime.UtcNow;
 	public DateTime? ApprovalDate { get; set; }
