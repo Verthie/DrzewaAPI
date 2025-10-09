@@ -7,7 +7,7 @@ services:
       - '8080:8080'
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=drzewaapi-sql-server-2025.database.windows.net,1433;Initial Catalog=DrzewaDB;Persist Security Info=False;User ID=${SQL_USER};Password=${SQL_PASSWORD};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+      - ConnectionStrings__DefaultConnection=Server=drzewaapi-sql.database.windows.net,1433;Initial Catalog=DrzewaDB;Persist Security Info=False;User ID=${SQL_USER};Password=${SQL_PASSWORD};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
       - ConnectionStrings__AzureStorage=DefaultEndpointsProtocol=https;AccountName=${STORAGE_ACCOUNT};AccountKey=${STORAGE_KEY};EndpointSuffix=core.windows.net
       - Email__Username=${EMAIL_USER}
       - Email__Password=${EMAIL_PASSWORD}
