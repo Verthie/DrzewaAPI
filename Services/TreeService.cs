@@ -95,7 +95,7 @@ public class TreeService(
 		}
 	}
 
-	public async Task<TreeSubmissionDto> CreateTreeSubmissionAsync(CreateTreeSubmissionDto req, IFormFileCollection images, Guid userId)
+	public async Task<TreeSubmissionDto> CreateTreeSubmissionAsync(CreateTreeSubmissionDto req, IFormFileCollection images, Guid userId, IFormFile screenshot)
 	{
 		try
 		{
@@ -202,6 +202,22 @@ public class TreeService(
 				{
 					_logger.LogError(ex, "Error saving images for tree submission {Id}", submission.Id);
 					// TODO Notify the user that images couldn't be saved
+				}
+			}
+
+			// Handle screenshot upload
+			if (screenshot != null)
+			{
+				try
+				{
+					string folderPath = $"uploads/tree-submissions/screenshot/{submission.Id}";
+					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(new FormFileCollection() { screenshot }, folderPath);
+					submission.TreeScreenshotUrl = imagePaths[0];
+					await _context.SaveChangesAsync();
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "Error saving screenshot for submission {Id}", submission.Id);
 				}
 			}
 
@@ -546,6 +562,7 @@ public class TreeService(
 			Legend = s.Legend,
 			ImageUrls = s.Images?.Select(path =>
 						FileHelper.GetFileUrl(path, _azureStorageService)).ToList() ?? new List<string>(),
+			TreeScreenshotUrl = s.TreeScreenshotUrl != null ? FileHelper.GetFileUrl(s.TreeScreenshotUrl, _azureStorageService) : "",
 			IsMonument = s.IsMonument,
 			Status = s.Status,
 			SubmissionDate = s.SubmissionDate,

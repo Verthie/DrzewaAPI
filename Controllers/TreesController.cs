@@ -45,23 +45,27 @@ public class TreesController(ITreeService _treeService) : ControllerBase
     // TODO Add screenshot to submissions functionality
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> CreateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images)
+    public async Task<IActionResult> CreateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images, IFormFile screenshot)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
         if (images == null || images.Count == 0)
         {
-            return BadRequest("At least one image needs to be provided");
+            return BadRequest("Przynajmniej jeden obrazeek musi zostać przekazany");
         }
 
-        // Validate images
         if (images.Count > 6) // Limit to 6 images
         {
-            return BadRequest("Maximum 6 images allowed");
+            return BadRequest("Maksymalnie 6 obrazków jest dozwolone");
+        }
+
+        if (screenshot == null)
+        {
+            return BadRequest("Nie udało się uzyskać zrzutu drzewa");
         }
 
         Guid userId = User.GetCurrentUserId();
-        TreeSubmissionDto result = await _treeService.CreateTreeSubmissionAsync(request, images, userId);
+        TreeSubmissionDto result = await _treeService.CreateTreeSubmissionAsync(request, images, userId, screenshot);
 
         return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
     }
