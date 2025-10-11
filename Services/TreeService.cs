@@ -210,7 +210,7 @@ public class TreeService(
 			{
 				try
 				{
-					string folderPath = $"uploads/tree-submissions/screenshot/{submission.Id}";
+					string folderPath = $"uploads/tree-submissions/{submission.Id}";
 					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(new FormFileCollection() { screenshot }, folderPath);
 					submission.TreeScreenshotUrl = imagePaths[0];
 					await _context.SaveChangesAsync();
