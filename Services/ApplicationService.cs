@@ -396,13 +396,15 @@ public class ApplicationService : IApplicationService
 			["location_province"] = treeSubmission.Location.Province ?? "",
 			["tree_circumference"] = treeSubmission.Circumference,
 			["tree_height"] = treeSubmission.Height,
-			// ["tree_condition"] = treeSubmission.Condition,
+			["tree_soil"] = string.Join(", ", treeSubmission.Soil ?? ["Brak danych"]),
+			["tree_health"] = string.Join(", ", treeSubmission.Health ?? ["Brak danych"]),
+			["tree_environment"] = string.Join(", ", treeSubmission.Environment ?? ["Brak danych"]),
 			["tree_estimated_age"] = treeSubmission.EstimatedAge,
 			["tree_is_alive"] = treeSubmission.IsAlive,
-			["tree_location_latitude"] = treeSubmission.Location.Lat,
-			["tree_location_longitude"] = treeSubmission.Location.Lng,
 			["tree_description"] = treeSubmission.Description ?? "",
 			["tree_spread"] = treeSubmission.CrownSpread,
+			["tree_images"] = treeSubmission.Images != null ? $"Zdjęcia - {treeSubmission.Images.Count} Szt." : "Zdjęcia - Brak",
+			["tree_map_image"] = treeSubmission.TreeScreenshotUrl != null ? "Mapa lokalizacyjna drzewa - 1 Szt." : "Mapa lokalizacyjna drzewa - Brak",
 			["submission_date"] = treeSubmission.SubmissionDate.ToString("dd.MM.yyyy"),
 			["commune_name"] = commune.Name,
 			["commune_address"] = commune.Address,
@@ -627,6 +629,66 @@ public class ApplicationService : IApplicationService
 				Placeholder = "Opisz gatunek drzewa, jego wygląd, wymiary...",
 				HelpText = "Podaj szczegółowy opis drzewa (gatunek, wymiary, stan)",
 				Order = 5
+		}},
+		{
+		"location_address", new ApplicationField {
+				Name = "location_address",
+				Label = "Adres",
+				Type = ApplicationFieldType.Text,
+				IsRequired = true,
+				Placeholder = "Wioślarska, 35-233 Rzeszów",
+				HelpText = "Podaj adres drzewa",
+				Order = 6
+		}},
+		{
+		"location_plot", new ApplicationField {
+				Name = "location_plot",
+				Label = "Numer działki",
+				Type = ApplicationFieldType.Text,
+				IsRequired = true,
+				Placeholder = "123/11",
+				HelpText = "Podaj numer działki",
+				Order = 7
+		}},
+		{
+		"location_district", new ApplicationField {
+				Name = "location_district",
+				Label = "Obręb ewidencyjny",
+				Type = ApplicationFieldType.Text,
+				IsRequired = true,
+				Placeholder = "Pobitno",
+				HelpText = "Podaj obręb ewidencyjny",
+				Order = 8
+		}},
+		{
+		"location_commune", new ApplicationField {
+				Name = "location_commune",
+				Label = "Gmina",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "Rzeszów",
+				HelpText = "Podaj gminę, w której znajduje się drzewo",
+				Order = 9
+		}},
+		{
+		"location_county", new ApplicationField {
+				Name = "location_county",
+				Label = "Numer działki",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "powiat Rzeszów",
+				HelpText = "Podaj powiat, w którym znajduje się drzewo",
+				Order = 10
+		}},
+		{
+		"location_province", new ApplicationField {
+				Name = "location_province",
+				Label = "Województwo",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "12/123",
+				HelpText = "Podaj województwo, w którym znajduje się drzewo",
+				Order = 11
 		}}
 	};
 }

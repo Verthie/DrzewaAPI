@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Update to AddScreenshotPropertyToSubmission",
+      "type": "shell",
+      "command": "dotnet ef database update AddScreenshotPropertyToSubmission",
+      "problemMatcher": []
+    },
+    {
+      "label": "Remove Migration",
+      "type": "shell",
+      "command": "dotnet ef migrations remove",
+      "dependsOn": ["Update to AddScreenshotPropertyToSubmission"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Add ChangedApplicationTemplate Migration",
+      "type": "shell",
+      "command": "dotnet ef migrations add ChangedApplicationTemplate",
+      "dependsOn": ["Remove Migration"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Update Database",
+      "type": "shell",
+      "command": "dotnet ef database update",
+      "dependsOn": ["Add ChangedApplicationTemplate Migration"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Docker Compose",
+      "type": "shell",
+      "command": "docker-compose up",
+      "dependsOn": ["Update Database"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Run All: EF Migrations + Docker",
+      "dependsOn": ["Start Docker Compose"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    }
+  ]
+}

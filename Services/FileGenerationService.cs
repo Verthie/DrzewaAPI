@@ -115,9 +115,7 @@ public class FileGenerationService(IAzureStorageService _azureStorageService, IL
 
 			// Adding Metadata
 			var info = pdfDoc.GetDocumentInfo();
-			info.SetTitle("Dokument do podpisu elektronicznego");
-			info.SetAuthor("System");
-			info.SetCreator("PuppeteerSharp + iText7");
+			info.SetTitle("Wniosek");
 
 			var page = pdfDoc.GetFirstPage();
 			var pageSize = page.GetPageSize();

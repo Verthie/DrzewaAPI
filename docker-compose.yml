@@ -11,4 +11,3 @@ services:
       - ConnectionStrings__AzureStorage=DefaultEndpointsProtocol=https;AccountName=${STORAGE_ACCOUNT};AccountKey=${STORAGE_KEY};EndpointSuffix=core.windows.net
       - Email__Username=${EMAIL_USER}
       - Email__Password=${EMAIL_PASSWORD}
-      - MAPTILER_KEY=${MAPTILER_KEY}

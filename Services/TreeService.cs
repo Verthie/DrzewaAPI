@@ -297,6 +297,15 @@ public class TreeService(
 			if (req.Height.HasValue)
 				submission.Height = req.Height.Value;
 
+			if (req.Soil != null && !req.Soil.SequenceEqual(submission.Soil ?? []))
+				submission.Soil = req.Soil;
+
+			if (req.Health != null && !req.Health.SequenceEqual(submission.Health ?? []))
+				submission.Health = req.Health;
+
+			if (req.Environment != null && !req.Environment.SequenceEqual(submission.Environment ?? []))
+				submission.Environment = req.Environment;
+
 			if (req.IsAlive.HasValue)
 				submission.IsAlive = req.IsAlive.Value;
 
@@ -311,6 +320,9 @@ public class TreeService(
 
 			if (req.Legend != null)
 				submission.Legend = req.Legend;
+
+			if (req.TreeScreenshotUrl != null && req.TreeScreenshotUrl != submission.TreeScreenshotUrl)
+				submission.TreeScreenshotUrl = req.TreeScreenshotUrl;
 
 			if (locationChanged)
 			{
@@ -555,6 +567,9 @@ public class TreeService(
 			Location = s.Location,
 			Circumference = s.Circumference,
 			Height = s.Height,
+			Soil = s.Soil,
+			Health = s.Health,
+			Environment = s.Environment,
 			IsAlive = s.IsAlive,
 			EstimatedAge = s.EstimatedAge,
 			CrownSpread = s.CrownSpread,
@@ -580,6 +595,9 @@ public class TreeService(
 			Location = updateDto.Location ?? existing.Location,
 			Circumference = updateDto.Circumference ?? existing.Circumference,
 			Height = updateDto.Height ?? existing.Height,
+			Soil = updateDto.Soil ?? existing.Soil,
+			Health = updateDto.Health ?? existing.Health,
+			Environment = updateDto.Environment ?? existing.Environment,
 			IsAlive = updateDto.IsAlive ?? existing.IsAlive,
 			EstimatedAge = updateDto.EstimatedAge ?? existing.EstimatedAge,
 			CrownSpread = updateDto.CrownSpread ?? existing.CrownSpread,
