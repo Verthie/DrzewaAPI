@@ -38,10 +38,17 @@ public record CreateApplicationDto
 public record class SubmitApplicationDto
 {
 	[Required]
-	public required Dictionary<string, object> FormData { get; set; }
+	public required Dictionary<string, object> FormData { get; init; }
 }
 
 public record UpdateApplicationDto
 {
-	public Dictionary<string, object>? FormData { get; set; }
+	public Dictionary<string, object>? FormData { get; init; }
+}
+
+public record ApplicationFileUrlsDto
+{
+	public string? PdfPath { get; init; }
+	public List<string>? Images { get; init; }
+	public string? TreeScreenshotUrl { get; init; }
 }

@@ -102,8 +102,8 @@ public class ApplicationsController(IApplicationService _applicationService) : C
 		Guid applicationId = ValidationHelpers.ValidateAndParseId(id);
 		Guid userId = User.GetCurrentUserId();
 
-		string pdfPath = await _applicationService.GeneratePdfFromAplicationAsync(applicationId, userId);
+		ApplicationFileUrlsDto fileUrls = await _applicationService.GeneratePdfFromAplicationAsync(applicationId, userId);
 
-		return Ok(new { PdfUrl = pdfPath });
+		return Ok(fileUrls);
 	}
 }

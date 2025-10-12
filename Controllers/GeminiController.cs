@@ -16,7 +16,7 @@ public class GeminiController(IGeminiService _geminiService) : ControllerBase
 
         string response = await _geminiService.GetJustificationAsync(treeId);
 
-        return Ok(response);
+        return Ok(new { Justification = response });
     }
 
     [HttpGet("test")]
@@ -24,6 +24,6 @@ public class GeminiController(IGeminiService _geminiService) : ControllerBase
     {
         string response = await _geminiService.GetTestMessageAsync();
 
-        return Ok(response);
+        return Ok(new { Joke = response });
     }
 }

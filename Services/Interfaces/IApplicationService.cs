@@ -9,5 +9,5 @@ public interface IApplicationService
 	Task DeleteApplicationAsync(Guid id, Guid userId, bool isModerator);
 	Task<ApplicationFormSchemaDto> GetApplicationFormSchemaAsync(Guid applicationId, Guid userId);
 	Task<ApplicationDto> SubmitApplicationAsync(Guid id, Guid userId, SubmitApplicationDto submitDto);
-	Task<string> GeneratePdfFromAplicationAsync(Guid applicationId, Guid userId);
+	Task<ApplicationFileUrlsDto> GeneratePdfFromAplicationAsync(Guid applicationId, Guid userId);
 }

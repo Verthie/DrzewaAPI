@@ -286,7 +286,7 @@ public class ApplicationService : IApplicationService
 		}
 	}
 
-	public async Task<string> GeneratePdfFromAplicationAsync(Guid applicationId, Guid userId)
+	public async Task<ApplicationFileUrlsDto> GeneratePdfFromAplicationAsync(Guid applicationId, Guid userId)
 	{
 		try
 		{
@@ -310,9 +310,14 @@ public class ApplicationService : IApplicationService
 			application.GeneratedPdfPath = pdfPath;
 			await _context.SaveChangesAsync();
 
-			string fileUrl = FileHelper.GetFileUrl(pdfPath, _azureStorageService);
+			string pdfUrl = FileHelper.GetFileUrl(pdfPath, _azureStorageService);
 
-			return fileUrl;
+			return new ApplicationFileUrlsDto
+			{
+				PdfPath = pdfUrl,
+				Images = application.TreeSubmission.Images,
+				TreeScreenshotUrl = application.TreeSubmission.TreeScreenshotUrl
+			};
 		}
 		catch (BusinessException)
 		{
