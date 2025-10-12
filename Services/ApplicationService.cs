@@ -572,7 +572,7 @@ public class ApplicationService : IApplicationService
 				Validation = new ApplicationFieldValidation
 				{
 						MinLength = 9,
-						MaxLength = 15,
+						MaxLength = 20,
 						Pattern = @"^\+?[0-9\s\-\(\)]{9,15}$",
 						ValidationMessage = "Numer telefonu musi zawierać 9-15 cyfr"
 				},
@@ -588,9 +588,9 @@ public class ApplicationService : IApplicationService
 				Placeholder = "ul. Wiśniewska 34/1",
 				Validation = new ApplicationFieldValidation
 				{
-						MinLength = 5,
+						MinLength = 1,
 						MaxLength = 150,
-						ValidationMessage = "Adres musi mieć od 5 do 150 znaków"
+						ValidationMessage = "Adres musi mieć od 1 do 150 znaków"
 				},
 				HelpText = "Podaj pełny adres zamieszkania",
 				Order = 2
@@ -604,9 +604,9 @@ public class ApplicationService : IApplicationService
 				Placeholder = "Warszawa",
 				Validation = new ApplicationFieldValidation
 				{
-						MinLength = 2,
-						MaxLength = 50,
-						ValidationMessage = "Nazwa miasta musi mieć od 2 do 50 znaków"
+						MinLength = 1,
+						MaxLength = 100,
+						ValidationMessage = "Nazwa miasta musi mieć od 1 do 100 znaków"
 				},
 				HelpText = "Podaj nazwę miasta",
 				Order = 3
@@ -620,6 +620,7 @@ public class ApplicationService : IApplicationService
 				Placeholder = "12-345",
 				Validation = new ApplicationFieldValidation
 				{
+						MaxLength = 10,
 						Pattern = @"^\d{2}-\d{3}$",
 						ValidationMessage = "Kod pocztowy musi być w formacie XX-XXX"
 				},
@@ -633,6 +634,12 @@ public class ApplicationService : IApplicationService
 				Type = ApplicationFieldType.TextArea,
 				IsRequired = true,
 				Placeholder = "Opisz gatunek drzewa, jego wygląd, wymiary...",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 100,
+						ValidationMessage = "Nazwa miasta musi mieć od 1 do 100 znaków"
+				},
 				HelpText = "Podaj szczegółowy opis drzewa (gatunek, wymiary, stan)",
 				Order = 5
 		}},
@@ -643,6 +650,12 @@ public class ApplicationService : IApplicationService
 				Type = ApplicationFieldType.Text,
 				IsRequired = true,
 				Placeholder = "Wioślarska, 35-233 Rzeszów",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 200,
+						ValidationMessage = "Adres musi zawierać od 1 do 200 znaków"
+				},
 				HelpText = "Podaj adres drzewa",
 				Order = 6
 		}},
@@ -653,6 +666,12 @@ public class ApplicationService : IApplicationService
 				Type = ApplicationFieldType.Text,
 				IsRequired = true,
 				Placeholder = "123/11",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 15,
+						ValidationMessage = "Numer działki musi zawierać od 1 do 15 znaków"
+				},
 				HelpText = "Podaj numer działki",
 				Order = 7
 		}},
@@ -663,6 +682,12 @@ public class ApplicationService : IApplicationService
 				Type = ApplicationFieldType.Text,
 				IsRequired = true,
 				Placeholder = "Pobitno",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 100,
+						ValidationMessage = "Nazwa obrębu ewidencyjnego musi mieć od 1 do 100 znaków"
+				},
 				HelpText = "Podaj obręb ewidencyjny",
 				Order = 8
 		}},
@@ -673,6 +698,12 @@ public class ApplicationService : IApplicationService
 				Type = ApplicationFieldType.Text,
 				IsRequired = false,
 				Placeholder = "Rzeszów",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 100,
+						ValidationMessage = "Nazwa gminy musi mieć od 1 do 100 znaków"
+				},
 				HelpText = "Podaj gminę, w której znajduje się drzewo",
 				Order = 9
 		}},
@@ -683,6 +714,12 @@ public class ApplicationService : IApplicationService
 				Type = ApplicationFieldType.Text,
 				IsRequired = false,
 				Placeholder = "powiat Rzeszów",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 100,
+						ValidationMessage = "Nazwa powiatu musi mieć od 1 do 100 znaków"
+				},
 				HelpText = "Podaj powiat, w którym znajduje się drzewo",
 				Order = 10
 		}},
@@ -692,7 +729,13 @@ public class ApplicationService : IApplicationService
 				Label = "Województwo",
 				Type = ApplicationFieldType.Text,
 				IsRequired = false,
-				Placeholder = "12/123",
+				Placeholder = "Podkarpackie",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 100,
+						ValidationMessage = "Nazwa województwa musi mieć od 1 do 100 znaków"
+				},
 				HelpText = "Podaj województwo, w którym znajduje się drzewo",
 				Order = 11
 		}}

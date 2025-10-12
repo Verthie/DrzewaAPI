@@ -11,11 +11,11 @@ public class Commune
 	public required string Name { get; set; }
 
 	[Required]
-	[MaxLength(200)]
+	[Range(5, 150)]
 	public required string Address { get; set; }
 
 	[Required]
-	[MaxLength(100)]
+	[Range(2, 100)]
 	public required string City { get; set; }
 
 	[Required]
@@ -28,15 +28,15 @@ public class Commune
 
 	[Required]
 	[Phone]
-	[MaxLength(20)]
+	[Range(9, 20)]
 	public required string Phone { get; set; }
 
 	[Required]
 	[EmailAddress]
-	[MaxLength(100)]
+	[MaxLength(255)]
 	public required string Email { get; set; }
 
-	[MaxLength(100)]
+	[MaxLength(255)]
 	public string? Website { get; set; }
 
 	public DateTime CreatedDate { get; set; } = DateTime.UtcNow;

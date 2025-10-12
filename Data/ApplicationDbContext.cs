@@ -28,22 +28,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<User>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-			entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
-			entity.Property(e => e.LastName).IsRequired().HasMaxLength(100);
-			entity.Property(e => e.PasswordHash).IsRequired();
-			entity.Property(e => e.Phone).HasMaxLength(20);
-			entity.Property(e => e.Avatar).HasMaxLength(500);
 			entity.Property(e => e.RegistrationDate).HasDefaultValueSql("GETUTCDATE()");
-			entity.Property(e => e.Role).HasDefaultValue(UserRole.User);
 			entity.HasIndex(e => e.Email).IsUnique();
 		});
 
-		// TreeReport Configuration
+		// TreeSubmission Configuration
 		modelBuilder.Entity<TreeSubmission>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Description).HasMaxLength(2000);
 			entity.OwnsOne(e => e.Location, location =>
 			{
 				location.Property(l => l.Lat).IsRequired();
@@ -55,6 +47,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 				location.Property(l => l.County);
 				location.Property(l => l.Commune);
 			});
+			entity.Property(e => e.SubmissionDate).HasDefaultValueSql("GETUTCDATE()");
 
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.TreeSubmissions)
@@ -71,9 +64,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<TreeSpecies>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.PolishName).IsRequired().HasMaxLength(200);
-			entity.Property(e => e.LatinName).IsRequired().HasMaxLength(200);
-			entity.Property(e => e.Description).HasMaxLength(2000);
 			entity.OwnsOne(e => e.SeasonalChanges);
 			entity.OwnsOne(e => e.Traits);
 			entity.OwnsMany(e => e.Images);
@@ -84,6 +74,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		{
 			entity.HasKey(e => e.Id);
 			entity.HasIndex(e => new { e.UserId, e.TreeSubmissionId }).IsUnique();
+			entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
 
 			entity.HasOne(e => e.User)
 									.WithMany(e => e.TreeVotes)
@@ -102,6 +93,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.FormData).HasJsonConversion();
 			entity.Property(e => e.Status).HasConversion<string>();
+			entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
 
 			entity.HasOne(e => e.User)
 								.WithMany(u => u.Applications)
@@ -119,42 +111,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										.OnDelete(DeleteBehavior.Restrict);
 		});
 
-
-		modelBuilder.Entity<TreeSubmission>(entity =>
-		{
-			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Description).HasMaxLength(2000);
-			entity.OwnsOne(e => e.Location, location =>
-						{
-							location.Property(l => l.Lat).IsRequired();
-							location.Property(l => l.Lng).IsRequired();
-							location.Property(l => l.Address);
-							location.Property(l => l.PlotNumber);
-							location.Property(l => l.District);
-							location.Property(l => l.Province);
-							location.Property(l => l.County);
-							location.Property(l => l.Commune);
-						});
-
-			entity.HasOne(e => e.User)
-									.WithMany(e => e.TreeSubmissions)
-									.HasForeignKey(e => e.UserId)
-									.OnDelete(DeleteBehavior.Restrict);
-
-			entity.HasOne(e => e.Species)
-									.WithMany(e => e.TreeSubmissions)
-									.HasForeignKey(e => e.SpeciesId)
-									.OnDelete(DeleteBehavior.Restrict);
-		});
-
 		// ApplicationTemplate Configuration
 		modelBuilder.Entity<ApplicationTemplate>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-			entity.Property(e => e.Description).HasMaxLength(500);
-			entity.Property(e => e.HtmlTemplate).IsRequired();
 			entity.Property(e => e.Fields).HasJsonConversion();
+			entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
 			entity.HasIndex(e => new { e.CommuneId, e.Name }).IsUnique();
 
 			entity.OwnsOne(e => e.Signature, signature =>
@@ -176,14 +138,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<Commune>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-			entity.Property(e => e.Address).IsRequired().HasMaxLength(200);
-			entity.Property(e => e.City).IsRequired().HasMaxLength(100);
-			entity.Property(e => e.Province).IsRequired().HasMaxLength(100);
-			entity.Property(e => e.PostalCode).IsRequired().HasMaxLength(10);
-			entity.Property(e => e.Phone).IsRequired().HasMaxLength(20);
-			entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
-			entity.Property(e => e.Website).HasMaxLength(100);
+			entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
 
 			entity.HasIndex(e => e.Name).IsUnique();
 		});
@@ -191,7 +146,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		modelBuilder.Entity<EmailVerificationToken>(entity =>
 		{
 			entity.HasKey(e => e.Id);
-			entity.Property(e => e.Token).IsRequired().HasMaxLength(100);
 			entity.HasIndex(e => e.Token).IsUnique();
 
 			entity.HasOne(e => e.User)
@@ -372,8 +326,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Validation = new ApplicationFieldValidation
 										{
 												MinLength = 50,
-												MaxLength = 1000,
-												ValidationMessage = "Uzasadnienie musi mieć od 50 do 1000 znaków"
+												MaxLength = 1500,
+												ValidationMessage = "Uzasadnienie musi mieć od 50 do 1500 znaków"
 										},
 										HelpText = "Opisz walory przyrodnicze, historyczne lub krajobrazowe drzewa",
 										Order = 1
@@ -403,8 +357,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "Imię i nazwisko",
 										Validation = new ApplicationFieldValidation
 										{
-												MinLength = 3,
-												MaxLength = 100
+												MinLength = 1,
+												MaxLength = 200,
+												ValidationMessage = "Imię i nazwisko powinno zawierać od 1 do 200 znaków"
 										},
 										Order = 3
 								},
@@ -417,6 +372,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "+48 123 456 789",
 										Validation = new ApplicationFieldValidation
 										{
+												MinLength = 9,
+												MaxLength = 20,
 												Pattern = @"^\+?[0-9\s\-\(\)]{9,15}$",
 												ValidationMessage = "Numer telefonu musi zawierać 9-15 cyfr"
 										},
@@ -455,8 +412,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Validation = new ApplicationFieldValidation
 										{
 												MinLength = 50,
-												MaxLength = 1000,
-												ValidationMessage = "Uzasadnienie musi mieć od 50 do 1000 znaków"
+												MaxLength = 1500,
+												ValidationMessage = "Uzasadnienie musi mieć od 50 do 1500 znaków"
 										},
 										HelpText = "Opisz walory przyrodnicze, historyczne lub krajobrazowe drzewa",
 										Order = 1
@@ -470,9 +427,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "Proszę podać działkę na której znajduje się pomnik przyrody",
 										Validation = new ApplicationFieldValidation
 										{
-												MinLength = 2,
+												MinLength = 1,
 												MaxLength = 100,
-												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+												ValidationMessage = "Tekst musi mieć od 1 do 100 znaków"
 										},
 										Order = 2
 								},
@@ -485,9 +442,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "Proszę podać obręb ewidencyjny",
 										Validation = new ApplicationFieldValidation
 										{
-												MinLength = 2,
+												MinLength = 1,
 												MaxLength = 100,
-												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+												ValidationMessage = "Tekst musi mieć od 1 do 100 znaków"
 										},
 										Order = 3
 								},
@@ -500,9 +457,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "Proszę podać jednostkę ewidencyjną",
 										Validation = new ApplicationFieldValidation
 										{
-												MinLength = 2,
+												MinLength = 1,
 												MaxLength = 100,
-												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+												ValidationMessage = "Tekst musi mieć od 1 do 100 znaków"
 										},
 										Order = 4
 								},
@@ -515,9 +472,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "Proszę podać formę własności",
 										Validation = new ApplicationFieldValidation
 										{
-												MinLength = 2,
+												MinLength = 1,
 												MaxLength = 100,
-												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+												ValidationMessage = "Tekst musi mieć od 1 do 100 znaków"
 										},
 										Order = 5
 								},
@@ -530,9 +487,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "Proszę podać rodzaj gruntów",
 										Validation = new ApplicationFieldValidation
 										{
-												MinLength = 2,
+												MinLength = 1,
 												MaxLength = 100,
-												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+												ValidationMessage = "Tekst musi mieć od 1 do 100 znaków"
 										},
 										Order = 6
 								},
@@ -545,9 +502,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "Proszę podać nazwę opracowania",
 										Validation = new ApplicationFieldValidation
 										{
-												MinLength = 2,
+												MinLength = 1,
 												MaxLength = 100,
-												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+												ValidationMessage = "Tekst musi mieć od 1 do 100 znaków"
 										},
 										Order = 7
 								},
@@ -560,9 +517,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										Placeholder = "Proszę podać imię i nazwisko autora opracowania",
 										Validation = new ApplicationFieldValidation
 										{
-												MinLength = 2,
+												MinLength = 1,
 												MaxLength = 100,
-												ValidationMessage = "Tekst musi mieć od 2 do 100 znaków"
+												ValidationMessage = "Tekst musi mieć od 1 do 100 znaków"
 										},
 										Order = 8
 								},
@@ -582,10 +539,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			new
 			{
 				ApplicationTemplateId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000006"),
-				Height = 10.0F,
-				Width = 10.0F,
-				X = 10.0F,
-				Y = 10.0F,
+				Height = 120.0F,
+				Width = 80.0F,
+				X = 410.0F,
+				Y = 150.0F,
 			}
 		);
 

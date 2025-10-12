@@ -6,11 +6,14 @@ public class TreeSpecies
 {
 	public Guid Id { get; set; }
 	[Required]
+	[MaxLength(200)]
 	public required string PolishName { get; set; }
 	[Required]
+	[MaxLength(200)]
 	public required string LatinName { get; set; }
 	[Required]
 	public required string Family { get; set; }
+	[MaxLength(1500)]
 	public string? Description { get; set; }
 	public List<string>? IdentificationGuide { get; set; }
 	public SeasonalChangesDto? SeasonalChanges { get; set; }

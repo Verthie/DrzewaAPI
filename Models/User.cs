@@ -7,25 +7,25 @@ public class User
 {
 	public Guid Id { get; set; }
 	[Required]
-	[MaxLength(50)]
+	[MaxLength(100)]
 	public required string FirstName { get; set; }
 	[Required]
-	[MaxLength(50)]
+	[MaxLength(100)]
 	public required string LastName { get; set; }
 	[Required]
 	[EmailAddress]
-	[MaxLength(100)]
+	[MaxLength(255)]
 	public required string Email { get; set; }
 	[Required]
 	public string PasswordHash { get; set; } = "";
 	[Phone]
 	[Range(9, 20)]
 	public string? Phone { get; set; }
-	[Length(5, 150)]
+	[Length(1, 150)]
 	public string? Address { get; set; }
-	[Length(2, 50)]
+	[Length(1, 100)]
 	public string? City { get; set; }
-	[MaxLength(50)]
+	[MaxLength(10)]
 	public string? PostalCode { get; set; }
 	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; set; } = DateTime.UtcNow;
