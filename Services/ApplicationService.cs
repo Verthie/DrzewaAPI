@@ -315,8 +315,9 @@ public class ApplicationService : IApplicationService
 			return new ApplicationFileUrlsDto
 			{
 				PdfPath = pdfUrl,
-				Images = application.TreeSubmission.Images,
-				TreeScreenshotUrl = application.TreeSubmission.TreeScreenshotUrl
+				Images = application.TreeSubmission.Images?.Select(path =>
+						FileHelper.GetFileUrl(path, _azureStorageService)).ToList() ?? new List<string>(),
+				TreeScreenshotUrl = application.TreeSubmission.TreeScreenshotUrl != null ? FileHelper.GetFileUrl(application.TreeSubmission.TreeScreenshotUrl, _azureStorageService) : ""
 			};
 		}
 		catch (BusinessException)
