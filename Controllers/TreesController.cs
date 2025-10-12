@@ -42,7 +42,6 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         return Ok(tree);
     }
 
-    // TODO Add screenshot to submissions functionality
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateTreeSubmission([FromForm] CreateTreeSubmissionDto request, IFormFileCollection images, IFormFile screenshot)
@@ -70,7 +69,6 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         return CreatedAtAction(nameof(GetTreeSubmissionById), new { id = result.Id }, result);
     }
 
-    // TODO Update screenshot in submissions functionality 
     [Authorize]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateTreeSubmission(Guid id, [FromForm] UpdateTreeSubmissionDto request, IFormFileCollection? images)

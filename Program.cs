@@ -14,6 +14,8 @@ using DrzewaAPI.Models;
 using DrzewaAPI.Services;
 using DrzewaAPI.Utils;
 using FluentValidation;
+using MaIN.Core;
+using MaIN.Domain.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -41,6 +43,14 @@ builder.Services.AddSingleton(provider =>
     return new BlobServiceClient(connectionString);
 });
 
+// Initialize MaIN.NET with Gemini
+MaINBootstrapper.Initialize(configureSettings: (options) =>
+{
+    options.BackendType = BackendType.Gemini;
+    options.GeminiKey = builder.Configuration["Gemini:ApiKey"]
+        ?? throw new InvalidOperationException("Gemini API key is not configured");
+});
+
 // Service Registration
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -54,6 +64,7 @@ builder.Services.AddScoped<ICommuneService, CommuneService>();
 builder.Services.AddScoped<IFileGenerationService, FileGenerationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IGeminiService, GeminiService>();
 
 // Validators
 builder.Services.AddScoped<IValidator<UpdatePasswordDto>, ResetPasswordValidator>();

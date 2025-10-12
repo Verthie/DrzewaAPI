@@ -15,6 +15,7 @@
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="itext7" Version="9.3.0" />
     <PackageReference Include="itext7.bouncy-castle-adapter" Version="9.3.0" />
+    <PackageReference Include="MaIN.NET" Version="0.6.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
@@ -29,6 +30,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
     <PackageReference Include="Nominatim.API" Version="2.1.0" />
     <PackageReference Include="PuppeteerSharp" Version="20.2.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
