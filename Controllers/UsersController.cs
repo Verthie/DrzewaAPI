@@ -43,7 +43,7 @@ public class UsersController(IUserService _userService) : ControllerBase
     }
 
     [HttpPut("data/{userId?}")]
-    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto req, string? userId, IFormFile? image)
+    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto req, string? userId)
     {
         ValidationHelpers.ValidateModelState(ModelState);
 
@@ -55,7 +55,7 @@ public class UsersController(IUserService _userService) : ControllerBase
         string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
         bool isModerator = currentUserRole == UserRole.Moderator.ToString();
 
-        UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userGuid, req, image, isModerator);
+        UserDto updatedUser = await _userService.UpdateUserAsync(currentUserId, userGuid, req, isModerator);
 
         return Ok(updatedUser);
     }

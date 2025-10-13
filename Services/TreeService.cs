@@ -559,7 +559,6 @@ public class TreeService(
 			{
 				UserId = s.User.Id,
 				UserName = s.User.FullName,
-				Avatar = s.User.Avatar != null ? FileHelper.GetFileUrl(s.User.Avatar, _azureStorageService) : ""
 			},
 			Species = s.Species.PolishName,
 			SpeciesLatin = s.Species.LatinName,

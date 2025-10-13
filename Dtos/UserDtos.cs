@@ -13,7 +13,6 @@ public record UserDto
 	public string? Address { get; set; }
 	public string? City { get; set; }
 	public string? PostalCode { get; set; }
-	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; init; }
 	public UserStatisticsDto Statistics { get; init; } = new UserStatisticsDto();
 }
@@ -27,7 +26,6 @@ public record CurrentUserDto
 	public string? Address { get; set; }
 	public string? City { get; set; }
 	public string? PostalCode { get; set; }
-	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; init; }
 	public UserRole Role { get; init; }
 	public UserStatisticsDto Statistics { get; init; } = new UserStatisticsDto();

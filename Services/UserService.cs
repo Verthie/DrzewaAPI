@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Services;
 
-public class UserService(ApplicationDbContext _context, IAzureStorageService _azureStorageService, IPasswordHasher<User> _passwordHasher, ILogger<UserService> _logger) : IUserService
+public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _passwordHasher, ILogger<UserService> _logger) : IUserService
 {
 	public async Task<List<UserDto>> GetAllUsersAsync()
 	{
@@ -49,7 +49,6 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 					Address = user.Address,
 					City = user.City,
 					PostalCode = user.PostalCode,
-					Avatar = user.Avatar != null ? FileHelper.GetFileUrl(user.Avatar, _azureStorageService) : "",
 					RegistrationDate = user.RegistrationDate,
 					Role = user.Role,
 					Statistics = new UserStatisticsDto
@@ -70,7 +69,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 		}
 	}
 
-	public async Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, IFormFile? image, bool isModerator)
+	public async Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, bool isModerator)
 	{
 		try
 		{
@@ -86,23 +85,6 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 			user.Address = updateDto.Address?.Trim();
 			user.City = updateDto.City?.Trim();
 			user.PostalCode = updateDto.PostalCode?.Trim();
-
-			// Handle image upload
-			if (image != null)
-			{
-				try
-				{
-					string folderPath = $"uploads/user-avatars/{user.Id}";
-					List<string> imagePaths = await _azureStorageService.SaveImagesAsync(new FormFileCollection() { image }, folderPath);
-					user.Avatar = imagePaths[0];
-					await _context.SaveChangesAsync();
-				}
-				catch (Exception ex)
-				{
-					_logger.LogError(ex, "Error saving images for user {Id}", user.Id);
-					// TODO Notify the user that images couldn't be saved
-				}
-			}
 
 			await _context.SaveChangesAsync();
 
@@ -180,7 +162,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 				_logger.LogDebug("Deleted {Count} email verification tokens for user {UserId}", emailTokens.Count, userId);
 			}
 
-			// 3. Delete TreeVotes
+			// 2. Delete TreeVotes
 			var treeVotes = await _context.TreeVotes
 					.Where(tv => tv.UserId == userId)
 					.ToListAsync();
@@ -190,7 +172,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 				_logger.LogDebug("Deleted {Count} tree votes for user {UserId}", treeVotes.Count, userId);
 			}
 
-			// 5. Delete Applications
+			// 3. Delete Applications
 			var applications = await _context.Applications
 					.Where(a => a.UserId == userId)
 					.ToListAsync();
@@ -200,7 +182,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 				_logger.LogDebug("Deleted {Count} applications for user {UserId}", applications.Count, userId);
 			}
 
-			// 6. Delete TreeSubmissions (these might have complex relationships)
+			// 4. Delete TreeSubmissions (these might have complex relationships)
 			var treeSubmissions = await _context.TreeSubmissions
 					.Where(ts => ts.UserId == userId)
 					.ToListAsync();
@@ -210,7 +192,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 				_logger.LogDebug("Deleted {Count} tree submissions for user {UserId}", treeSubmissions.Count, userId);
 			}
 
-			// 7. Finally, delete the user
+			// 5. Delete the user
 			_context.Users.Remove(user);
 
 			// Save all changes
@@ -243,7 +225,6 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 			Address = u.Address,
 			City = u.City,
 			PostalCode = u.PostalCode,
-			Avatar = u.Avatar != null ? FileHelper.GetFileUrl(u.Avatar, _azureStorageService) : "",
 			RegistrationDate = u.RegistrationDate,
 			Statistics = new UserStatisticsDto()
 			{

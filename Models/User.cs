@@ -27,7 +27,6 @@ public class User
 	public string? City { get; set; }
 	[MaxLength(10)]
 	public string? PostalCode { get; set; }
-	public string? Avatar { get; set; }
 	public DateTime RegistrationDate { get; set; } = DateTime.UtcNow;
 	public UserRole Role { get; set; } = UserRole.User;
 	public bool IsEmailVerified { get; set; } = false;
