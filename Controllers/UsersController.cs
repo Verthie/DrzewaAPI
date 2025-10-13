@@ -43,14 +43,9 @@ public class UsersController(IUserService _userService) : ControllerBase
     }
 
     [HttpPut("data/{userId?}")]
-    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto req, string userId, IFormFile image)
+    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto req, string? userId, IFormFile? image)
     {
         ValidationHelpers.ValidateModelState(ModelState);
-
-        if (image == null)
-        {
-            return BadRequest("An image needs to be provided");
-        }
 
         userId ??= User.GetCurrentUserId().ToString();
 

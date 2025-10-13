@@ -4,7 +4,7 @@ public interface IUserService
 {
 	Task<List<UserDto>> GetAllUsersAsync();
 	Task<T> GetUserByIdAsync<T>(Guid userId);
-	Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, IFormFile image, bool isModerator);
+	Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, IFormFile? image, bool isModerator);
 	Task UpdatePasswordAsync(Guid userId, string newPassword);
 	Task DeleteUserAsync(Guid currentUserId, Guid userId, bool isModerator);
 	// Task<bool> DeactivateUserAsync(Guid userId);

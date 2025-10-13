@@ -96,7 +96,6 @@ public class SpeciesService(
 								Type = ImageType.Fruit,
 							}
 					};
-					await _context.SaveChangesAsync();
 				}
 				catch (Exception ex)
 				{

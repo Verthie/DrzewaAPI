@@ -78,7 +78,7 @@ public class TreesController(ITreeService _treeService) : ControllerBase
         // Validate images if provided
         if (images?.Count > 6) // Limit to 6 images
         {
-            return BadRequest("Maximum 6 images allowed");
+            return BadRequest("Maksymalnie 6 obrazków jest dozwolone");
         }
 
         string? currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;

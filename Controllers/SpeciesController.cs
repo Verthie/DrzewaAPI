@@ -37,7 +37,7 @@ public class SpeciesController(ISpeciesService _speciesService) : ControllerBase
 
         if (treeImage == null || leafImage == null || barkImage == null || fruitImage == null)
         {
-            return BadRequest("Images for all categories need to be provided");
+            return BadRequest("Obrazek dla każdej z kategorii musi być podany");
         }
 
         Guid userId = User.GetCurrentUserId();

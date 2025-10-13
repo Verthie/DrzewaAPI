@@ -70,7 +70,7 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 		}
 	}
 
-	public async Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, IFormFile image, bool isModerator)
+	public async Task<UserDto> UpdateUserAsync(Guid currentUserId, Guid userId, UpdateUserDto updateDto, IFormFile? image, bool isModerator)
 	{
 		try
 		{
@@ -86,7 +86,6 @@ public class UserService(ApplicationDbContext _context, IAzureStorageService _az
 			user.Address = updateDto.Address?.Trim();
 			user.City = updateDto.City?.Trim();
 			user.PostalCode = updateDto.PostalCode?.Trim();
-
 
 			// Handle image upload
 			if (image != null)
