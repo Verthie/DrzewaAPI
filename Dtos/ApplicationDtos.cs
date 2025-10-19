@@ -37,6 +37,7 @@ public record class SubmitApplicationDto
 {
 	[Required]
 	public required Dictionary<string, object> FormData { get; init; }
+	public bool IsOrganization { get; init; }
 }
 
 public record UpdateApplicationDto

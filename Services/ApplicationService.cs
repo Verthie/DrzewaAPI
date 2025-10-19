@@ -263,8 +263,13 @@ public class ApplicationService : IApplicationService
 				allData[kvp.Key] = kvp.Value;
 			}
 
+			allData["sender"] = submitDto.IsOrganization ? "<p>{{organization_name}}<p>{{organization_address}}<p>{{organization_postal_code}} {{organization_city}}<p>KRS: {{organization_krs}}<p>REGON: {{organization_regon}}<p>mail: {{organization_mail}}<p>tel. {{organization_phone}}<p style=margin-top:12px><span style=font-weight:700;text-decoration:underline>Adres do korespondencji:</span><p>skrytka pocztowa {{correspondence_box}}<p>{{correspondence_address}}<p>{{correspondence_postal_code}} {{correspondence_city}}" : "<p>{{user_full_name}}<p>{{user_address}}<p>{{user_postal_code}} {{user_city}}<p>mail: {{user_email}}<p>tel. {{user_phone}}";
+
 			application.GeneratedHtmlContent = await _fileGenerationService.GenerateHtmlFromTemplateAsync(
-					application.ApplicationTemplate.HtmlTemplate, allData);
+				application.ApplicationTemplate.HtmlTemplate, allData);
+
+			application.GeneratedHtmlContent = await _fileGenerationService.GenerateHtmlFromTemplateAsync(
+				application.GeneratedHtmlContent, allData);
 
 			await _context.SaveChangesAsync();
 
@@ -390,6 +395,18 @@ public class ApplicationService : IApplicationService
 			["user_address"] = user.Address ?? "",
 			["user_city"] = user.City ?? "",
 			["user_postal_code"] = user.PostalCode ?? "",
+			["organization_name"] = user.Organization?.Name ?? "",
+			["organization_address"] = user.Organization?.Address ?? "",
+			["organization_postal_code"] = user.Organization?.PostalCode ?? "",
+			["organization_city"] = user.Organization?.City ?? "",
+			["organization_krs"] = user.Organization?.Krs ?? "",
+			["organization_regon"] = user.Organization?.Regon ?? "",
+			["organization_mail"] = user.Organization?.Mail ?? "",
+			["organization_phone"] = user.Organization?.Phone ?? "",
+			["correspondence_box"] = user.Organization?.Correspondence.PoBox ?? 0,
+			["correspondence_address"] = user.Organization?.Correspondence.Address ?? "",
+			["correspondence_postal_code"] = user.Organization?.Correspondence.PostalCode ?? "",
+			["correspondence_city"] = user.Organization?.Correspondence.City ?? "",
 			["tree_species_polish"] = treeSubmission.Species.PolishName,
 			["tree_species_latin"] = treeSubmission.Species.LatinName,
 			["location_lat"] = treeSubmission.Location.Lat,
@@ -738,6 +755,198 @@ public class ApplicationService : IApplicationService
 				},
 				HelpText = "Podaj województwo, w którym znajduje się drzewo",
 				Order = 11
+		}},
+		{
+		"organization_name", new ApplicationField {
+				Name = "organization_name",
+				Label = "Nazwa organizacji",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "Stowarzyszenie Ochrony Przyrody",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 2,
+						MaxLength = 200,
+						ValidationMessage = "Nazwa organizacji musi mieć od 2 do 200 znaków"
+				},
+				HelpText = "Podaj pełną nazwę organizacji",
+				Order = 12
+		}},
+		{
+		"organization_address", new ApplicationField {
+				Name = "organization_address",
+				Label = "Adres organizacji",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "ul. Kwiatowa 15/3",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 150,
+						ValidationMessage = "Adres musi mieć od 1 do 150 znaków"
+				},
+				HelpText = "Podaj adres siedziby organizacji",
+				Order = 13
+		}},
+		{
+		"organization_postal_code", new ApplicationField {
+				Name = "organization_postal_code",
+				Label = "Kod pocztowy",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "12-345",
+				Validation = new ApplicationFieldValidation
+				{
+						MaxLength = 10,
+						Pattern = @"^\d{2}-\d{3}$",
+						ValidationMessage = "Kod pocztowy musi być w formacie XX-XXX"
+				},
+				HelpText = "Podaj kod pocztowy w formacie XX-XXX",
+				Order = 13
+		}},
+		{
+		"organization_city", new ApplicationField {
+				Name = "organization_city",
+				Label = "Miasto",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "Warszawa",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 100,
+						ValidationMessage = "Nazwa miasta musi mieć od 1 do 100 znaków"
+				},
+				HelpText = "Podaj miasto siedziby organizacji",
+				Order = 14
+		}},
+		{
+		"organization_krs", new ApplicationField {
+				Name = "organization_krs",
+				Label = "Numer KRS",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "0000123456",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 10,
+						MaxLength = 10,
+						Pattern = @"^\d{10}$",
+						ValidationMessage = "Numer KRS musi składać się z 10 cyfr"
+				},
+				HelpText = "Podaj numer KRS organizacji (jeśli dotyczy)",
+				Order = 15
+		}},
+		{
+		"organization_regon", new ApplicationField {
+				Name = "organization_regon",
+				Label = "Numer REGON",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "123456789",
+				Validation = new ApplicationFieldValidation
+				{
+						Pattern = @"^\d{9}(\d{5})?$",
+						ValidationMessage = "Numer REGON musi składać się z 9 lub 14 cyfr"
+				},
+				HelpText = "Podaj numer REGON organizacji (9 lub 14 cyfr)",
+				Order = 16
+		}},
+		{
+		"organization_mail", new ApplicationField {
+				Name = "organization_mail",
+				Label = "Adres e-mail",
+				Type = ApplicationFieldType.Email,
+				IsRequired = false,
+				Placeholder = "kontakt@organizacja.pl",
+				Validation = new ApplicationFieldValidation
+				{
+						MaxLength = 100,
+						Pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+						ValidationMessage = "Podaj prawidłowy adres e-mail"
+				},
+				HelpText = "Podaj adres e-mail kontaktowy organizacji",
+				Order = 17
+		}},
+		{
+		"organization_phone", new ApplicationField {
+				Name = "organization_phone",
+				Label = "Numer telefonu",
+				Type = ApplicationFieldType.Phone,
+				IsRequired = false,
+				Placeholder = "+48 123 456 789",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 9,
+						MaxLength = 20,
+						Pattern = @"^\+?[0-9\s\-\(\)]{9,15}$",
+						ValidationMessage = "Numer telefonu musi zawierać 9-15 cyfr"
+				},
+				HelpText = "Podaj numer telefonu kontaktowego organizacji",
+				Order = 18
+		}},
+		{
+		"correspondence_box", new ApplicationField {
+				Name = "correspondence_box",
+				Label = "Skrytka pocztowa",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "P.O. Box 123",
+				Validation = new ApplicationFieldValidation
+				{
+						MaxLength = 50,
+						ValidationMessage = "Numer skrytki może mieć maksymalnie 50 znaków"
+				},
+				HelpText = "Podaj numer skrytki pocztowej (jeśli dotyczy)",
+				Order = 19
+		}},
+		{
+		"correspondence_address", new ApplicationField {
+				Name = "correspondence_address",
+				Label = "Adres korespondencyjny",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "ul. Pocztowa 12",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 150,
+						ValidationMessage = "Adres musi mieć od 1 do 150 znaków"
+				},
+				HelpText = "Podaj adres korespondencyjny (jeśli inny niż adres siedziby)",
+				Order = 20
+		}},
+		{
+		"correspondence_postal_code", new ApplicationField {
+				Name = "correspondence_postal_code",
+				Label = "Kod pocztowy (korespondencja)",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "12-345",
+				Validation = new ApplicationFieldValidation
+				{
+						MaxLength = 10,
+						Pattern = @"^\d{2}-\d{3}$",
+						ValidationMessage = "Kod pocztowy musi być w formacie XX-XXX"
+				},
+				HelpText = "Podaj kod pocztowy dla adresu korespondencyjnego",
+				Order = 21
+		}},
+		{
+		"correspondence_city", new ApplicationField {
+				Name = "correspondence_city",
+				Label = "Miasto (korespondencja)",
+				Type = ApplicationFieldType.Text,
+				IsRequired = false,
+				Placeholder = "Kraków",
+				Validation = new ApplicationFieldValidation
+				{
+						MinLength = 1,
+						MaxLength = 100,
+						ValidationMessage = "Nazwa miasta musi mieć od 1 do 100 znaków"
+				},
+				HelpText = "Podaj miasto dla adresu korespondencyjnego",
+				Order = 22
 		}}
 	};
 }

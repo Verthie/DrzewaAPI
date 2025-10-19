@@ -28,7 +28,7 @@ public class Commune
 
 	[Required]
 	[Phone]
-	[Range(9, 20)]
+	[StringLength(20, MinimumLength = 9)]
 	public required string Phone { get; set; }
 
 	[Required]

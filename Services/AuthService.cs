@@ -116,7 +116,7 @@ public class AuthService : IAuthService
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas weryfikacji maila użytkownika");
-			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+			throw new ServiceException($"Nie udało się zweryfikować użytkownika", "MAIL_VERIFICATION_ERROR");
 		}
 	}
 
@@ -143,8 +143,8 @@ public class AuthService : IAuthService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Nieoczekiwany błąd podczas weryfikacji maila użytkownika");
-			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+			_logger.LogError(ex, "Nieoczekiwany błąd podczas wysyłania maila weryfikacji do użytkownika");
+			throw new ServiceException($"Błąd podczas wysyłania maila weryfikcaji", "MAIL_VERIFICATION_ERROR");
 		}
 	}
 
@@ -186,7 +186,7 @@ public class AuthService : IAuthService
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas logowania użytkownika: {Email}", loginDto.Email);
-			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+			throw new ServiceException($"Błąd podczas logowania użytkownika: {loginDto.Email}", "USER_LOGIN_ERROR");
 		}
 	}
 
@@ -207,7 +207,7 @@ public class AuthService : IAuthService
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas wysyłania maila do zmiany hasła użytkownika");
-			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+			throw new ServiceException($"Błąd podczas wysyłania maila do zmiany hasła na mail: {email}", "MAIL_SEND_ERROR");
 		}
 	}
 
@@ -248,7 +248,7 @@ public class AuthService : IAuthService
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Nieoczekiwany błąd podczas odświeżania tokenów");
-			throw EntityCreationFailedException.ForUser("Nieoczekiwany błąd systemu");
+			throw new ServiceException($"Błąd podczas odświeżania tokenów", "TOKEN_REFRESH_ERROR");
 		}
 	}
 

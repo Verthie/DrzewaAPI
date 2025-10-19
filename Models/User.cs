@@ -19,7 +19,7 @@ public class User
 	[Required]
 	public string PasswordHash { get; set; } = "";
 	[Phone]
-	[Range(9, 20)]
+	[StringLength(20, MinimumLength = 9)]
 	public string? Phone { get; set; }
 	[Length(1, 150)]
 	public string? Address { get; set; }
@@ -29,6 +29,7 @@ public class User
 	public string? PostalCode { get; set; }
 	public DateTime RegistrationDate { get; set; } = DateTime.UtcNow;
 	public UserRole Role { get; set; } = UserRole.User;
+	public OrganizationDto? Organization { get; set; }
 	public bool IsEmailVerified { get; set; } = false;
 	public DateTime? EmailVerifiedAt { get; set; }
 

@@ -4,6 +4,7 @@ using DrzewaAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrzewaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251019150228_ChangedTemplatesForLlmIntegration")]
+    partial class ChangedTemplatesForLlmIntegration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,7 +78,7 @@ namespace DrzewaAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Applications", (string)null);
+                    b.ToTable("Applications");
 
                     b.HasData(
                         new
@@ -142,7 +145,7 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("CommuneId", "Name")
                         .IsUnique();
 
-                    b.ToTable("ApplicationTemplates", (string)null);
+                    b.ToTable("ApplicationTemplates");
 
                     b.HasData(
                         new
@@ -203,8 +206,7 @@ namespace DrzewaAPI.Migrations
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PostalCode")
                         .IsRequired()
@@ -225,7 +227,7 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Communes", (string)null);
+                    b.ToTable("Communes");
 
                     b.HasData(
                         new
@@ -375,7 +377,7 @@ namespace DrzewaAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("EmailVerificationTokens", (string)null);
+                    b.ToTable("EmailVerificationTokens");
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.RefreshToken", b =>
@@ -401,7 +403,7 @@ namespace DrzewaAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeSpecies", b =>
@@ -433,7 +435,7 @@ namespace DrzewaAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TreeSpecies", (string)null);
+                    b.ToTable("TreeSpecies");
 
                     b.HasData(
                         new
@@ -520,7 +522,7 @@ namespace DrzewaAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TreeSubmissions", (string)null);
+                    b.ToTable("TreeSubmissions");
 
                     b.HasData(
                         new
@@ -583,7 +585,7 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("UserId", "TreeSubmissionId")
                         .IsUnique();
 
-                    b.ToTable("TreeVotes", (string)null);
+                    b.ToTable("TreeVotes");
                 });
 
             modelBuilder.Entity("DrzewaAPI.Models.User", b =>
@@ -624,8 +626,7 @@ namespace DrzewaAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PostalCode")
                         .HasMaxLength(10)
@@ -644,7 +645,7 @@ namespace DrzewaAPI.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
 
                     b.HasData(
                         new
@@ -729,7 +730,7 @@ namespace DrzewaAPI.Migrations
 
                             b1.HasKey("ApplicationTemplateId");
 
-                            b1.ToTable("ApplicationTemplates", (string)null);
+                            b1.ToTable("ApplicationTemplates");
 
                             b1.WithOwner()
                                 .HasForeignKey("ApplicationTemplateId");
@@ -772,35 +773,6 @@ namespace DrzewaAPI.Migrations
 
             modelBuilder.Entity("DrzewaAPI.Models.TreeSpecies", b =>
                 {
-                    b.OwnsMany("DrzewaAPI.Dtos.TreeSpeciesImageDto", "Images", b1 =>
-                        {
-                            b1.Property<Guid>("TreeSpeciesId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<string>("AltText")
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("ImageUrl")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<int>("Type")
-                                .HasColumnType("int");
-
-                            b1.HasKey("TreeSpeciesId", "Id");
-
-                            b1.ToTable("TreeSpeciesImageDto", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("TreeSpeciesId");
-                        });
-
                     b.OwnsOne("DrzewaAPI.Dtos.SeasonalChangesDto", "SeasonalChanges", b1 =>
                         {
                             b1.Property<Guid>("TreeSpeciesId")
@@ -824,7 +796,7 @@ namespace DrzewaAPI.Migrations
 
                             b1.HasKey("TreeSpeciesId");
 
-                            b1.ToTable("TreeSpecies", (string)null);
+                            b1.ToTable("TreeSpecies");
 
                             b1.WithOwner()
                                 .HasForeignKey("TreeSpeciesId");
@@ -856,7 +828,7 @@ namespace DrzewaAPI.Migrations
 
                             b1.HasKey("TreeSpeciesId");
 
-                            b1.ToTable("TreeSpecies", (string)null);
+                            b1.ToTable("TreeSpecies");
 
                             b1.WithOwner()
                                 .HasForeignKey("TreeSpeciesId");
@@ -869,6 +841,35 @@ namespace DrzewaAPI.Migrations
                                     MaxHeight = 40,
                                     NativeToPoland = true
                                 });
+                        });
+
+                    b.OwnsMany("DrzewaAPI.Dtos.TreeSpeciesImageDto", "Images", b1 =>
+                        {
+                            b1.Property<Guid>("TreeSpeciesId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("AltText")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("ImageUrl")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("Type")
+                                .HasColumnType("int");
+
+                            b1.HasKey("TreeSpeciesId", "Id");
+
+                            b1.ToTable("TreeSpeciesImageDto");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TreeSpeciesId");
                         });
 
                     b.Navigation("Images");
@@ -923,7 +924,7 @@ namespace DrzewaAPI.Migrations
 
                             b1.HasKey("TreeSubmissionId");
 
-                            b1.ToTable("TreeSubmissions", (string)null);
+                            b1.ToTable("TreeSubmissions");
 
                             b1.WithOwner()
                                 .HasForeignKey("TreeSubmissionId");
@@ -991,47 +992,40 @@ namespace DrzewaAPI.Migrations
 
                             b1.Property<string>("Address")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Organization_Address");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("City")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Organization_City");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("Krs")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Organization_Krs");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("Mail")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Organization_Mail");
+                                .HasMaxLength(255)
+                                .HasColumnType("nvarchar(255)");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Organization_Name");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("Phone")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Organization_Phone");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("PostalCode")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Organization_PostalCode");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("Regon")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("Organization_Regon");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("Users", (string)null);
+                            b1.ToTable("Users");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -1043,57 +1037,29 @@ namespace DrzewaAPI.Migrations
 
                                     b2.Property<string>("Address")
                                         .IsRequired()
-                                        .HasColumnType("nvarchar(max)")
-                                        .HasColumnName("Organization_Correspondence_Address");
+                                        .HasColumnType("nvarchar(max)");
 
                                     b2.Property<string>("City")
                                         .IsRequired()
-                                        .HasColumnType("nvarchar(max)")
-                                        .HasColumnName("Organization_Correspondence_City");
+                                        .HasColumnType("nvarchar(max)");
 
                                     b2.Property<int>("PoBox")
-                                        .HasColumnType("int")
-                                        .HasColumnName("Organization_Correspondence_PoBox");
+                                        .HasColumnType("int");
 
                                     b2.Property<string>("PostalCode")
                                         .IsRequired()
-                                        .HasColumnType("nvarchar(max)")
-                                        .HasColumnName("Organization_Correspondence_PostalCode");
+                                        .HasColumnType("nvarchar(max)");
 
                                     b2.HasKey("OrganizationDtoUserId");
 
-                                    b2.ToTable("Users", (string)null);
+                                    b2.ToTable("Users");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OrganizationDtoUserId");
-
-                                    b2.HasData(
-                                        new
-                                        {
-                                            OrganizationDtoUserId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
-                                            Address = "Mleczna 12",
-                                            City = "Rzeszów",
-                                            PoBox = 123,
-                                            PostalCode = "00-001"
-                                        });
                                 });
 
                             b1.Navigation("Correspondence")
                                 .IsRequired();
-
-                            b1.HasData(
-                                new
-                                {
-                                    UserId = new Guid("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
-                                    Address = "ul. Wiosenna 21/26",
-                                    City = "Rzeszów",
-                                    Krs = "0000812345",
-                                    Mail = "fundacja.nazwa.@gmail.com",
-                                    Name = "Fundacja Będzie Dziko",
-                                    Phone = "123213321",
-                                    PostalCode = "12-202",
-                                    Regon = "386123456"
-                                });
                         });
 
                     b.Navigation("Organization");

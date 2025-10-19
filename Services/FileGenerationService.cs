@@ -146,15 +146,6 @@ public class FileGenerationService(IAzureStorageService _azureStorageService, IL
 			// Adding field to form
 			form.AddField(signatureField);
 
-			// Adding visualization for the field
-			var canvas = new PdfCanvas(page);
-			canvas.SaveState()
-				.SetStrokeColor(ColorConstants.BLUE)
-				.SetLineWidth(1)
-				.Rectangle(signatureRect)
-				.Stroke()
-				.RestoreState();
-
 			_logger.LogInformation("✓ Pole podpisu dodane do PDF");
 
 			pdfDoc.Close();

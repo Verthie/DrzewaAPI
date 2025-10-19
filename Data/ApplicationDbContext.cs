@@ -1,9 +1,5 @@
-using System.Text.Json;
 using DrzewaAPI.Extensions;
 using DrzewaAPI.Models;
-using DrzewaAPI.Models.Enums;
-using DrzewaAPI.Utils;
-using iText.Forms.Xfdf;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrzewaAPI.Data;
@@ -30,6 +26,26 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			entity.HasKey(e => e.Id);
 			entity.Property(e => e.RegistrationDate).HasDefaultValueSql("GETUTCDATE()");
 			entity.HasIndex(e => e.Email).IsUnique();
+
+			entity.OwnsOne(e => e.Organization, organization =>
+			{
+				organization.Property(o => o.Name).HasColumnName("Organization_Name");
+				organization.Property(o => o.Address).HasColumnName("Organization_Address");
+				organization.Property(o => o.PostalCode).HasColumnName("Organization_PostalCode");
+				organization.Property(o => o.City).HasColumnName("Organization_City");
+				organization.Property(o => o.Krs).HasColumnName("Organization_Krs");
+				organization.Property(o => o.Regon).HasColumnName("Organization_Regon");
+				organization.Property(o => o.Mail).HasColumnName("Organization_Mail");
+				organization.Property(o => o.Phone).HasColumnName("Organization_Phone");
+
+				organization.OwnsOne(o => o.Correspondence, correspondence =>
+				{
+					correspondence.Property(c => c.PoBox).HasColumnName("Organization_Correspondence_PoBox");
+					correspondence.Property(c => c.Address).HasColumnName("Organization_Correspondence_Address");
+					correspondence.Property(c => c.PostalCode).HasColumnName("Organization_Correspondence_PostalCode");
+					correspondence.Property(c => c.City).HasColumnName("Organization_Correspondence_City");
+				});
+			});
 		});
 
 		// TreeSubmission Configuration
@@ -164,6 +180,30 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			new User { Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000001"), FirstName = "Adam", LastName = "Kowalski", Email = "mod@example.com", RegistrationDate = new DateTime(2024, 1, 15), PasswordHash = "AQAAAAIAAYagAAAAEHrSf4c5BhE6GMi8qlT3Q+oj6mJdQ2OAuPNUgxuc2sFGCxCeqhJwGOEUTqjSuPCFRw==", Role = UserRole.Moderator },
 			new User { Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"), FirstName = "Jan", LastName = "Kowalski", Email = "user@example.com", RegistrationDate = new DateTime(2024, 1, 15), PasswordHash = "AQAAAAIAAYagAAAAEDk+b31OOCvyrUQRFQztUECMUI+lPATVktwSn0Uysc66qax8wCdiejpv2Rd1YuophQ==", Role = UserRole.User }
 		);
+
+		modelBuilder.Entity<User>().OwnsOne(e => e.Organization).HasData(
+			new
+			{
+				UserId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
+				Name = "Fundacja Będzie Dziko",
+				Address = "ul. Wiosenna 21/26",
+				PostalCode = "12-202",
+				City = "Rzeszów",
+				Krs = "0000812345",
+				Regon = "386123456",
+				Mail = "fundacja.nazwa.@gmail.com",
+				Phone = "123213321",
+			});
+
+		modelBuilder.Entity<User>().OwnsOne(u => u.Organization).OwnsOne(o => o.Correspondence).HasData(
+			new
+			{
+				OrganizationDtoUserId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000002"),
+				PoBox = 123,
+				Address = "Mleczna 12",
+				PostalCode = "00-001",
+				City = "Rzeszów"
+			});
 
 		modelBuilder.Entity<TreeSpecies>().HasData(new TreeSpecies
 		{
@@ -311,9 +351,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000005"),
 				CommuneId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000003"),
 				CreatedDate = new DateTime(2024, 1, 15),
-				Name = "Wniosek o rejestrację pomnika przyrody",
-				Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
-				HtmlTemplate = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Wniosek o rejestrację pomnika przyrody</title></head><body><h1>WNIOSEK O REJESTRACJĘ POMNIKA PRZYRODY</h1><div><h3>{{commune_name}}</h3><p>{{commune_address}}, {{commune_city}} {{commune_postal_code}}</p></div><div><h3>Dane wnioskodawcy:</h3><p>Imię i nazwisko: {{user_full_name}}</p><p>Adres: {{user_address}}, {{user_city}} {{user_postal_code}}</p><p>Telefon: {{user_phone}}</p><p>Email: {{user_email}}</p></div><div><h3>Dane drzewa:</h3><p>Gatunek: {{tree_species_polish}}</p><p>Obwód: {{tree_circumference}} cm</p><p>Wysokość: {{tree_height}} m</p><p>Wiek: {{tree_estimated_age}} lat</p><p>Stan: {{tree_condition}}</p></div><div><h3>Dodatkowe informacje:</h3><p>Uzasadnienie: {{justification}}</p><p>Przewidywany koszt opieki: {{estimated_care_cost}} zł/rok</p><p>Osoba odpowiedzialna: {{responsible_person}}</p><p>Telefon kontaktowy: {{contact_phone}}</p></div><div><p>Data: {{submission_date}}</p><p>Podpis: ................................<span style=position:relative; top:-5px; display:block;>{{user_full_name}}</span></p></div></body></html>",
+				Name = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
+				Description = "Wniosek Opisowy",
+				HtmlTemplate = "<!DOCTYPE html><html><meta charset=UTF-8><title>Wniosek o ustanowienie ochroną pomnikową drzew</title><style>body{font-family:'Times New Roman',Times,serif;}.container-flex{display:flex;flex-direction:row;justify-content:space-between}.sender{text-align:left}.sender p{padding:0}.date{text-align:right}.recipient{text-align:center;margin-bottom:15px;margin-top:25px}.recipient p{margin:2px 0;font-weight:700}.title{font-weight:700;text-align:center;margin-bottom:15px}.content{text-align:justify;text-justify:inter-word}.paragraph{text-indent:30px;line-height:1.65}.paragraph.first{margin-bottom:10px;text-indent:30px;font-style:italic;text-align:center}</style><div><div class=container-flex><div class=sender>{{sender}}</div><div class=date>{{user_city}}, {{generation_date}}r.</div></div><div class=recipient><p>{{commune_name}}<p>{{commune_address}}<p>{{commune_postal_code}} {{commune_city}}</div><div class=title>Wniosek o ustanowienie ochroną pomnikową drzew</div><div class=content><p class=\"paragraph first\"><span>Na podstawie art. 221 i art. 241 KPA, składam wniosek o opisanego niżej drzewa za pomnik przyrody w trybie art. 40-45 ustawy o ochronie przyrody.</span><p class=paragraph>{{justification}}<p class=paragraph>Załącznik<p class=paragraph>1. {{tree_images}}<p class=paragraph>2. {{tree_map_image}}</div></div>",
 				Fields = new List<ApplicationField>
 						{
 								new ApplicationField
@@ -331,74 +371,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 										},
 										HelpText = "Opisz walory przyrodnicze, historyczne lub krajobrazowe drzewa",
 										Order = 1
-								},
-								new ApplicationField
-								{
-										Name = "estimated_care_cost",
-										Label = "Szacowany koszt rocznej opieki (zł)",
-										Type = ApplicationFieldType.Number,
-										IsRequired = true,
-										Placeholder = "np. 500",
-										Validation = new ApplicationFieldValidation
-										{
-												Min = 0,
-												Max = 10000,
-												ValidationMessage = "Koszt musi być liczbą od 0 do 10000"
-										},
-										HelpText = "Przewidywany koszt opieki nad drzewem w ciągu roku",
-										Order = 2
-								},
-								new ApplicationField
-								{
-										Name = "responsible_person",
-										Label = "Osoba odpowiedzialna za opiekę",
-										Type = ApplicationFieldType.Text,
-										IsRequired = true,
-										Placeholder = "Imię i nazwisko",
-										Validation = new ApplicationFieldValidation
-										{
-												MinLength = 1,
-												MaxLength = 200,
-												ValidationMessage = "Imię i nazwisko powinno zawierać od 1 do 200 znaków"
-										},
-										Order = 3
-								},
-								new ApplicationField
-								{
-										Name = "contact_phone",
-										Label = "Telefon kontaktowy osoby odpowiedzialnej",
-										Type = ApplicationFieldType.Phone,
-										IsRequired = true,
-										Placeholder = "+48 123 456 789",
-										Validation = new ApplicationFieldValidation
-										{
-												MinLength = 9,
-												MaxLength = 20,
-												Pattern = @"^\+?[0-9\s\-\(\)]{9,15}$",
-												ValidationMessage = "Numer telefonu musi zawierać 9-15 cyfr"
-										},
-										Order = 4
-								},
-								new ApplicationField
-								{
-										Name = "care_agreement",
-										Label = "Zobowiązuję się do sprawowania opieki nad drzewem",
-										Type = ApplicationFieldType.Checkbox,
-										IsRequired = true,
-										DefaultValue = "false",
-										HelpText = "Wymagane potwierdzenie zobowiązania",
-										Order = 5
 								}
 						}
 			},
-
 			new ApplicationTemplate
 			{
 				Id = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000006"),
 				CommuneId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000004"),
 				CreatedDate = new DateTime(2024, 1, 15),
-				Name = "Uznanie obiektu przyrodniczego za pomnik przyrody WS-13",
-				Description = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
+				Name = "Szablon udostępniony przez gminę Kraków",
+				Description = "Uznanie obiektu przyrodniczego za pomnik przyrody WS-13",
 				HtmlTemplate = "<!DOCTYPE html><html><meta charset=UTF-8><style>body{font-family:Arial,sans-serif;font-size:12px}.header{text-align:left;margin:0 5px 20px 5px;font-size:12px}.title{margin:42px 5px 42px 5px}.title h1{text-align:center;font-size:22px;font-weight:300;margin:0}.title h2{text-align:center;font-size:15px;margin:0 0 12px 0}.title p{font-size:14px}table{border-collapse:collapse;margin:auto}td{border:1px solid #000;padding:4px 8px 8px 8px;vertical-align:top}.number-col{width:30px;text-align:center}.question-col{width:42%;}.answer-col{width:55%;text-wrap:balance;word-break:break-word;overflow-wrap:break-word}.footer{display:flex;justify-content:space-between;align-items:flex-start;margin:100px 5px 0 5px}.footer *{margin:0}.signature{display:flex;flex-direction:column;text-align:center;align-items:center;justify-content:center;position:relative;}.signature-text{font-size:10px}.signature-field{position:absolute;bottom:17px;}</style><div class=header>Załącznik do procedury WS-13</div><div class=title><h1>Wniosek</h1><h2>o uznanie obiektu przyrodniczego za pomnik przyrody</h2><p>na podstawie Art. 6 ust. 1 pkt 6, art. 40, art. 44 ustawy z dnia 16 kwietnia 2004 r. o ochronie przyrody.</div><table><tr><td class=number-col>1.<td class=question-col>Imię i nazwisko wnioskodawcy / nazwa wnioskodawcy<br>Adres / siedziba wnioskodawcy<td class=answer-col>{{user_full_name}}<br>{{user_address}}<br>{{user_city}}, {{user_postal_code}}<tr><td class=number-col>2.<td class=question-col>Nazwa i rodzaj pomnika przyrody<td class=answer-col>Nazwa polska: {{tree_species_polish}}<br>Nazwa łacińska: {{tree_species_latin}}<br>Rodzaj: drzewo<tr><td class=number-col>3.<td class=question-col>Określenie położenia geograficznego i administracyjnego pomnika przyrody (działka, obręb ewidencyjny, jednostka ewidencyjna)<td class=answer-col>Położenie geograficzne: {{location_lat}} lat, {{location_long}} long<br>Działka: {{location_plot}}<br>Obręb ewidencyjny: {{location_district}}<br>Jednostka ewidencyjna: {{record_keeping_unit}}<tr><td class=number-col>4.<td class=question-col>Wskazanie formy własności i rodzajów gruntów<td class=answer-col>Forma własności: {{ownership_form}}<br>Rodzaj gruntów: {{land_type}}<tr><td class=number-col>5.<td class=question-col>Krótki opis pomnika przyrody<br>- dla pomników przyrody żywej gatunek, wiek, pierśnica, wysokość, rozpiętość korony, stan zdrowotny,<br>- dla pomników przyrody nieżywej typ, rodzaj, wielkość źródła, wodospadu, głazu, jaskini itp.<td class=answer-col>Wiek: {{tree_estimated_age}}<br>Pierśnica: {{tree_circumference}} cm<br>Wysokość: {{tree_height}} m<br>Rozpiętość: {{tree_spread}} m<br>Stan gleby: {{tree_soil}}<br>Stan zdrowia: {{tree_health}}<br>Stan środowiska: {{tree_environment}}<tr><td class=number-col>6.<td class=question-col>Nazwa, autor opracowania potwierdzającego wartości przyrodnicze obiektu<td class=answer-col>Nazwa opracowania: {{study_name}}<br>Autor: {{study_author}}<tr><td class=number-col>7.<td class=question-col>Uzasadnienie<td class=answer-col>{{justification}}<tr><td class=number-col>8.<td class=question-col>Załączniki<td class=answer-col>{{tree_images}}<br>{{tree_map_image}}</table><div class=footer><p>{{user_city}}, dn. {{generation_date}}<div class=signature><p>..............................................<p class=signature-text><em>(podpis)</em></div></div></body></html>",
 				Fields = new List<ApplicationField>
 				{
@@ -531,18 +513,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 			new
 			{
 				ApplicationTemplateId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000005"),
-				Height = 120.0F,
-				Width = 80.0F,
+				Height = 80.0F,
+				Width = 120.0F,
 				X = 410.0F,
-				Y = 150.0F,
+				Y = 100.0F,
 			},
 			new
 			{
 				ApplicationTemplateId = Guid.Parse("c6d5f2b5-bc4a-4f3d-9b68-000000000006"),
-				Height = 120.0F,
-				Width = 80.0F,
+				Height = 80.0F,
+				Width = 120.0F,
 				X = 410.0F,
-				Y = 150.0F,
+				Y = 100.0F,
 			}
 		);
 

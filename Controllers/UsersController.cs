@@ -45,7 +45,7 @@ public class UsersController(IUserService _userService) : ControllerBase
     [HttpPut("data/{userId?}")]
     public async Task<IActionResult> UpdateUser([FromForm] UpdateUserDto req, string? userId)
     {
-        ValidationHelpers.ValidateModelState(ModelState);
+        // ValidationHelpers.ValidateModelState(ModelState);
 
         userId ??= User.GetCurrentUserId().ToString();
 

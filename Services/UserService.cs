@@ -50,6 +50,7 @@ public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _p
 					City = user.City,
 					PostalCode = user.PostalCode,
 					RegistrationDate = user.RegistrationDate,
+					Organization = user.Organization,
 					Role = user.Role,
 					Statistics = new UserStatisticsDto
 					{
@@ -85,6 +86,51 @@ public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _p
 			user.Address = updateDto.Address?.Trim();
 			user.City = updateDto.City?.Trim();
 			user.PostalCode = updateDto.PostalCode?.Trim();
+
+			OrganizationDto organizationCurrent = user.Organization ?? new OrganizationDto();
+			CorrespondenceDto correspondenceCurrent = organizationCurrent.Correspondence;
+
+			OrganizationDto organizationUpdated = updateDto.Organization ?? new OrganizationDto();
+			CorrespondenceDto correspondenceUpdated = organizationUpdated.Correspondence;
+
+			if (!string.IsNullOrEmpty(organizationUpdated.Name))
+				organizationCurrent.Name = organizationUpdated.Name;
+
+			if (!string.IsNullOrEmpty(organizationUpdated.Address))
+				organizationCurrent.Address = organizationUpdated.Address;
+
+			if (!string.IsNullOrEmpty(organizationUpdated.PostalCode))
+				organizationCurrent.PostalCode = organizationUpdated.PostalCode;
+
+			if (!string.IsNullOrEmpty(organizationUpdated.City))
+				organizationCurrent.City = organizationUpdated.City;
+
+			if (!string.IsNullOrEmpty(organizationUpdated.Krs))
+				organizationCurrent.Krs = organizationUpdated.Krs;
+
+			if (!string.IsNullOrEmpty(organizationUpdated.Regon))
+				organizationCurrent.Regon = organizationUpdated.Regon;
+
+			if (!string.IsNullOrEmpty(organizationUpdated.Mail))
+				organizationCurrent.Mail = organizationUpdated.Mail;
+
+			if (!string.IsNullOrEmpty(organizationUpdated.Phone))
+				organizationCurrent.Phone = organizationUpdated.Phone;
+
+			if (correspondenceUpdated.PoBox != 0)
+				correspondenceCurrent.PoBox = correspondenceUpdated.PoBox;
+
+			if (!string.IsNullOrEmpty(correspondenceUpdated.Address))
+				correspondenceCurrent.Address = correspondenceUpdated.Address;
+
+			if (!string.IsNullOrEmpty(correspondenceUpdated.PostalCode))
+				correspondenceCurrent.PostalCode = correspondenceUpdated.PostalCode;
+
+			if (!string.IsNullOrEmpty(correspondenceUpdated.City))
+				correspondenceCurrent.City = correspondenceUpdated.City;
+
+			user.Organization = organizationCurrent;
+			user.Organization.Correspondence = correspondenceCurrent;
 
 			await _context.SaveChangesAsync();
 
@@ -226,6 +272,7 @@ public class UserService(ApplicationDbContext _context, IPasswordHasher<User> _p
 			City = u.City,
 			PostalCode = u.PostalCode,
 			RegistrationDate = u.RegistrationDate,
+			Organization = u.Organization,
 			Statistics = new UserStatisticsDto()
 			{
 				ApplicationCount = u.Applications.Count,
