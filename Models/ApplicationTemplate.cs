@@ -21,6 +21,8 @@ public class ApplicationTemplate
 	public bool IsActive { get; set; } = true;
 	public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 	public DateTime? LastModifiedDate { get; set; }
+	public int GeminiResponseMinLength { get; set; } = 900;
+	public int GeminiResponseMaxLength { get; set; } = 1200;
 
 	// Navigation Properties
 	public Commune Commune { get; set; } = default!;

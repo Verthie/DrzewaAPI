@@ -8,16 +8,20 @@ namespace DrzewaAPI.Services;
 
 public class GeminiService(ApplicationDbContext _context, ILogger<GeminiService> _logger) : IGeminiService
 {
-	public async Task<string> GetJustificationAsync(Guid treeId)
+	public async Task<string> GetJustificationAsync(Guid applicationId)
 	{
 		try
 		{
-			TreeSubmission submission = await _context.TreeSubmissions
-				.Include(s => s.Species)
-				.FirstOrDefaultAsync(s => s.Id == treeId)
-				?? throw EntityNotFoundException.ForApplication(treeId);
+			Application application = await _context.Applications
+				.Include(a => a.ApplicationTemplate)
+				.Include(t => t.TreeSubmission)
+				.FirstOrDefaultAsync(a => a.Id == applicationId)
+				?? throw EntityNotFoundException.ForApplication(applicationId);
 
-			string predeterminedMessage = $"Z przekazanych danych wyciągnij znaczące informacje odnośnie podanego drzewa, a następnie stwórz uzasadnienie do wniosku z prośbą o jego ochronę na maksimum 1100 liter. Nie dodawaj informacji które nie są istotne dla wniosku, pomijaj rzeczy nieistotne, nie używaj wypunktowywania. Dane: [Gatunek: {submission.Species.PolishName}, Opis gatunku: {submission.Species.Description}, Szacowany wiek: {submission.EstimatedAge}, {(submission.Name != null ? "Potencjalna nazwa: " + submission.Name + "," : "")} Adres: {submission.Location.Address}, {(submission.Health != null ? "Stan zdrowia drzewa:" + "'" + string.Join(", ", submission.Health) + "'," : "")} {(submission.Soil != null ? "Stan gleby:" + "'" + string.Join(", ", submission.Soil) + "'," : "")} {(submission.Environment != null ? "Stan środowiska:" + "'" + string.Join(", ", submission.Environment) + "'," : "")} {(submission.Legend != null ? "Kontekst historyczny:" + "'" + submission.Legend + "'," : "")} {(submission.Description != null ? "Opis drzewa:" + "'" + submission.Description + "'" : "")}]";
+			TreeSubmission submission = application.TreeSubmission;
+			ApplicationTemplate template = application.ApplicationTemplate;
+
+			string predeterminedMessage = $"Z przekazanych danych wyciągnij znaczące informacje odnośnie podanego drzewa, a następnie stwórz uzasadnienie do wniosku z prośbą o jego ochronę na minimum {template.GeminiResponseMinLength} liter i maksimum {template.GeminiResponseMaxLength} liter. Nie dodawaj informacji które nie są istotne dla wniosku, pomijaj rzeczy nieistotne, nie używaj wypunktowywania. Dane: [Gatunek: {submission.Species.PolishName}, Opis gatunku: {submission.Species.Description}, Szacowany wiek: {submission.EstimatedAge}, {(submission.Name != null ? "Potencjalna nazwa: " + submission.Name + "," : "")} Adres: {submission.Location.Address}, {(submission.Health != null ? "Stan zdrowia drzewa:" + "'" + string.Join(", ", submission.Health) + "'," : "")} {(submission.Soil != null ? "Stan gleby:" + "'" + string.Join(", ", submission.Soil) + "'," : "")} {(submission.Environment != null ? "Stan środowiska:" + "'" + string.Join(", ", submission.Environment) + "'," : "")} {(submission.Legend != null ? "Kontekst historyczny:" + "'" + submission.Legend + "'," : "")} {(submission.Description != null ? "Opis drzewa:" + "'" + submission.Description + "'" : "")}]";
 
 			var response = await AIHub.Chat()
 				.WithModel("gemini-2.0-flash")
