@@ -4,6 +4,6 @@ namespace DrzewaAPI.Services;
 
 public interface IGeminiService
 {
-	Task<string> GetJustificationAsync(Guid treeId);
+	Task<string> GetJustificationAsync(Guid applicationId);
 	Task<string> GetTestMessageAsync();
 }

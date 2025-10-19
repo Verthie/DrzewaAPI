@@ -9,12 +9,12 @@ namespace DrzewaAPI.Controllers;
 [ApiController]
 public class GeminiController(IGeminiService _geminiService) : ControllerBase
 {
-    [HttpGet("tree/{id}/justification")]
+    [HttpGet("application/{id}/justification")]
     public async Task<IActionResult> GetJustification(string id)
     {
-        Guid treeId = ValidationHelpers.ValidateAndParseId(id);
+        Guid applicationId = ValidationHelpers.ValidateAndParseId(id);
 
-        string response = await _geminiService.GetJustificationAsync(treeId);
+        string response = await _geminiService.GetJustificationAsync(applicationId);
 
         return Ok(response);
     }

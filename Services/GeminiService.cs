@@ -14,7 +14,8 @@ public class GeminiService(ApplicationDbContext _context, ILogger<GeminiService>
 		{
 			Application application = await _context.Applications
 				.Include(a => a.ApplicationTemplate)
-				.Include(t => t.TreeSubmission)
+				.Include(a => a.TreeSubmission)
+					.ThenInclude(t => t.Species)
 				.FirstOrDefaultAsync(a => a.Id == applicationId)
 				?? throw EntityNotFoundException.ForApplication(applicationId);
 

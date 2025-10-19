@@ -353,6 +353,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 				CreatedDate = new DateTime(2024, 1, 15),
 				Name = "Standardowy szablon wniosku o rejestrację drzewa jako pomnika przyrody",
 				Description = "Wniosek Opisowy",
+				GeminiResponseMinLength = 900,
+				GeminiResponseMaxLength = 1200,
 				HtmlTemplate = "<!DOCTYPE html><html><meta charset=UTF-8><title>Wniosek o ustanowienie ochroną pomnikową drzew</title><style>body{font-family:'Times New Roman',Times,serif;}.container-flex{display:flex;flex-direction:row;justify-content:space-between}.sender{text-align:left}.sender p{padding:0}.date{text-align:right}.recipient{text-align:center;margin-bottom:15px;margin-top:25px}.recipient p{margin:2px 0;font-weight:700}.title{font-weight:700;text-align:center;margin-bottom:15px}.content{text-align:justify;text-justify:inter-word}.paragraph{text-indent:30px;line-height:1.65}.paragraph.first{margin-bottom:10px;text-indent:30px;font-style:italic;text-align:center}</style><div><div class=container-flex><div class=sender>{{sender}}</div><div class=date>{{user_city}}, {{generation_date}}r.</div></div><div class=recipient><p>{{commune_name}}<p>{{commune_address}}<p>{{commune_postal_code}} {{commune_city}}</div><div class=title>Wniosek o ustanowienie ochroną pomnikową drzew</div><div class=content><p class=\"paragraph first\"><span>Na podstawie art. 221 i art. 241 KPA, składam wniosek o opisanego niżej drzewa za pomnik przyrody w trybie art. 40-45 ustawy o ochronie przyrody.</span><p class=paragraph>{{justification}}<p class=paragraph>Załącznik<p class=paragraph>1. {{tree_images}}<p class=paragraph>2. {{tree_map_image}}</div></div>",
 				Fields = new List<ApplicationField>
 						{
