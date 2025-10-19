@@ -31,8 +31,6 @@ public record CreateApplicationDto
 
 	[Required]
 	public Guid ApplicationTemplateId { get; init; }
-	[Required]
-	public required string Title { get; init; }
 }
 
 public record class SubmitApplicationDto
