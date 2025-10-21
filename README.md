@@ -15,7 +15,7 @@ A comprehensive .NET Web API for managing tree registrations, monument applicati
 
 ### Prerequisites
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download) or later
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/download) or later
 - SQL Server (LocalDB, Express, or Full)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/) or [VS Code](https://code.visualstudio.com/)
 
