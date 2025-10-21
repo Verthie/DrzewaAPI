@@ -1,6 +1,6 @@
 # 🌳 DrzewaAPI
 
-A comprehensive .NET Web API for managing tree registrations, monument applications, and commune administration in Poland. It enables users to document and manage trees as well as submit monument applications to local communes.
+A comprehensive .NET Web API for managing tree registrations, monument applications, and commune administration in Poland. It enables users to document and manage trees as well as submit monument applications to local communes. This API provides the backend infrastructure for the [ZglosPomnik](https://www.zglospomnik.pl/) application.
 
 ## 📑 Table of Contents
 
