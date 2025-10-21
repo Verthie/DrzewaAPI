@@ -4,7 +4,7 @@ A comprehensive .NET Web API for managing tree registrations, monument applicati
 
 ## 📑 Table of Contents
 
-- [Features](#-getting-started)
+- [Getting Started](#-getting-started)
 - [Features](#-features)
 - [API Endpoints](#-api-endpoints)
 - [Technology Stack](#️-technology-stack)
